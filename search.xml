@@ -1,1074 +1,197 @@
 <?xml version="1.0" encoding="utf-8"?>
-<search>
-  <entry>
-    <title>Esko Ukkonen On-line Construction of Suffix Trees</title>
-    <url>/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/</url>
-    <content><![CDATA[<h1 id="Esko-Ukkonen-On-line-Construction-of-Suffix-Trees"><a href="#Esko-Ukkonen-On-line-Construction-of-Suffix-Trees" class="headerlink" title="Esko Ukkonen: On-line Construction of Suffix Trees"></a>Esko Ukkonen: On-line Construction of Suffix Trees</h1><p>@[toc]</p>
-<h1 id="一、后缀树的概念及应用【详见刘方州同学报告】"><a href="#一、后缀树的概念及应用【详见刘方州同学报告】" class="headerlink" title="一、后缀树的概念及应用【详见刘方州同学报告】"></a>一、后缀树的概念及应用【详见刘方州同学报告】</h1><h2 id="1-1-字典树-Trie"><a href="#1-1-字典树-Trie" class="headerlink" title="1.1 字典树 Trie"></a>1.1 字典树 Trie</h2><p>定义：字典树，又称单词查找树或键树，是一种树形结构，是一种哈希树的变种。<br>用途：用于统计和排序大量的字符串（但不仅限于字符串），所以经常被搜索引擎系统用于文本词频统计。<br>优点：最大限度地减少无谓的字符串比较，查询效率比哈希表高。<br>核心思想：空间换时间，利用字符串的公共前缀来降低查询时间的开销以达到提高效率的目的。<br>基本性质：<br>（1）根节点不包含字符，除根节点外每一个节点都只包含一个字符。<br>（2）从根节点到某一节点，路径上经过的字符连接起来，为该节点对应的字符串。<br>（3）每个节点的所有子节点包含的字符都不相同。</p>
-<h2 id="1-2-后缀树-Suffix-Tree"><a href="#1-2-后缀树-Suffix-Tree" class="headerlink" title="1.2 后缀树 Suffix Tree"></a>1.2 后缀树 Suffix Tree</h2><p>后缀树是一种数据结构，能快速解决很多关于字符串的问题。后缀树的概念最早由Weiner于1973年提出，既而由McCreight在1976年和Ukkonen在1992年和1995年加以改进完善。<br>给定一长度为n的字符串T&#x3D;T_1 T_2 〖…T〗<em>n和整数i (1&lt;&#x3D;i&lt;&#x3D;n)，子串T_i T</em>(i+1) 〖…T〗_n便都是字符串T的后缀。以字符串T&#x3D;abcabxabcd为例，它的长度为10，所以abcabxabcd、bcabxabcd、cabxabcd、…、d都是T的后缀。规定空字串也是后缀。后缀树，就是包含一则字符串所有后缀的压缩字典树，压缩过程如图1所示。把abcabxabcd的所有后缀加入字典树并压缩后，我们得到如图2的后缀树。</p>
-<p>![图1 后缀字典树到后缀树的压缩过程](Esko Ukkonen On-line Construction of Suffix Trees.assets&#x2F;6acacda119cab9dd2e567502e3677939.png)</p>
-<p>![图2 abcabxabcd的后缀树](Esko Ukkonen On-line Construction of Suffix Trees.assets&#x2F;441b6b774ab91a0a40e2b0edd0232d4e.png)</p>
-<p>如图2所示，Suffix Tree与Trie的不同在于边不再只代表单个字符，而是每个边可以表示任意的长度，实操过程中用两个指针[from， to]实现，耗费O(1)的空间。</p>
-<h2 id="2-后缀树的应用"><a href="#2-后缀树的应用" class="headerlink" title="2 后缀树的应用"></a>2 后缀树的应用</h2><p>2.1 最长重复子串<br>2.2 最长公共子串<br>2.3 最长回文子串</p>
-<h1 id="二、朴素后缀树构造方法及问题"><a href="#二、朴素后缀树构造方法及问题" class="headerlink" title="二、朴素后缀树构造方法及问题"></a>二、朴素后缀树构造方法及问题</h1><p>略
- </p>
-<h1 id="三、线性时间内后缀树在线构造方法"><a href="#三、线性时间内后缀树在线构造方法" class="headerlink" title="三、线性时间内后缀树在线构造方法"></a>三、线性时间内后缀树在线构造方法</h1><p>McCreight最初的构造法原则上要按逆序构造，也就是说字符要从末端开始插入。如此一来便不能作为在线算法， 它变得更加难以应用于实际问题，如数据压缩。<br>20年后，来自赫尔辛基理工大学的Esko Ukkonen把原算法作了一些改动，实现了线性时间内对字符串从左往右的后缀树在线构造方法。<br>对于所给的文本T，由一棵空树开始逐步构造T的后缀树。以abcabxabcd为例，先由a开始，接着是ab，然后abc，…，不断更新直到构造出abcabxabcd的后缀树。</p>
-<h2 id="3-1-概念引入"><a href="#3-1-概念引入" class="headerlink" title="3.1 概念引入"></a>3.1 概念引入</h2><h3 id="（1）隐式后缀树-Implicit-Suffix-Tree"><a href="#（1）隐式后缀树-Implicit-Suffix-Tree" class="headerlink" title="（1）隐式后缀树 Implicit Suffix Tree"></a>（1）隐式后缀树 Implicit Suffix Tree</h3><p>按上述方法在线构造abcabxabcd的后缀树的过程中，我们必然会构造出字符串abcab的后缀树，对其所有后缀枚举如下：abcab、bcab、cab、ab、b。观察发现：后缀ab被包含在abcab中作为其前缀；后缀b被包含在bcab中作为其前缀。<br>如果为ab或b单独开辟新的分支，则不符合字典树的性质，即每个节点的所有子节点包含的字符都不相同。因此我们选择暂时认为ab、b隐式包含在已有分支里，这样构造出来的后缀树称为隐式后缀树。<br>在我看来，隐式后缀树是在扫描和构建过程中节省时间的一步操作。因为字符串尚未扫描结束，所以这些操作可以先记录着而暂时不去执行，其代价是需要引入接下来要提及的活动点和剩余后缀数。</p>
-<h3 id="（2）终止符"><a href="#（2）终止符" class="headerlink" title="（2）终止符 $"></a>（2）终止符 $</h3><p><strong>问题：如何确定查找后缀树得到的子串是一个后缀还是后缀的一部分？</strong><br>解决：在文本后添加字母表以外的字符，比如$。这样，当查找到ab$或b$就说明这是一个后缀，避免了二义性。对abcab$的所有后缀重新枚举如下：xabxa$、abxa$、bxa$、xa$、a$、$。观察发现：xa$不再是xabxa$的前缀；a$不再是bcab$的前缀。</p>
-<h3 id="（3）活动点active-point、剩余后缀数-remainder"><a href="#（3）活动点active-point、剩余后缀数-remainder" class="headerlink" title="（3）活动点active point、剩余后缀数 remainder"></a>（3）活动点active point、剩余后缀数 remainder</h3><p><strong>问题：我们提到了隐式后缀树，隐式什么时候变为显式？怎么变为显式？</strong><br>比喻：隐式就像瘦子躲在胖子后面，瘦子露出马脚的时候就是变为显式的时候。<br>举例：以最终构建abcabx为例。第一阶段，我们从左到右在线构建abc的后缀树，如图3所示。<br> ![在这里插入图片描述](Esko Ukkonen On-line Construction of Suffix Trees.assets&#x2F;dd57f4da725c038161235b3f84657b20.png)<br>图3 abc的后缀树<br>第二阶段，我们需要构建abcab的后缀树，如图4所示。新增字符a新增字符b的情况下，不必大刀阔斧改变树的结构，只要悄悄在每条边后面追加a追加b即可。枚举abcab的后缀集合：abcab、bcab、cab、ab、b。观察发现，abcab、bcab、cab即为三条边，而ab、b隐式地包含其中。</p>
-<p> ![在这里插入图片描述](Esko Ukkonen On-line Construction of Suffix Trees.assets&#x2F;7bf70b3bdbcbf172481964a86f221193.png)</p>
-<p>图4 abcab的后缀树<br>第三阶段，我们需要构建abcabx的后缀树。新增字符x，x就是露出的马脚，因为已有的后缀树的边里没有包含abx的。露出马脚之时就是变为显式之日，通过裂变出新的边变为显式，如图5所示。<br> ![在这里插入图片描述](Esko Ukkonen On-line Construction of Suffix Trees.assets&#x2F;2a784f64875c60a2bb00befdfcab4329.png)<br>图5 abcabx的后缀树</p>
-<p><strong>问题：如何确定裂变的位置？</strong><br>解决：引入活动点active point，用于确定裂变的位置。活动点active point是一个包括(active_node, active_edge, active_length)的三元组。该三元组在每次后缀树的搜索中更新。<br>根据active_node确定结点，根据active_edge确定结点的某一条边，根据active_length确定边上的某个位置。举例来说，如图6所示，active_node为0，即根节点，active_edge为a，即从根节点出发、字符为a的这条边，active_length为2，即该边索引为2的地方，即符号|所在位置。<br> ![在这里插入图片描述](Esko Ukkonen On-line Construction of Suffix Trees.assets&#x2F;0cd8b06ef3a341b25445a60cac7e6b1c.png)<br>图6 active point的含义解释</p>
-<p><strong>问题：裂变具体怎么做？</strong><br>解决：如图7所示，以abcab-&gt;abcabx为例，裂变时进行以下操作：<br>① 根据活动点确定裂变位置（ab|cab），在|处添加节点。<br>② 在新增的节点后分裂出一个边为x的节点。</p>
-<p>![在这里插入图片描述](Esko Ukkonen On-line Construction of Suffix Trees.assets&#x2F;33d19f111e79fc01e511eed4fd34410c.png)<br>图7 裂变的过程<br>至此由于添加abx后缀引发的裂变完成。<br><strong>问题：只裂变一次就够了吗？</strong><br>思考：未必够。以abcab到abcabx为例，abcab的后缀树表示如图8所示。<br> ![在这里插入图片描述](Esko Ukkonen On-line Construction of Suffix Trees.assets&#x2F;916ab767229cd8688ecede1d6214c4df.png)<br>图8 abcab的后缀树<br>已知abcabx的后缀集合：abcabx、bcabx、cabx、abx、bx、x。<br>如果仅在已有的边后面添加x，只能覆盖abcabx、bcabx、cabx，剩下abx、bx、x。由于每次裂变能得到1个新后缀，直觉上来说需要进行3次裂变，事实上也是如此。上述过程只完成了添加abx后缀引发的裂变。<br>解决：引入剩余后缀数remainder，表示还需要插入多少个新的后缀，即还需要裂变几次。remainder&#x3D;0时，表示当前新增字符处理完毕，继续扩展下一字符。</p>
-<h3 id="（4）后缀链接-Suffix-Link"><a href="#（4）后缀链接-Suffix-Link" class="headerlink" title="（4）后缀链接 Suffix Link"></a>（4）后缀链接 Suffix Link</h3><p>根据上述问题思考已经明确了两个事实：<br>① 活动点active point指向要裂变的位置。<br>② 要裂变的位置可能不止一个。<br><strong>问题：每次都重新从根节点搜索下一裂变处吗？</strong><br>解决：不需要。引入后缀链接Suffix Link，用于快速找到下一裂变处。<br><strong>问题：后缀链接怎么创建？</strong><br>规则：每进行一次裂变，会新增非叶节点和新边。后缀链接从该新增的非叶节点出发，指向下一次裂变新增的非叶节点，用虚线连接。<br><strong>问题：为什么后缀链接可以快速找到下一裂变处？</strong><br>观察：后缀链接连接的节点存在的关系：如果有一个从A指向B的后缀链接，那么从根节点到A节点表示的子串剔除第首个字符后得到的即为从根节点到B节点表示的子串。<br>举例：图9中节点4表示字符串ab，节点6表示字符串b，ab剔除掉首个字符a后得到b。实际处理时，每一次裂变意味着一个待添加后缀的成功插入（abx），下一次裂变的工作就是插入下一个待添加后缀（bx），下一个待添加后缀（bx）与当前成功插入的后缀（abx）的关系也是这样。<br>好处：可以方便地从一个后缀跳到另一个后缀，降低算法的时间复杂度。<br>![在这里插入图片描述](Esko Ukkonen On-line Construction of Suffix Trees.assets&#x2F;adeeca639e49e547a5b54e7b817e1c59.png)</p>
-<h2 id="3-2-过程演示"><a href="#3-2-过程演示" class="headerlink" title="3.2 过程演示"></a>3.2 过程演示</h2><p>![图10 后缀树构建过程演示Step 1-空树](Esko Ukkonen On-line Construction of Suffix Trees.assets&#x2F;76d05959648ed4212fe1c0ccaa09e7cd.png)</p>
-<p>![图11 后缀树构建过程演示Step 2-a](Esko Ukkonen On-line Construction of Suffix Trees.assets&#x2F;e91af3d53f2bb9ee38567cf6045e1cc6.png)</p>
-<p>![图12 后缀树构建过程演示Step 3-ab](Esko Ukkonen On-line Construction of Suffix Trees.assets&#x2F;d3851a90bc2f300a0fc14dffa770f4e5.png)</p>
-<p>![图13 后缀树构建过程演示Step 4-abc](Esko Ukkonen On-line Construction of Suffix Trees.assets&#x2F;53309f726a393bced86746c7a838c6f1.png)</p>
-<p>![图14 后缀树构建过程演示Step 5-abca](Esko Ukkonen On-line Construction of Suffix Trees.assets&#x2F;d45b48924e9a6f7252b6f2b0ce4aad13.png)</p>
-<p>注意到已经存在的第一条边前缀中隐式包含了a。隐式包含在实操过程中的做法就是更新活动点active point和剩余后缀数remainder。<br>单就后缀树而言，这颗后缀树没有准确地描述当前读到的字符串abca。如何保证最后扫描结束的时候后缀树可以准确表示呢？回扣前文终结符的引入：在遇到$并做完相应操作后，后缀树可以准确地描述abca$。</p>
-<p>![图15 后缀树构建过程演示Step 6-abcab](Esko Ukkonen On-line Construction of Suffix Trees.assets&#x2F;3e305edbd22d407d460daf5833cba095.png)</p>
-<p>更新active point：a后面有b，length+1，往后挪；还在同一条边上，node和edge不变；<br>更新remainder+1&#x3D;2：表示需要插入两个后缀ab、b。<br><strong>问题：为什么remainder+1？</strong><br>因为上一步的a实际上没有被插入树中，所以它被remain了下来，而后我们又继续处理b了，所以上一步没插入的a延长成了ab。加入的1即需要插入新的后缀b。<br><strong>问题：再看active point和remainder记录信息似乎是缺失的：记录了后缀ab即将添加的位置，记录了2个待添加后缀，却没有记录b即将添加的位置？为什么呢？</strong><br>先说结论：“既然第一条边有ab|cab，那在第一条边后面（也就是第二条第三条边里）一定存在去掉a以b开头的后缀”。<br>再详细解释：回顾一下这里第二条边是如何产生的？正是因为后缀树的逐步构建过程中a后接了b，所以我们先在第一条边的a追加成ab，再为b开辟新的边，即第二条边，所以这个第二条边就是显然的以b开头的后缀。换句话说，即使a后面不是紧跟的b，而是紧跟的是个x，那也会新开一条边以x开头的。</p>
-<p>![图16 后缀树构建过程演示Step 7-abcabx-插入abx](Esko Ukkonen On-line Construction of Suffix Trees.assets&#x2F;a22f32c30e4b711815f8af1b5f9e5f9f.png)</p>
-<p>remainder&#x3D;3，表示有3个待添加的后缀：abx、bx、x<br>我们按之前的逻辑来试图更新active point：ab之后找x，找不到！因此在裂变位置添加新的节点4、新的边x。这一步完成了后缀abx的添加。但是active point怎么更新呢？ </p>
-<h3 id="Rule-1（活动点更新规则1）"><a href="#Rule-1（活动点更新规则1）" class="headerlink" title="Rule 1（活动点更新规则1）"></a>Rule 1（活动点更新规则1）</h3><p>当active_node &#x3D; root 时遵循：<br>    active_node 保持为 root；<br>    active_edge 被设置为即将被插入的新后缀的首字符；<br>    active_length 减1；</p>
-<p>![图17 后缀树构建过程演示Step 7-abcabx-插入abx后更新active point](Esko Ukkonen On-line Construction of Suffix Trees.assets&#x2F;a64832fcdb1136281c02cdf2fbdf0854.png)</p>
-<p>根据Rule 1规则更新active point：<br>    active_node 保持为 root；<br>    active_edge 被设置为即将被插入的新后缀bx的首字符b；<br>    active_length-1&#x3D;1；<br>更新remainder：remainder-1&#x3D;2，表示还有2个后缀待添加：bx、x。</p>
-<p>![图18 后缀树构建过程演示Step 8-abcabx-插入bx](Esko Ukkonen On-line Construction of Suffix Trees.assets&#x2F;63436a9acf538d6d203988fdae7ab973.png)</p>
-<p>裂变过程与abx的插入相似，不多赘述。依据Rule 1更新active point为 (0, ‘x’, 0)。<br>更新remainder-1&#x3D;1，表示还有1个后缀x没有插入。<br>注：图里的remainder&#x3D;0，我认为其意思是在扫描到x时回头处理之前的ab，但其实并没有真的扫描x，就像一个人往前走路只是把脚伸过去但没有迈过去踩实，所以默认观察到了x并处理了之前遗留的a和b，但尚未处理x，现在remainder&#x3D;0说明a和b处理好了，开始处理下一个字符x，直接在根节点加边x。<br>除此以外，该步骤还需要创建后缀链接。</p>
-<h3 id="Rule-2（后缀链接创建规则）"><a href="#Rule-2（后缀链接创建规则）" class="headerlink" title="Rule 2（后缀链接创建规则）"></a>Rule 2（后缀链接创建规则）</h3><p>如果我们分裂一条边并且插入一个新的节点，并且如果该新节点不是创建的第一个节点，则将先前插入的节点与该新节点通过一个特殊的指针连接，称为后缀链接，通过一条虚线来表示。<br>在图18中，因插入bx新裂变出来的节点6，不是扫描到x后创建的第一个节点了（第一个节点是因插入abx新裂变出来的节点4），因此创建后缀链接：4-&gt;6。<br>我的理解是“前人栽树，后人乘凉”，这条后缀链接在下一次碰到ab时会有用。</p>
-<p>![图19 后缀树构建过程演示Step 9-abcabx-插入x](Esko Ukkonen On-line Construction of Suffix Trees.assets&#x2F;241229f58f6858bce3fdc663271d3a02.png)</p>
-<p>active point为 (0, x, 0)，length&#x3D;0，所以在根节点创建边x。<br>remainder-1&#x3D;0，表示可以处理下一个字符了。</p>
-<p>![图20 Step 10 后缀树构建过程演示-abcabxa](Esko Ukkonen On-line Construction of Suffix Trees.assets&#x2F;8d808c8cb610ac0bae0578d2a0f076e4.png)</p>
-<p>![图21 后缀树构建过程演示Step 11-abcabxab](Esko Ukkonen On-line Construction of Suffix Trees.assets&#x2F;1c1968d58f4f4c5bc7683d5b16938455.png)<br>![图22 后缀树构建过程演示Step 12-abcabxabc](Esko Ukkonen On-line Construction of Suffix Trees.assets&#x2F;c0ae42f9a7da011ee79ddb8dc51b280e.png)</p>
-<p>更新active point(4,’c’,1)；<br>更新remainder&#x3D;3，表示需要插入abc、bc、c三个后缀。</p>
-<p>![图23 后缀树构建过程演示Step 13-abcabxabcd](Esko Ukkonen On-line Construction of Suffix Trees.assets&#x2F;2bc2d57804e9482ce96f46ece0d7cf3e.png)</p>
-<p>更新remainder &#x3D; 4，需要插入abcd、bcd、cd、d四个后缀；<br>更新active point：abc之后找d，找不到！因此在裂变位置添加新的节点9、新的边d。<br><strong>问题：此时active point如何更新的？</strong></p>
-<h3 id="Rule-3（活动点更新规则2）"><a href="#Rule-3（活动点更新规则2）" class="headerlink" title="Rule 3（活动点更新规则2）"></a>Rule 3（活动点更新规则2）</h3><p>当从active_node从不为root的节点分裂边时，我们沿着后缀链接的方向寻找节点：<br>    如果存在一个节点，则设置该节点为 active_node；<br>    如果不存在，则设置 active_node 为 root。<br>上述两种情况的active_edge 和 active_length 保持不变。</p>
-<p>根据Rule 3，图23的active point为(6, c, 1)。<br>更新remainder &#x3D; 3，并且开始处理下一个剩余后缀bcd。<br>bc后并没有没出现d，裂变。</p>
-<p>![图24 后缀树构建过程演示Step 14-abcabxabcd-插入bcd](Esko Ukkonen On-line Construction of Suffix Trees.assets&#x2F;65e0df16b2dc3965f7e7c0189a225f24.png)</p>
-<p>裂变创建了节点11和边d。除了更新之外，根据Rule2创建后缀链接：9-&gt;11。<br>此时，我们观察两个后缀链接：<br>    4 (ab) -&gt; 6 (b)<br>    9 (abc) -&gt; 11 (bc)<br>remainder-1&#x3D;2，表示还需要插入cd、d；<br>根据Rule 3更新active point为(root, c, 1)。</p>
-<p>![图25 后缀树构建过程演示Step 15-abcabxabcd-插入cd](Esko Ukkonen On-line Construction of Suffix Trees.assets&#x2F;386d3504718fddf9b0ce651c7dc86a79.png)</p>
-<p>更新active point时：由于找不到后续d，因此裂变：新建节点13和边d；<br>更新remainder-1 &#x3D; 1；<br>依据Rule 2创建后缀链接：11 -&gt; 13。</p>
-<p>![图26 后缀树构建过程演示Step 16-abcabxabcd-插入d](Esko Ukkonen On-line Construction of Suffix Trees.assets&#x2F;fddc1ff5489a9a7cae0c61c89f034748.png)</p>
-<p>更新active point时：由于找不到后续d，因此裂变，新建边d；<br>更新remainder-1&#x3D;0。</p>
-<p>![图27 后缀树构建过程演示Step 17-abcabxabcd$](Esko Ukkonen On-line Construction of Suffix Trees.assets&#x2F;d892500e7a996e91ed73317b7618ce7b.png)</p>
-<p>对树结构的改变仅需在根节点上插入一条新边$。<br>整个后缀树构建完成。</p>
-<h2 id="3-3-复杂度分析"><a href="#3-3-复杂度分析" class="headerlink" title="3.3 复杂度分析"></a>3.3 复杂度分析</h2><p>关于隐式后缀树，如果扫描发现要被插入的字符已经存在于树中，则无需修改树的结构。原因是要被插入的字符实际上已经隐式地被包含在了当前的树中。而active point和remainder的更新记录了这部分信息，确保了在后续的操作中会进行处理。</p>
-<p><strong>问题：算法结束时remainder &gt; 0的情况存在吗？</strong><br>解决： remainder &gt; 0意味着当前仍为隐式后缀树，虽然隐式包含着后缀信息，但是整个树并没有准确表达所有后缀。<br>我们在字符串末尾添加$以避免这种情况。由于$一定不同于字符串中任一字符的特性，使得在扫描到$时一定将之前所有隐式包含的后缀暴露出来并处理，处理的过程中remainder递减至0，最终完成整个后缀树的构建。<br>remainder记录了还余下多少后缀需要插入。这些插入操作将逐个的与当前位之前的后缀进行对应，我们需要一个接着一个的处理。每次插入需要O(1)时间。active point记录了插入（裂变）的位置。仅需在该位置新增一个字符，因为其他字符都被隐式地包含了。每次插入后：对于remainder，相应减少；对于active point：如果存在后缀连接的node续接至下一个节点；如果不存在则返回root节点；如果已经是在root节点了，则依据Rule1来修改活动点。无论哪种情况，仅需O(1)时间。<br>如果这些插入操作中，如果发现要被插入的字符已经存在于树中，则什么也不做，即使 remainder&gt;0。原因是要被插入的字符实际上已经隐式地被包含在了当前的树中。而 remainder&gt;0 则确保了在后续的操作中会进行处理。</p>
-<p><strong>整体算法复杂度是多少？</strong><br>如果输入字符串的长度为n，则有n步需要执行，加上$有n+1步。在每一步中：<br>    要么消耗O(1) 时间更新active point和remainder；<br>    要么消耗O(1) 时间执行裂变插入操作；<br>因此整体算法复杂度为O(n)。</p>
-]]></content>
+<search> 
+  
+  
+    
+    <entry>
+      <title>新手入门 Hexo</title>
+      <link href="/2024/12/25/%E6%96%B0%E6%89%8B%E5%85%A5%E9%97%A8%20Hexo/"/>
+      <url>/2024/12/25/%E6%96%B0%E6%89%8B%E5%85%A5%E9%97%A8%20Hexo/</url>
+      
+        <content type="html"><![CDATA[<h1 id="一些有用的链接鸭"><a href="#一些有用的链接鸭" class="headerlink" title="一些有用的链接鸭"></a>一些有用的链接鸭</h1><h2 id="快速开始"><a href="#快速开始" class="headerlink" title="快速开始"></a>快速开始</h2><ul><li>哔哩哔哩<ul><li>教程1（无声音，建议倍速播放）：<a href="https://www.bilibili.com/video/BV1Lt411R78H/?spm_id_from=333.1387.favlist.content.click&vd_source=75b9d3d5f06effdeeedd4346aa855634">https://www.bilibili.com/video/BV1Lt411R78H/?spm_id_from=333.1387.favlist.content.click&amp;vd_source=75b9d3d5f06effdeeedd4346aa855634</a></li><li>教程2：<a href="https://www.bilibili.com/video/BV16W411t7mq/?spm_id_from=333.1387.favlist.content.click&vd_source=75b9d3d5f06effdeeedd4346aa855634">https://www.bilibili.com/video/BV16W411t7mq/?spm_id_from=333.1387.favlist.content.click&amp;vd_source=75b9d3d5f06effdeeedd4346aa855634</a></li><li>教程3（2024）：<a href="https://www.bilibili.com/video/BV1ot421G7D9/?spm_id_from=333.1387.favlist.content.click&vd_source=75b9d3d5f06effdeeedd4346aa855634">https://www.bilibili.com/video/BV1ot421G7D9/?spm_id_from=333.1387.favlist.content.click&amp;vd_source=75b9d3d5f06effdeeedd4346aa855634</a></li></ul></li><li>Hexo保姆级文字教程：<a href="https://dayuzy.com/2024%E4%BF%9D%E5%A7%86%E7%BA%A7Hexo.html">https://dayuzy.com/2024%E4%BF%9D%E5%A7%86%E7%BA%A7Hexo.html</a></li><li>Hexo中文官网：<a href="https://hexo.io/zh-cn/index.html">https://hexo.io/zh-cn/index.html</a></li><li>iconfont官网：<a href="https://www.iconfont.cn/">https://www.iconfont.cn/</a></li></ul><h2 id="问题解决"><a href="#问题解决" class="headerlink" title="问题解决"></a>问题解决</h2><ul><li>[2024] hexo图片无法加载究极解决方案：<a href="https://blog.csdn.net/lengcs/article/details/143816877">https://blog.csdn.net/lengcs/article/details/143816877</a></li></ul>]]></content>
+      
+      
       <categories>
-        <category>讲解教程</category>
+          
+          <category> 讲解教程 </category>
+          
       </categories>
-  </entry>
-  <entry>
-    <title>IDEA使用Tomcat运行Web项目及其常见报错</title>
-    <url>/2024/12/20/IDEA%E4%BD%BF%E7%94%A8Tomcat%E8%BF%90%E8%A1%8CWeb%E9%A1%B9%E7%9B%AE%E5%8F%8A%E5%85%B6%E5%B8%B8%E8%A7%81%E6%8A%A5%E9%94%99/</url>
-    <content><![CDATA[<p>@[toc]</p>
-<h1 id="IDEA使用Tomcat运行Web项目及其常见报错"><a href="#IDEA使用Tomcat运行Web项目及其常见报错" class="headerlink" title="IDEA使用Tomcat运行Web项目及其常见报错"></a>IDEA使用Tomcat运行Web项目及其常见报错</h1><h2 id="一、Project-Structure"><a href="#一、Project-Structure" class="headerlink" title="一、Project Structure"></a>一、Project Structure</h2><blockquote>
-<p>目的：让IDEA知道这是个Web项目</p>
-</blockquote>
-<ol>
-<li><p><strong>Modules</strong></p>
-<blockquote>
-<p>目的：加载Web相关的配置和资源</p>
-</blockquote>
-<p><code>右键</code>目标模块 - <code>Add</code> - <code>Web</code></p>
-<p><strong>Web配置窗口</strong></p>
-<ol>
-<li><p>确认<code>web.xml</code>路径是否正确，不正确需要手动修改</p>
-<blockquote>
-<p>web.xml即Deployment Descripters下的Path</p>
-</blockquote>
-</li>
-<li><p>确认<code>Web资源目录</code>是否正确，不正确需要手动修改</p>
-<blockquote>
-<p><code>web资源目录</code>即<code>WEB-INF</code>上级路径（<code>JSP</code>等放置的位置）</p>
-</blockquote>
-<blockquote>
-<p>应用程序一般默认为<code>web</code>文件夹，但是我的项目为<code>webapp</code>文件夹，改为正确的<code>webapp</code></p>
-</blockquote>
-</li>
-</ol>
-</li>
-<li><p><strong>Artifacts</strong></p>
-<blockquote>
-<p>即编译后的Java类，Web资源等的整合，用以测试、部署等工作</p>
-<p>白话一点，就是说某个module要如何打包，例如war exploded、war、jar、ear等等这种打包形式</p>
-<p>某个module有了 Artifacts 就可以部署到应用服务器中了</p>
-</blockquote>
-<p><code>＋</code> - <code>Add</code> - <code>Web Application: Exploded</code> -  <code>From Modules...</code> - 选择我们的项目or模块</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">区分：</span><br><span class="line">（1）jar：Java ARchive，通常聚合Java类文件、相关数据和资源（文本、图片等）到一个文件，以便分发Java平台应用软件或库；</span><br><span class="line">（2）war：Web application ARchive，一种JAR文件，其中包含用来分发的JSP、Java Servlet、Java类、XML文件、标签库、静态网页（HTML和相关文件），以及构成Web应用程序的其他资源；</span><br><span class="line">（3）war exploded：展开，不压缩。直接把文件夹、jsp页面 、classes等移到Tomcat 部署文件夹里面</span><br><span class="line">			因此这种方式支持热部署，建议在开发的时候使用这种模式，便于修改了文件的效果立刻显现出来</span><br><span class="line">			热部署：对于Java应用程序来说，热部署就是在运行时更新Java类文件。</span><br></pre></td></tr></table></figure></li>
-</ol>
-<h2 id="二、Tomcat配置"><a href="#二、Tomcat配置" class="headerlink" title="二、Tomcat配置"></a>二、Tomcat配置</h2><ol>
-<li><p>点击IDEA右上方执行的<code>Add Configuration...</code></p>
-</li>
-<li><p>弹出的窗口中点击<code>+</code>，出现的选项中往下滑，选择<code>Tomcat Server</code> - <code>Local</code></p>
-<blockquote>
-<p>这步添加Tomcat配置</p>
-</blockquote>
-</li>
-<li><p>点击<code>Deployement</code>页签，点击<code>+</code>，选择<code>Artifact...</code></p>
-<blockquote>
-<p>这里IDEA会将刚才的<code>项目</code>的<code>artifact</code>放入窗口中</p>
-<p>但也有可能存在其他的<code>artifact</code>，选择我们需要的</p>
-</blockquote>
-</li>
-<li><p>修改<code>Application context</code>，可以只保留一个<code>/</code></p>
-<blockquote>
-<p>IDEA会自动为我们生成项目根路径</p>
-<p>如果其他配置没问题结果访问404很可能是因为这个没改</p>
-</blockquote>
-</li>
-<li><p>点击<code>Server</code>页签，检查<code>URL</code>处是否与步骤<code>4</code>中设置的同步</p>
-<blockquote>
-<p>IDEA会自动同步</p>
-</blockquote>
-</li>
-</ol>
-<h2 id="三、Tomcat运行"><a href="#三、Tomcat运行" class="headerlink" title="三、Tomcat运行"></a>三、Tomcat运行</h2><p>给我点那个绿色的<code>Run</code>！！！！</p>
-<h3 id="当你点击运行Tomcat时，IDEA在做什么"><a href="#当你点击运行Tomcat时，IDEA在做什么" class="headerlink" title="当你点击运行Tomcat时，IDEA在做什么"></a>当你点击运行Tomcat时，IDEA在做什么</h3><ol>
-<li><p><strong>编译</strong>。</p>
-<p>IDEA在保存后不会做编译，不像Eclipse的保存即编译，</p>
-<p>因此在运行server前会做一次编译，</p>
-<p>编译后class文件存放在指定的项目<u>编译输出目录</u>下；</p>
-</li>
-<li><p>根据artifact中的设定对目录结构进行<strong>创建</strong>；</p>
-</li>
-<li><p>拷贝<strong>web资源</strong>的根目录下的所有文件到artifact的目录下（见1.2.3）；</p>
-</li>
-<li><p>拷贝<u>编译输出目录</u>下的<strong>classes目录</strong>到artifact下的WEB-INF下（见1.2.2）；</p>
-</li>
-<li><p>拷贝<strong>lib目录</strong>下所需的jar包到artifact下的WEB_INF下；</p>
-</li>
-<li><p>运行server，运行成功后，如有需要，会自动打开浏览器访问指定url。</p>
-</li>
-</ol>
-<h2 id="四、一些报错及解决"><a href="#四、一些报错及解决" class="headerlink" title="四、一些报错及解决"></a>四、一些报错及解决</h2><h3 id="4-1、org-springframework-xxx不存在"><a href="#4-1、org-springframework-xxx不存在" class="headerlink" title="4.1、org.springframework..xxx不存在"></a>4.1、org.springframework..xxx不存在</h3><h4 id="4-1-1、情况一：pom-xml中的maven的dependency没加载好（红色version）"><a href="#4-1-1、情况一：pom-xml中的maven的dependency没加载好（红色version）" class="headerlink" title="4.1.1、情况一：pom.xml中的maven的dependency没加载好（红色version）"></a>4.1.1、情况一：pom.xml中的maven的dependency没加载好（红色version）</h4><ol>
-<li><p><strong>方法一：头铁再试一次</strong></p>
-<p><code>右击项目</code> - <code>Maven</code> - <code>Reimport</code></p>
-<blockquote>
-<p>IDEA将通过网络自动下载相关依赖，并存放在Maven的本地仓库中</p>
-</blockquote>
-</li>
-<li><p><strong>方法二：换个version罢</strong></p>
-<p>如果还不行，可能的原因及解决：<br>原因一：你的<code>maven</code>配置了从<code>aliyun</code>镜像下载，而<code>aliyun仓库</code>中恰好没有对应<code>version</code><br>原因二：<code>版本号version</code>暂时用不了（我也不知道是什么缘故），换个<code>版本号</code>就好了<br>解决：访问<code>https://mvnrepository.com/</code>（需要梯子）<br>            搜索需要的<code>artifact</code>，复制其他<code>version</code>的<code>dependency</code>并粘贴到<code>pom.xml</code>中</p>
-</li>
-<li><p><strong>方法三：你是不是装过不止一个maven</strong></p>
-<p>检查<code>File</code> - <code>Settings</code> - <code>Build,Execution,Deployment</code> - <code>Maven</code> </p>
-<p><code>Maven home directory</code>选择你本次项目要用的maven</p>
-<p><code>User settings file</code>的<code>settings.xml</code>里可能配置了从<code>aliyun</code>下载（自己权衡要不要改）</p>
-</li>
-<li><p><strong>方法四：手动下载jar包</strong></p>
-<p>如果上面的你都尝试过了，还是不行（哦，可怜的人儿）：<br>你需要<code>baidu.com</code>搜索对应版本的jar包并下载<br>把<code>jar包</code>放到<code>maven</code>的<code>本地repository文件夹</code>中的对应位置（这个对应位置要<u>点进一个个小文件夹</u>）<br>注意<u>删除</u>最里面那个文件夹里以 .lastUpdated为后缀的文件（下载失败的），然后粘贴<br><u>刷新</u>一下maven依赖</p>
-</li>
-</ol>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">将Maven的刷新设置为自动，配置方法为：</span><br><span class="line">（1）打开File-Settings-Maven</span><br><span class="line">（2）勾选Import Maven projects automatically</span><br></pre></td></tr></table></figure>
-
-<h4 id="4-2-2、情况二：pom文件相关的依赖明明都下载好了，但运行还是找不到XXX相关的包"><a href="#4-2-2、情况二：pom文件相关的依赖明明都下载好了，但运行还是找不到XXX相关的包" class="headerlink" title="4.2.2、情况二：pom文件相关的依赖明明都下载好了，但运行还是找不到XXX相关的包"></a>4.2.2、情况二：pom文件相关的依赖明明都下载好了，但运行还是找不到XXX相关的包</h4><p><strong>方法一：</strong>删除<code>target文件夹</code>下所有文件，重新编译运行。</p>
-<p><strong>方法二：</strong><code>File</code> - <code>Settings</code> - <code>Build,Execution,Deployment</code> - <code>Maven</code> - <code>Runner</code></p>
-<pre><code>            勾选`Delegate IDE build/run actions to Maven`
-
-            选择自己安装的`JRE的路径`
-</code></pre>
-<hr>
-<h3 id="4-2、java-io-FileNotFoundException-class-path-resource-spring-cannot-be-resolve"><a href="#4-2、java-io-FileNotFoundException-class-path-resource-spring-cannot-be-resolve" class="headerlink" title="4.2、java.io.FileNotFoundException: class path resource [spring&#x2F;] cannot be resolve"></a>4.2、java.io.FileNotFoundException: class path resource [spring&#x2F;] cannot be resolve</h3><p><strong>描述：</strong>此异常是说找不到<code>spring</code>的配置文件。</p>
-<p><strong>原因：</strong>为了防止<code>mybatis</code>的<code>mapper</code>文件被过滤掉，在<code>pom.xml</code>的<code>build</code>节点下加入了如下代码</p>
-<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="comment">&lt;!--如果不加如下配置maven打包时不会将mapper文件打包进去--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">resources</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">resource</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">directory</span>&gt;</span>src/main/java<span class="tag">&lt;/<span class="name">directory</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">includes</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">include</span>&gt;</span>**/*.properties<span class="tag">&lt;/<span class="name">include</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">include</span>&gt;</span>**/*.xml<span class="tag">&lt;/<span class="name">include</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">includes</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">filtering</span>&gt;</span>false<span class="tag">&lt;/<span class="name">filtering</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">resource</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">resources</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p><strong>解决：</strong><code>maven</code>默认扫描<code>src/main/java</code>中的文件但并不理会<code>src/main/resources</code>中的xml文件，</p>
-<pre><code>        因此，添加resource节点，使其扫描`src/main/resources`中的xml文件
-</code></pre>
-<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="comment">&lt;!--如果不加如下配置maven打包时不会将mapper文件打包进去--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">resources</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">resource</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">directory</span>&gt;</span>src/main/java<span class="tag">&lt;/<span class="name">directory</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">includes</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">include</span>&gt;</span>**/*.properties<span class="tag">&lt;/<span class="name">include</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">include</span>&gt;</span>**/*.xml<span class="tag">&lt;/<span class="name">include</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">includes</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">filtering</span>&gt;</span>false<span class="tag">&lt;/<span class="name">filtering</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">resource</span>&gt;</span></span><br><span class="line">&lt;！--修改后的文件--&gt;</span><br><span class="line"><span class="comment">&lt;!--如果不加此节点，resources文件中的spring配置文件将会找不到--&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">resource</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">directory</span>&gt;</span>src/main/resources<span class="tag">&lt;/<span class="name">directory</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">includes</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">include</span>&gt;</span>**/*.properties<span class="tag">&lt;/<span class="name">include</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">include</span>&gt;</span>**/*.xml<span class="tag">&lt;/<span class="name">include</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">includes</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">filtering</span>&gt;</span>false<span class="tag">&lt;/<span class="name">filtering</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">resource</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">resources</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<hr>
-<h3 id="4-3、maven依赖的多个版本依赖冲突"><a href="#4-3、maven依赖的多个版本依赖冲突" class="headerlink" title="4.3、maven依赖的多个版本依赖冲突"></a>4.3、maven依赖的多个版本依赖冲突</h3><p><strong>描述</strong>：当出现下面问题异常的时候，如果clean jar包之后还是无法成功启动项目，可以考虑是这个问题</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">1、NoDefClassException</span><br><span class="line">2、ClassNotFoundException</span><br><span class="line">3、NoSuchMethodError</span><br><span class="line">4、NoSuchFieldError</span><br></pre></td></tr></table></figure>
-
-<p><strong>查看</strong>：在界面右侧可找到<code>Maven</code>，点开，小图标里找到<code>Show Dependencies</code>，</p>
-<pre><code>        点击后即可查看当前`maven模块的依赖结构图`，&lt;u&gt;红色的线&lt;/u&gt;即为&lt;u&gt;依赖冲突&lt;/u&gt;。
-</code></pre>
-<p><strong>解决：</strong></p>
-<ol>
-<li><code>File</code> - <code>Settings</code> - <code>Plugins</code> - 搜索 <code>maven helper</code> - <code>install</code></li>
-<li>打开<code>pom.xml</code>，在编辑器下方 控制台上方，点击text旁边的<code>Dependency Analyzer</code></li>
-<li>左侧为<code>冲突的jar包</code>，挨个点开，把右侧红色的挨个右击<code>exclude</code></li>
-</ol>
-<h2 id="五、参考博客"><a href="#五、参考博客" class="headerlink" title="五、参考博客"></a>五、参考博客</h2><ol>
-<li>IDEA使用Tomcat运行web项目教程：<a href="http://t.csdn.cn/44qjF">http://t.csdn.cn/44qjF</a></li>
-<li>idea运行项目 程序包org.springframework..xxx不存在的解决办法：<a href="http://t.csdn.cn/kzfyg">http://t.csdn.cn/kzfyg</a></li>
-<li>解决idea打开的项目中maven依赖下载失败问题：<a href="http://t.csdn.cn/6nNLs">http://t.csdn.cn/6nNLs</a></li>
-<li>如何将下载到本地的JAR包手动添加到Maven仓库：<a href="http://t.csdn.cn/82XIn">http://t.csdn.cn/82XIn</a></li>
-<li>war和war exploded的区别：<a href="http://t.csdn.cn/quYCO">http://t.csdn.cn/quYCO</a></li>
-<li>IDEA项目运行项目报404错误——org.apache.jasper.servlet.TldScanner.scanJars 至少有一个JAR被扫描用于TLD但尚未包含TLD。：<a href="http://t.csdn.cn/CY4WI">http://t.csdn.cn/CY4WI</a></li>
-<li>IDEA部署项目到tomcat运行成功但是页面404的两种原因：<a href="http://t.csdn.cn/E3IBU">http://t.csdn.cn/E3IBU</a></li>
-<li>java.io.FileNotFoundException: class path resource [spring&#x2F;] cannot be resolve 《异常信息》：<a href="http://t.csdn.cn/5JDz8">http://t.csdn.cn/5JDz8</a></li>
-<li>idea如何解决jar包冲突：<a href="http://t.csdn.cn/qyKTp">http://t.csdn.cn/qyKTp</a></li>
-</ol>
-]]></content>
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>IDEA本地环境手撕LeetCode闹的乌龙</title>
+      <link href="/2024/12/25/IDEA%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%89%8B%E6%92%95LeetCode%E9%97%B9%E7%9A%84%E4%B9%8C%E9%BE%99/"/>
+      <url>/2024/12/25/IDEA%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%89%8B%E6%92%95LeetCode%E9%97%B9%E7%9A%84%E4%B9%8C%E9%BE%99/</url>
+      
+        <content type="html"><![CDATA[<h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>目前LeetCode已经刷了不少题目，开始关心起这样一个问题：<strong>面试时候手撕代码怎么撕？口述、txt还是牛客平台？笔试是点入各家的链接吗？跟力扣的代码平台有什么很大区别吗？</strong></p><h2 id="手撕代码"><a href="#手撕代码" class="headerlink" title="手撕代码"></a>手撕代码</h2><p>咨询身边好友得到的回复是：区别很大，不能Debug。</p><ul><li><p><strong>牛客平台</strong>：哔哩哔哩</p></li><li><p><strong>本地环境</strong>：京东（提供题目描述，自己用开发环境写代码，没有类名，函数名、参数返回值）</p></li><li><p><strong>第三方平台</strong>：字节用飞书面试，给代码沙盒环境（极少量类似vc++能提供的那种提示）</p></li><li><p><strong>手写</strong></p></li></ul><h1 id="乌龙"><a href="#乌龙" class="headerlink" title="乌龙"></a>乌龙</h1><p>我尝试了<strong>VSCode + LeetCode</strong>插件，不习惯VSCode的提示和运行方式，毕竟只是编辑器，显得不是那么专业和趁手，于是转向挚爱的IDEA。</p><h2 id="以LeetCode-203-移除链表元素为例"><a href="#以LeetCode-203-移除链表元素为例" class="headerlink" title="以LeetCode 203.移除链表元素为例"></a>以LeetCode 203.移除链表元素为例</h2><img src="/2024/12/25/IDEA%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%89%8B%E6%92%95LeetCode%E9%97%B9%E7%9A%84%E4%B9%8C%E9%BE%99/image-20241225171110359.png" class="" title="image-20241225171110359"><h2 id="我在IDEA中编写了以下类"><a href="#我在IDEA中编写了以下类" class="headerlink" title="我在IDEA中编写了以下类"></a>我在IDEA中编写了以下类</h2><ul><li>Solution</li><li>Test<ul><li>DataStruct.ListNode</li><li>Utils.ListUtils：用于输入样例数组转链表、打印链表方便调试</li></ul></li></ul><h2 id="遇到的问题"><a href="#遇到的问题" class="headerlink" title="遇到的问题"></a>遇到的问题</h2><p>理应正常，实际正常的输出如下：</p><img src="/2024/12/25/IDEA%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%89%8B%E6%92%95LeetCode%E9%97%B9%E7%9A%84%E4%B9%8C%E9%BE%99/image-20241225171538402.png" class="" title="image-20241225171538402"><p>理应正常，实际不正常的输出如下：</p><img src="/2024/12/25/IDEA%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%89%8B%E6%92%95LeetCode%E9%97%B9%E7%9A%84%E4%B9%8C%E9%BE%99/image-20241225171642932.png" class="" title="image-20241225171642932"><p>按照<code>Solution#removeElements</code>的返回结果不应该有错：</p><img src="/2024/12/25/IDEA%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%89%8B%E6%92%95LeetCode%E9%97%B9%E7%9A%84%E4%B9%8C%E9%BE%99/image-20241225171715430.png" class="" title="image-20241225171715430"><h2 id="发现的乌龙Bug"><a href="#发现的乌龙Bug" class="headerlink" title="发现的乌龙Bug"></a>发现的乌龙Bug</h2><p>乌龙在于一个有参构造方法的参数名笔误了！！！</p><img src="/2024/12/25/IDEA%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%89%8B%E6%92%95LeetCode%E9%97%B9%E7%9A%84%E4%B9%8C%E9%BE%99/image-20241225171828942.png" class="" title="image-20241225171828942"><h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><ol><li>学以致用，善用<code>Junit</code>。不要自己写Test，怪麻烦的。</li><li>即使你不会<code>Junit</code>也要会Debug，这次的bug就是通过<code>Step Into (F7)</code> 看到了控制台才发现的。</li></ol><img src="/2024/12/25/IDEA%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%89%8B%E6%92%95LeetCode%E9%97%B9%E7%9A%84%E4%B9%8C%E9%BE%99/image-20241225172201512.png" class="" title="image-20241225172201512">]]></content>
+      
+      
       <categories>
-        <category>环境配置</category>
+          
+          <category> 环境配置 </category>
+          
       </categories>
-  </entry>
-  <entry>
-    <title>IDEA本地环境手撕LeetCode闹的乌龙</title>
-    <url>/2024/12/25/IDEA%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%89%8B%E6%92%95LeetCode%E9%97%B9%E7%9A%84%E4%B9%8C%E9%BE%99/</url>
-    <content><![CDATA[<h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>目前LeetCode已经刷了不少题目，开始关心起这样一个问题：<strong>面试时候手撕代码怎么撕？口述、txt还是牛客平台？笔试是点入各家的链接吗？跟力扣的代码平台有什么很大区别吗？</strong></p>
-<h2 id="手撕代码"><a href="#手撕代码" class="headerlink" title="手撕代码"></a>手撕代码</h2><p>咨询身边好友得到的回复是：区别很大，不能Debug。</p>
-<ul>
-<li><p><strong>牛客平台</strong>：哔哩哔哩</p>
-</li>
-<li><p><strong>本地环境</strong>：京东（提供题目描述，自己用开发环境写代码，没有类名，函数名、参数返回值）</p>
-</li>
-<li><p><strong>第三方平台</strong>：字节用飞书面试，给代码沙盒环境（极少量类似vc++能提供的那种提示）</p>
-</li>
-<li><p><strong>手写</strong></p>
-</li>
-</ul>
-<h1 id="乌龙"><a href="#乌龙" class="headerlink" title="乌龙"></a>乌龙</h1><p>我尝试了<strong>VSCode + LeetCode</strong>插件，不习惯VSCode的提示和运行方式，毕竟只是编辑器，显得不是那么专业和趁手，于是转向挚爱的IDEA。</p>
-<h2 id="以LeetCode-203-移除链表元素为例"><a href="#以LeetCode-203-移除链表元素为例" class="headerlink" title="以LeetCode 203.移除链表元素为例"></a>以LeetCode 203.移除链表元素为例</h2><img src="/2024/12/25/IDEA%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%89%8B%E6%92%95LeetCode%E9%97%B9%E7%9A%84%E4%B9%8C%E9%BE%99/image-20241225171110359.png" class="" title="image-20241225171110359">
-
-
-
-<h2 id="我在IDEA中编写了以下类"><a href="#我在IDEA中编写了以下类" class="headerlink" title="我在IDEA中编写了以下类"></a>我在IDEA中编写了以下类</h2><ul>
-<li>Solution</li>
-<li>Test<ul>
-<li>DataStruct.ListNode</li>
-<li>Utils.ListUtils：用于输入样例数组转链表、打印链表方便调试</li>
-</ul>
-</li>
-</ul>
-<h2 id="遇到的问题"><a href="#遇到的问题" class="headerlink" title="遇到的问题"></a>遇到的问题</h2><p>理应正常，实际正常的输出如下：</p>
-<img src="/2024/12/25/IDEA%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%89%8B%E6%92%95LeetCode%E9%97%B9%E7%9A%84%E4%B9%8C%E9%BE%99/image-20241225171538402.png" class="" title="image-20241225171538402">
-
-
-
-<p>理应正常，实际不正常的输出如下：</p>
-<img src="/2024/12/25/IDEA%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%89%8B%E6%92%95LeetCode%E9%97%B9%E7%9A%84%E4%B9%8C%E9%BE%99/image-20241225171642932.png" class="" title="image-20241225171642932">
-
-
-
-<p>按照<code>Solution#removeElements</code>的返回结果不应该有错：</p>
-<img src="/2024/12/25/IDEA%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%89%8B%E6%92%95LeetCode%E9%97%B9%E7%9A%84%E4%B9%8C%E9%BE%99/image-20241225171715430.png" class="" title="image-20241225171715430">
-
-<h2 id="发现的乌龙Bug"><a href="#发现的乌龙Bug" class="headerlink" title="发现的乌龙Bug"></a>发现的乌龙Bug</h2><p>乌龙在于一个有参构造方法的参数名笔误了！！！</p>
-<img src="/2024/12/25/IDEA%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%89%8B%E6%92%95LeetCode%E9%97%B9%E7%9A%84%E4%B9%8C%E9%BE%99/image-20241225171828942.png" class="" title="image-20241225171828942">
-
-
-
-<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><ol>
-<li>学以致用，善用<code>Junit</code>。不要自己写Test，怪麻烦的。</li>
-<li>即使你不会<code>Junit</code>也要会Debug，这次的bug就是通过<code>Step Into (F7)</code> 看到了控制台才发现的。</li>
-</ol>
-<img src="/2024/12/25/IDEA%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%89%8B%E6%92%95LeetCode%E9%97%B9%E7%9A%84%E4%B9%8C%E9%BE%99/image-20241225172201512.png" class="" title="image-20241225172201512">
-
-]]></content>
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>《寻找直播间里最有钱的傻子》播客笔记</title>
+      <link href="/2024/12/25/%E3%80%8A%E5%AF%BB%E6%89%BE%E7%9B%B4%E6%92%AD%E9%97%B4%E9%87%8C%E6%9C%80%E6%9C%89%E9%92%B1%E7%9A%84%E5%82%BB%E5%AD%90%E3%80%8B%E6%92%AD%E5%AE%A2%E7%AC%94%E8%AE%B0/"/>
+      <url>/2024/12/25/%E3%80%8A%E5%AF%BB%E6%89%BE%E7%9B%B4%E6%92%AD%E9%97%B4%E9%87%8C%E6%9C%80%E6%9C%89%E9%92%B1%E7%9A%84%E5%82%BB%E5%AD%90%E3%80%8B%E6%92%AD%E5%AE%A2%E7%AC%94%E8%AE%B0/</url>
+      
+        <content type="html"><![CDATA[<h1 id="节目：跳进兔子洞"><a href="#节目：跳进兔子洞" class="headerlink" title="节目：跳进兔子洞"></a>节目：跳进兔子洞</h1><h1 id="标题：寻找直播间里最有钱的傻子"><a href="#标题：寻找直播间里最有钱的傻子" class="headerlink" title="标题：寻找直播间里最有钱的傻子"></a>标题：寻找直播间里最有钱的傻子</h1><h2 id="1、谁是”神豪“大哥？"><a href="#1、谁是”神豪“大哥？" class="headerlink" title="1、谁是”神豪“大哥？"></a>1、谁是”神豪“大哥？</h2><p><strong>“神豪大哥”</strong>是直播平台中非常特殊的一类用户。他们不仅是<strong>某位主播的“榜一大哥”</strong>，还往往是<strong>平台的 VIP 用户</strong>。这类用户在直播平台中有着独特的地位和标志，甚至会在整个社区内形成一种独特的英雄主义与魔幻主义氛围。</p><p>工作人员描述，这类人群占平台总用户的比例极小，甚至不到1%。<strong>这些“神豪大哥”的基本特征为</strong>：</p><ul><li><strong>时间与金钱富足</strong>：20到40岁之间，许多来自二三四线城市，尤其是北方地区的男性。很多是公务员、企业主或地方富豪</li><li><strong>生活单调，寻求刺激</strong>：他们往往在经济条件上优越，但生活中缺乏有效的社交或娱乐方式。根据某直播平台的</li></ul><h2 id="2、做神豪大哥的舔狗"><a href="#2、做神豪大哥的舔狗" class="headerlink" title="2、做神豪大哥的舔狗"></a>2、做神豪大哥的舔狗</h2><h3 id="2-1、平台"><a href="#2-1、平台" class="headerlink" title="2.1、平台"></a>2.1、平台</h3><p>对于平台，这群神豪大哥的价值不言而喻，这也是为什么平台内部会专门设置一个运营团队来维系大哥们，<strong>「花费比较少的运营人力，获得更高的价值」</strong>。</p><ol><li>大客户运营的规模在 20-30 人左右。他们一半的工作时间都是在做 24 小时客服，也就是<strong>「实时关注大客户在平台的体验以及他们反馈的问题，并帮他们跟进解决」</strong>。</li><li>在平台之外，大客户运营还要和大哥们维持好线下关系。比如说最基本的逢年过节、客户生日，要送去礼物；再比如说大客户来公司附近玩了，<strong>「我们带他去这个城市转一圈」</strong>。</li><li>而各种各样的线下运营招数中，最有效也最受大哥欢迎的是直播平台发起的<strong>年度庆典活动</strong>。但无论是盛装出席的主播，还是娱乐圈堪称前辈的表演嘉宾，<strong>其实都不是真正的主角，大哥才是</strong>。</li></ol><p><strong>大哥能重要到什么程度？</strong>富贵记得有一次庆典，平台为了等一个人在澳洲、飞机晚点的顶级大哥入场，甚至推迟了整场活动的开始时间，「这个大哥贡献了平台至少几个月的盈利，换我是组织者，我也等，我专门给他办一场都行。」</p><h3 id="2-2、主播"><a href="#2-2、主播" class="headerlink" title="2.2、主播"></a>2.2、主播</h3><p><strong>但神豪大哥们真的会在乎平台的这些小恩小惠吗？</strong></p><ul><li><p><strong>大哥的情感诉求：</strong>运营小张认为，无论是 24 小时的客户服务，还是思虑周全的日常关怀，还是为了答谢大哥的线下庆典活动，都属于「次一点的手段」。<strong>平台更愿意用的手段，是拿主播来留住大哥</strong>，「大客户一般有他固定打赏的一个或几个主播，他很爱这几个主播。这几个主播在，大哥才会在。」主播小乐透露，部分大哥来直播平台的目的比较简单直接，「就是为了给自己找情人，说实话大部分的主播和自己的榜一都是恋爱关系」。</p></li><li><p><strong>主播的金钱诉求：</strong>这层情爱的关系也意味着，平台只要留得住头部主播，就能留住那些神豪大哥。<strong>那主播喜欢什么呢？</strong>小张说，自然是来自平台的让利，「就给她们更高的签约费，以及更高的直播打赏分成」。这种手段在实际的操作中屡试不爽。小张的团队就曾经以更高的收益为诱饵，把一个酷狗音乐的主播挖到了自己的平台，然后「她的大哥就全过来了，平台就是想用这个主播来赚钱」。</p></li></ul><h2 id="3、困在情绪变现的闭环里"><a href="#3、困在情绪变现的闭环里" class="headerlink" title="3、困在情绪变现的闭环里"></a>3、困在情绪变现的闭环里</h2><h3 id="3-1、直播的本质在于情绪变现"><a href="#3-1、直播的本质在于情绪变现" class="headerlink" title="3.1、直播的本质在于情绪变现"></a>3.1、直播的本质在于情绪变现</h3><p>在娱乐直播平台，<strong>很难说你真的是通过自己的歌声留住人</strong>。相反，<strong>平台的一个玩法就是要刺激所有人的情绪</strong>，你不能光唱歌，而是要能<strong>带动情绪在这个平台上传递，最终这个情绪转化成钱才行</strong>。怎么刺激用户的情绪？一个完美的例子就是直播平台设计的直播间 PK 活动。<strong>直播间 PK</strong> ：也就是两个直播间连线，在 10-15 分钟内，哪个主播粉丝打赏的钱更多，谁就是赢家。输的一方要接受一个提前约定好的惩罚。</p><h3 id="3-2、大哥的保护欲和虚荣心"><a href="#3-2、大哥的保护欲和虚荣心" class="headerlink" title="3.2、大哥的保护欲和虚荣心"></a>3.2、大哥的保护欲和虚荣心</h3><p>小乐回忆，她曾经在一次 PK 中遇到过一个非常不想接受的惩罚。「我连 PK 的对象是一个跨性别人士，他直播间的尺度非常大。他跟我说，小姑娘，咱俩谁 PK 输了就给大家表演一个生孩子。」平时走文艺范儿的小乐心里打起了退堂鼓，「我没做过这种在我看来比较低俗的表演。」直播间里的大哥仿佛看穿了小乐的心思，在短短十几分钟之内不断疯狂地上票，「然后他说，我看出来你非常不想做这个表演，你脸皮太薄，如果输了的话肯定 hold 不住，那就帮你打赢。」</p><p>情感刺激最终转化成了真金白银。而对于大哥来说，付出也是有回报的。怡霖发现，在大哥的概念里，<strong>打赢一场 PK 赛，意味着可以在短时间里提高自己的等级和地位。</strong></p><h3 id="3-3、直播抽奖是变相的灰色赌场"><a href="#3-3、直播抽奖是变相的灰色赌场" class="headerlink" title="3.3、直播抽奖是变相的灰色赌场"></a>3.3、直播抽奖是变相的灰色赌场</h3><p>这种带有赌徒色彩的心态体现在玩法上，就是每个平台都会有的抽奖礼物。比如怡霖入驻的陌陌直播设计的抽奖转盘，「欢乐盘 10 元&#x2F;次，黄金盘 100 元&#x2F;次。玩家就会不断地想花 10 元去抽到 1000 元的东西。最后发现自己可能充了 2 万元，才抽了 2000 元的东西。」</p><p>这种玩法虽然听起来像是赔本的买卖，但大哥们似乎不这么想。怡霖发现，正是这种类似赌博的玩法让用户更有动力充值刷礼物。怡霖举例，这就好比你在现实中花 1 万元买了一个包，「然后你把这个包送出去，它就是值 1 万。但<strong>如果他花 10 万才得到这个 1 万的包，他心里想的这个东西就值 10 万。</strong>」</p><h2 id="4、神豪大哥的算盘"><a href="#4、神豪大哥的算盘" class="headerlink" title="4、神豪大哥的算盘"></a>4、神豪大哥的算盘</h2><h3 id="4-1、大哥到底是谁？"><a href="#4-1、大哥到底是谁？" class="headerlink" title="4.1、大哥到底是谁？"></a>4.1、大哥到底是谁？</h3><p>怡霖怀疑，<strong>这些深藏不露的人或许并不是真实的</strong>，「有多少人在一个平台上能消费上千万？这上千万中又有多少是他自己的钱？」尽管怡霖对这些神豪大哥的身份存疑，但<strong>「无论是平台、公会还是主播，这都是他们不愿意让外界知晓的」</strong>。</p><p><strong>那么他们到底是谁？</strong></p><p>富贵提供了一个思路，<strong>「大哥也不是大哥，就是个运营的号。」</strong>在做了榜一大哥后，富贵以好朋友的身份帮几个主播管理过直播间。他发现，一些平台会和运营主播的 MCN 公司进行所谓的合作，也就是平台会以一个折扣价向 MCN 公司出售虚拟货币，MCN 公司的号购买后，货币只能在自家主播的直播间里才生效，<strong>「相当于是演给其他人看的」</strong>。</p><h3 id="4-2、到底谁是傻子"><a href="#4-2、到底谁是傻子" class="headerlink" title="4.2、到底谁是傻子"></a>4.2、到底谁是傻子</h3><p><strong>那其他人又是谁？</strong></p><p>在怡霖的研究中，除了极少数的“顶级大哥”，平台中还有一类被称为<strong>“腰部大哥”</strong>的用户。这些腰部大哥虽然打赏金额通常不到百万，但他们依然在几个月内花费数十万。他们是平台上的“傻子”，但怡霖认为，<strong>他们只是“有钱的傻子”，而非真正意义上的最有钱的用户，因为这些用户的钱财并不持久。</strong></p><p>许多腰部大哥来自中小型企业，尤其是工程施工和装修行业的老板。由于业务周期性，他们往往会在短期内获得较大一笔资金，而这些资金会迅速转化为消费。这些用户并不珍惜财富，更多的是想要即时享受。此外，一些用户通过互联网发展机会获取财富，成为<strong>“风口浪尖上的猪”</strong>。</p><p>尽管这些“腰部大哥”在外界看起来阔气大方，深入了解后却发现，他们的<strong>身份和社交关系都相对脆弱</strong>。许多腰部大哥并非大城市人，他们在城市中虽有财富，但无法真正融入，缺乏归属感，生活在一定的孤独与不安全感中。</p><h2 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h2><ol><li><p><strong>消费主义的极端体现。</strong>“神豪大哥”这一现象反映了现代消费主义的一种极端形态，尤其是在直播平台这种高度娱乐化和虚拟化的环境中，极少数人通过巨额的资金投入在社会中展现存在感和身份认同。这种行为引发了关于消费主义、财富分配与社会结构的广泛讨论。</p></li><li><p><strong>媒体与平台责任。</strong>直播平台作为这些现象的“温床”，在吸引这类用户时是否应当承担起更多的社会责任？平台是否应该设立更多的监管机制，避免这种行为造成社会的负面影响，尤其是对其他年轻群体的价值观形成潜在影响？</p><ul><li><p>平台、主播、大哥：不禁让我想到maiyin，只不过用了一种让人挑不出毛病的方式，一种falv之内的灰色地带。</p></li><li><p>魔化的直播的抽奖机制：更容易联想到dubo，利用简单的经济学原理，可以欺骗更多有钱无脑的冲动人士入局。</p></li></ul></li><li><p><strong>贫富差距与虚拟消费的交织。</strong>从经济学的角度看，神豪现象反映了当今社会贫富差距的进一步拉大。大量的虚拟消费并不意味着实体经济的增长，反而可能加剧社会的不公平感。人们在虚拟空间中的消费方式与现实经济环境之间的脱节，可能成为未来社会治理的新挑战。</p></li><li><p><strong>心理需求和自我认同感、存在感的空缺。</strong>“神豪大哥”背后的消费行为，暴露了现代人心理需求的空缺，尤其是关于自我认同感和存在感的需求。这种虚拟世界的行为可能会促使更多人寻求在数字世界中通过消费获得满足，而不是通过实际的社会交往或物质创造。</p></li></ol>]]></content>
+      
+      
       <categories>
-        <category>环境配置</category>
+          
+          <category> 播客笔记 </category>
+          
       </categories>
-  </entry>
-  <entry>
-    <title>《65种微习惯：轻松掌控你的行为、思维和情绪》读书笔记</title>
-    <url>/2024/12/20/%E3%80%8A65%E7%A7%8D%E5%BE%AE%E4%B9%A0%E6%83%AF%EF%BC%9A%E8%BD%BB%E6%9D%BE%E6%8E%8C%E6%8E%A7%E4%BD%A0%E7%9A%84%E8%A1%8C%E4%B8%BA%E3%80%81%E6%80%9D%E7%BB%B4%E5%92%8C%E6%83%85%E7%BB%AA%E3%80%8B%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/</url>
-    <content><![CDATA[<p>《65种微习惯：轻松掌控你的行为、思维和情绪》</p>
-<p>古川武士</p>
-<p>238个笔记</p>
-<p>点评</p>
-<p>◆ 2024&#x2F;09&#x2F;08 认为好看</p>
-<p>内容提要</p>
-<p>◆ 一个人有什么样的习惯，就会有什么样的人生。养成好习惯需要进行持久的积极性改变。在这一过程中，你真正要依靠的不是意志力和自控力，而是不用思考就直接去做的下意识行为。</p>
-<p>◆ 优秀不是行为，而是一种习惯。</p>
-<p>养成好习惯，创造你想要的人生！</p>
-<p>◆ 我们的思维很容易形成定式，我们会在日常生活中重复某种模式。</p>
-<p>◆ 人生90%的幸福是由好的习惯决定的。</p>
-<p>◆ “我看不到生命的意义和工作的价值。”你是否也有过这样的烦恼呢？我想说的是，只要调整好自己的情绪，你的心就会沉静下来。让我们了解自己真正想要什么，从而找到自己真正想做的事情，实现自己的价值。</p>
-<p>◆ 为什么你总是无法改变自己呢？因为你在潜意识中总是想要“安全、安心、安定”，对变化有抵触情绪。然而，“近朱者赤，近墨者黑”，环境对一个人的成长非常重要。只要你能够改变环境，就能够向自我成长的台阶迈进。</p>
-<p>◆ 2024&#x2F;08&#x2F;28发表想法</p>
-<p>自助餐，很有意思的比喻</p>
-<p>原文：当然，改变微习惯的65种方法不一定都适合你。你完全可以找到适合自己的几个方法去试试看，而不必掌握所有的方法。就像吃自助餐一样，你只要选择适合自己的那份“菜”即可。</p>
-<p>◆ 当然，改变微习惯的65种方法不一定都适合你。你完全可以找到适合自己的几个方法去试试看，而不必掌握所有的方法。就像吃自助餐一样，你只要选择适合自己的那份“菜”即可。</p>
-<p>不能养成微习惯的理由</p>
-<p>◆ 避免完美主义，让自己快速行动起来。</p>
-<p>◆ 例如，如果你有“我什么也做不好”“我比别人差”这样的观念，那么占据你内心的情绪就是无力感、自我厌恶感和绝望。</p>
-<p>◆ 如果你有“我来做肯定行”“我只要努力就会有结果”这种积极的观念，那么自我肯定感、希望、勇气等正面情绪就会油然而生，并且成为你行动的自驱力。</p>
-<p>◆ 在下面九种欲求中，对你来说最重要的有哪些？● 追求完美。● 同他人建立良好关系。● 达成目标。● 发挥独创性。● 深思熟虑，做好充分准备。● 有安全感。● 有愉悦感。● 感觉到自己的强大。● 按照自己的节奏行动。</p>
-<p>◆ 每个人都有自己的制胜方法，只有找到适合自己的方法，才能真正坚持下去。</p>
-<p>◆ 正是因为接触了日常生活中无法遇到的优秀的人，我才有了提升自己的想法和突破自我的勇气</p>
-<p>90%的幸福都来自习惯</p>
-<p>◆ 90%的幸福都来自习惯</p>
-<p>◆ 1.固定值（占40%）：思维方式和认知方式</p>
-<p>◆ 即使遇到同样的事情，有的人会理解为自己遭遇了困境，有的人则认为机遇降临到了自己头上。</p>
-<p>◆ 2.生活状态（占10%）：生活中发生的事情</p>
-<p>◆ 3.自发活动（占50%）：能否按照自己的心愿生活</p>
-<p>◆ 当我们被周围环境所左右或受情绪影响不能遵守约定、使自己处于失控状态时，我们的幸福感就会下降。</p>
-<p>◆ 在生活和工作中，不是“被迫做”，而是“主动做”——我们要像这样通过找回主体性、能动性、积极性让自己感到幸福。</p>
-<p>◆ 如果产生了“我的人生可以由自己选择！而且我已经选择了自己想要的人生”这种感觉，你的幸福感就会陡增。你能切实感受到自己主宰自己的命运，这一点至关重要。</p>
-<p>调整微习惯的关键在于调整好自己</p>
-<p>◆ 我们可以从中得到以下两个启示。</p>
-<p>◆ 如果我们能够理解这个激励机制，那么只要稍微动动脑筋就能帮助他人提高干劲。</p>
-<p>◆ 的干劲。同样的道理，无论是早起、运动还是打扫卫生，我们都能想办法激发出自己的干劲。</p>
-<p>◆ 本书提倡的不是强迫自己提高干劲，而是找到调整好自己的方法。如果能够调整好自己，激情就能自然而然地迸发出来，这一点极为重要。</p>
-<p>◆ 有的人靠坚持晨练养成了早起的习惯，但是并非所有人都能做到这一点；有的人如果知道第二天能吃上“网红”早点铺的早点，他就能做到早起；有的人则通过在Facebook上打卡并记录起床时间这种方式逼迫自己每天早起，从而获得某种心理上的愉悦。</p>
-<p>◆ 有的人喜欢在阳台上放一把椅子，一边喝咖啡一边看报，他为了享受这种从容的感觉而早起；有的人很享受在安静的地铁车厢里读书，因此愿意早起；还有的人早起，是因为他亲身感受到早晨慢跑去上班可以让一天身心愉悦。</p>
-<p>◆ 你只要稍加开动脑筋，就可以让内心的激情燃烧起来。反过来讲，如果你懒得思考，就很难达成心中的目标。</p>
-<p>◆ 养成好习惯和促进人生向好的关键在于两点：第一，要学会做自己喜欢的事情；第二，要有勇气让自己不喜欢的事情停下来。</p>
-<p>摆脱习惯引力</p>
-<p>◆ 只要遇到讨厌的工作，你就会拖延</p>
-<p>◆ ● 对于第一次碰到的事情，你迟迟不肯动手做；</p>
-<p>◆ 那是因为我们的大脑有一种机制，它为了保证安全而抵触新鲜事物，坚持维持现状。我把这种机制称为“习惯引力”。</p>
-<p>方法1 开心就好</p>
-<p>◆ 方法1 开心就好</p>
-<p>方法2 “婴儿学步式”习惯养成法：慢慢来</p>
-<p>◆ 方法2 “婴儿学步式”习惯养成法：慢慢来</p>
-<p>◆ 最难的是“迈出第一步”</p>
-<p>◆ 不用突然5点钟就起床， 只要比之前早起15分钟即可</p>
-<p>◆ ● 慢跑→健步走；</p>
-<p>● 减肥→把午饭的饭量减半；</p>
-<p>● 收拾房间→只收拾5分钟，或者只打扫卫生间；</p>
-<p>● 戒酒→平时喝3杯啤酒，现在只喝2杯半；</p>
-<p>● 早晨5点钟起床→比以前早起15分钟。</p>
-<p>方法3 先尝试再改变</p>
-<p>◆ 这样一来，你的身体反应和心理感受会给你一些反馈，</p>
-<p>◆ “晚上跑步可以消除我一天的焦虑情绪，打消我的不安，缓解工作压力，为一天的生活画上一个圆满的句号。”</p>
-<p>◆ 你也可以用这种先尝试再改变的方法塑造习惯。例如，每天早晨设置15分钟的时间不看手机信息（尝试坚持一周），停止召开不必要的例会（尝试坚持两周），每天22点之后不看手机（尝试坚持三天），每天按时下班（尝试坚持三天）。我建议你就按照这种节奏进行尝试。</p>
-<p>◆ 对于合适的方法你就去坚持，对于不合适的方法你就果断舍弃，慢慢调整自己的习惯。</p>
-<p>◆ 每天按时下班，戒掉低效加班（坚持三天）</p>
-<p>方法4 设定“例外规则”，别太完美主义</p>
-<p>◆ 方法4 设定“例外规则”，别太完美主义</p>
-<p>◆ 预先设定“例外规则”，遇到突发状况时可以灵活处理</p>
-<p>◆ 如果你今天加班、没抽出时间学英语，你在地铁上背几个英语单词就足够了[插图]</p>
-<p>◆ 当你没有精神的时候，只读一页书也很好</p>
-<p>◆ 生活中有很多突发事件，它们会影响习惯的养成。日子久了，你就会产生一种无力感，甚至会自我厌恶。最后，你就没有了干劲，取而代之的是深深的挫败感。为了防患于未然，请你提前设置“例外规则”，用于应对特殊情况。</p>
-<p>◆ 例如，当你心情不好或感到疲劳的时候，你可以把今天的学习任务减半。</p>
-<p>◆ “例外规则”是一种灵活对策。设定“例外规则”不是为了自我放松，而是为了让自己坚持下去。</p>
-<p>◆ 对于凡事追求完美的人而言，如果他做不到完美，就会极端地认为“和没做一样”，这样的人就非常适合设定“例外规则”。</p>
-<p>◆ 如果行动归零了，你就很难再次开始。</p>
-<p>◆ 2024&#x2F;08&#x2F;30发表想法</p>
-<p>汝听，人言否doge</p>
-<p>原文：昨晚我加班了。第二天早晨我不一定非得5点起床，能做到7点起床就行</p>
-<p>方法5 给自己一套“顶配”</p>
-<p>◆ 方法5 给自己一套“顶配”</p>
-<p>◆ 准备好提高干劲的工具，让自己进入状态</p>
-<p>◆ 我想买一套漂亮的运动服，这样跑步时就开心多了</p>
-<p>方法6 “抱团式”习惯养成法：不孤单</p>
-<p>◆ 方法6 “抱团式”习惯养成法：不孤单</p>
-<p>◆ 如果能够找到一个合作伙伴，就可以愉快地坚持下去</p>
-<p>◆ 有的人适合“抱团”培养好习惯。我的父母每天一起散步半小时，已经坚持了20多年。他们说：“正是因为一起散步，我俩才能坚持到今天。”其实，那半小时不仅是他们一起散步的时间，还是他们讨论健康、谈论孩子的时间，这就是他们继续走下去的理由。</p>
-<p>方法7 学会模仿别人</p>
-<p>◆ 方法7 学会模仿别人</p>
-<p>◆ 向有经验的人请教，倾听别人的实践经验，模仿好的做法</p>
-<p>◆ 在塑造微习惯的过程中，我觉得“模仿”是一条捷径。</p>
-<p>方法8 “胡萝卜”习惯养成法：给自己一个奖励</p>
-<p>◆ 方法8 “胡萝卜”习惯养成法：给自己一个奖励</p>
-<p>◆ 分阶段进行，犒劳自己，把握节奏</p>
-<p>◆ 完成这个大项目后，我想去旅行</p>
-<p>◆ 完成这项工作后， 我想看15分钟的闲书</p>
-<p>◆ ：为了保持上升的热情，给自己准备一份奖品。这个做法虽然看起来很普通，但是很有效果。</p>
-<p>◆ 慢跑之后我可以洗个热水澡，还可以喝一杯啤酒。</p>
-<p>◆  如果我能早起，就可以悠闲地一边喝咖啡一边看报纸</p>
-<p>◆ 当然，每天给自己一些小的奖励也是很有效果的。例如，“泡上一壶红茶”“吃些小点心”“听一首喜欢的曲子放松一下”都很不错。</p>
-<p>方法9 “马克笔”习惯养成法：记录你的成就感</p>
-<p>◆ 方法9 “马克笔”习惯养成法：记录你的成就感</p>
-<p>◆ 量化你的业绩和努力，提高积极性</p>
-<p>◆ 每天都能准时打卡、不留空白，这种成就感会成为一种积极性。</p>
-<p>◆ 努力一旦被数据化，“我可以再努力一些”这样的干劲就会涌上来。</p>
-<p>◆ 最近出现了综合评价睡眠时间和睡眠质量的手表。</p>
-<p>方法10 “朋友圈”习惯养成法：“晒一晒”你的努力</p>
-<p>◆ 我在一年内读完了100本电子书，被很多网友“点赞”</p>
-<p>◆ “想被别人表扬，想得到别人的认可”，这种想法是人类的根本需求。</p>
-<p>方法11 提高干劲的小装备</p>
-<p>◆ 方法11 提高干劲的小装备请使用一些能够提高积极性的小装备吧</p>
-<p>◆ 在重要的日子里，我会穿上能带给我力量的正装</p>
-<p>◆ 我是一个只要细分时间就能集中注意力工作的人，而让我能够集中注意力的装备就是计时器。</p>
-<p>◆ 2024&#x2F;08&#x2F;31发表想法</p>
-<p>这个功能宿舍极其友好，手戴小米手环6</p>
-<p>原文：它还可以震动，早上把我喊醒时也不会打扰家人。</p>
-<p>◆ 把琐碎的灵感写在一张A4纸上，这样你可能会有更多好的想法。</p>
-<p>方法12 把时间节点编入计划</p>
-<p>◆ 方法12 把时间节点编入计划一旦把时间节点确定下来，就很容易形成习惯</p>
-<p>◆ 每天早晨上班前在楼下的咖啡厅里学习30分钟</p>
-<p>◆ 在下班回家的地铁上，制订第二天的工作计划</p>
-<p>◆ “决定什么时候做”这件事能让我们的行动力大大提高。</p>
-<p>◆ ● 每周按时提交报告。● 每周五16点之前提交报告。我认为第二种方法更容易执行，因为这种方法设置了更明确的行动时间节点，这就会使我们的大脑接收的信息更加具体形象。研究结果证明，很多人都通过制订带附加条件的计划，使行动力提高了300%</p>
-<p>◆ 例如，我们可以加上这样的条件：“早晨起床后”“走路时”“坐在办公桌前等待电脑启动时”“吃午饭时”“洗澡时”“入睡前”等。如果把“在哪里做”这一点也加入计划，你就更加容易行动了。</p>
-<p>◆ 早会后我会和团队成员沟通5分钟洗完澡后我会在床上躺着放松10分钟</p>
-<p>方法13 向大家宣布，断绝自己的后路</p>
-<p>◆ 方法13 向大家宣布，断绝自己的后路</p>
-<p>◆ 当你告诉所有人你的目标后，就意味着你真的要这样做了</p>
-<p>◆ 2024&#x2F;09&#x2F;01发表想法</p>
-<p>内卷时代往往适得其反喔，打工人给领导打卡是努力可视化OK的，打工人给打工人打卡是恶心人了</p>
-<p>原文：几乎每个人都希望给别人留下好印象，“向大家宣布”利用的就是这种心理。</p>
-<p>◆ 亲手碾碎了睡懒觉这个恶魔。</p>
-<p>◆ 我还记得当时有人说“你小子绝对不可能戒烟”，听到此话，我越发坚定了戒烟的决心，最终成功地戒了烟。</p>
-<p>方法14 设定一个“激情目标”</p>
-<p>◆ 方法14 设定一个“激情目标”</p>
-<p>◆ 如果你厌倦了按部就班，就设定一个带劲的目标吧</p>
-<p>方法15 “年卡式”习惯养成法：要是“不想吃亏”，就坚持下去</p>
-<p>◆ 方法15 “年卡式”习惯养成法：要是“不想吃亏”，就坚持下去</p>
-<p>◆ 因为我提前投资了，所以就算为了挣回本钱也要努力</p>
-<p>方法16 “爱豆式”习惯养成法：我想成为那样的人</p>
-<p>◆ 方法16 “爱豆式”习惯养成法：我想成为那样的人</p>
-<p>◆ 憧憬会让你的理想保持热度</p>
-<p>方法17 “一刻钟”习惯养成法：起床后的黄金1小时</p>
-<p>◆ 方法17 “一刻钟”习惯养成法：起床后的黄金1小时如果有一个好的开始，你就可以顺利地投入工作</p>
-<p>◆ 一日之计在于晨。一天的开始是否顺畅会对我们一天的生活产生巨大的影响。</p>
-<p>◆ 我每天早晨起床后，会先喝一杯咖啡，然后一边听广播一边吃早餐。与看电视时要盯着屏幕不同，听广播时我不必将视线一直停留在收音机上，所以这件事适合在早上进行。到了办公室，在开始我的创造性工作之前，我会先制订今日计划，把自己的情绪调动起来，让大脑活跃起来。</p>
-<p>◆ 我喜欢在早晨一边喝咖啡一边冥想，这样我一整天都很放松我喜欢在早晨听有激情的音乐，开启一天的工作</p>
-<p>方法18 学会“一心二用”</p>
-<p>◆ 方法18 学会“一心二用”如果我能一边听歌一边运动，我就能坚持下去</p>
-<p>◆ 那么，尝试“一心二用”的最佳时机是什么时候呢？走路时、等待时、吃饭时、洗澡时——这些时机都很好。</p>
-<p>方法19 “氛围式”习惯养成法：寻找一个让你心情舒畅的场所</p>
-<p>◆ 方法19 “氛围式”习惯养成法：寻找一个让你心情舒畅的场所仅仅换个地方，就能让你提高干劲</p>
-<p>方法20 倒推“热情递减法则”，激活积极大脑</p>
-<p>◆ 方法20 倒推“热情递减法则”，激活积极大脑养成习惯≠公式化</p>
-<p>◆ 能够坚持下去的人最擅长利用变化和刺激。</p>
-<p>◆ 我们在开始做一件事时，因为有刺激，所以会感到很有意思，但随着熟悉程度的增加，我们会渐渐感到厌倦。因此，我们需要适度地加入某种变化，给生活一点刺激。</p>
-<p>拖延也是一种习惯</p>
-<p>◆ 拖延也是一种习惯</p>
-<p>◆ 拖延也是一种“习惯”，按原因分类的话，拖延可以分为以下7种：● 嫌麻烦；● 怕失败；● 觉得还有时间（其实已经没有时间了）；● 不想被人讨厌；● 觉得太辛苦；● 没有自信；● 不想后悔。</p>
-<p>方法21 克服拖延心理1：以15分钟为一个单位</p>
-<p>◆ 方法21 克服拖延心理1：以15分钟为一个单位</p>
-<p>◆ 把时间分段，高效利用碎片时间</p>
-<p>◆ 与跑马拉松不同，这种感觉就像短跑，你必须开足马力。如果一项工作需要15分钟，你在一个小时之内就可以完成四项工作。以我的个人经验来看，即便对于自己不太想做的事情，我用这种方法也能很好地完成。</p>
-<p>方法22 克服拖延心理2：列一个清单，做完一项勾掉一项</p>
-<p>◆ 方法22 克服拖延心理2：列一个清单，做完一项勾掉一项把要做的事情写出来，别总存在脑子里</p>
-<p>◆ 你这也想做那也想做，搞得自己很焦躁，结果怎么也动不了手，只好不断拖延。</p>
-<p>◆ 成就感和喜悦感可以提高我们的积极性，也是让我们能够坚持习惯的关键因素。因此，对孩子来说，虽然做作业本身并不是快乐的事，但是只要他们能体会到成就感和喜悦感，他们就会继续下去。</p>
-<p>方法23 克服拖延心理3：把工作细分</p>
-<p>◆ 方法23 克服拖延心理3：把工作细分分解你的工作，逐一突破</p>
-<p>方法24 克服拖延心理4：聚焦具体事项</p>
-<p>◆ 方法24 克服拖延心理4：聚焦具体事项如果有了明确的行动计划，你就容易行动起来</p>
-<p>方法25 克服拖延心理5：停止情绪内耗，干就完了</p>
-<p>◆ 方法25 克服拖延心理5：停止情绪内耗，干就完了对任何事都不感到麻烦的“零精神压力者”</p>
-<p>◆ “我只是做了我该做的事情。谈不上喜欢还是讨厌，我只是以平常心默默地去做而已。”</p>
-<p>◆ 用心去做，你就会泰然处之；不厌倦，你就能继续向前。所以，当你面对麻烦的工作时，淡定一点，做自己该做的就好。</p>
-<p>方法26 克服拖延心理6：当场就做这件事</p>
-<p>◆ 方法26 克服拖延心理6：当场就做这件事“我现在就做”——这是最有力量的一句话</p>
-<p>◆ 与其在任务清单上留下“写会议记录”这一条，不如尽量当场就完成这件事。别让这件事一直萦绕在你的脑海中折磨你，到最后不得不写的时候，它会消耗你大量的精力，得不偿失。</p>
-<p>◆ 我建议大家对于5分钟内就能完成的事情，不要拖延，马上就做。</p>
-<p>微习惯积极心理学</p>
-<p>◆ 对自己没有信心，惧怕失败而不能采取行动，被批评后陷入自我厌恶情绪——这些因素都会让我们进入消极状态、感到痛苦</p>
-<p>◆ 事实和解释是两回事，我们每个人都生活在由自己做出解释的世界里，虽然事实无法改变，但解释是可以改变的。</p>
-<p>◆ 有时我们看到的虽然是同一个事实，却由于认知方式不同而导致我们反应各异。</p>
-<p>◆ 一位职员因为拿到了一个大订单而得到了领导的表扬。这时，其他人会怎么想？有的人会想“太厉害了，我可不行啊”，有的人则会想“我也要加油”，还有的人会想“没什么了不起的，运气好罢了</p>
-<p>◆ 能够自我调节的人即使面对不乐观的事实，也会控制好自己的情绪，尽量积极地处理问题。</p>
-<p>◆ 她不再对自己无论如何都无法改变的人事变动耿耿于怀，而把精力花在自己可以控制的目标和事情上。</p>
-<p>◆ 我建议大家最好能每天坚持写日记，重新审视周围发生的事情，记录自己的对事情的理解和看法。慢慢地，你就会养成好的思维习惯。</p>
-<p>方法27 “1厘米超越思维”：不是超过别人，而是超过自己</p>
-<p>◆ 方法27 “1厘米超越思维”：不是超过别人，而是超过自己如果你不喜欢和别人比，那就和过去的自己比一比</p>
-<p>◆ 我又详细地询问了一番，才知道她的那位男同事在国外工作了20年之久，而D同学只在国外工作了3年。20年和3年当然有区别，可是，D同学却忽视了这一点。</p>
-<p>◆ 不要与他人比，而要与过去的自己比。</p>
-<p>◆ 我坚持了一个月晨跑，发现自己即使连续跑3千米也不觉得累了与半年前相比，我的英语词汇量增加了很多</p>
-<p>方法28 最大化思维：发挥既有优势</p>
-<p>◆ 方法28 最大化思维：发挥既有优势如果你觉得自己既没钱又没啥大本事，就要充分发挥你已经具备的优势</p>
-<p>◆ 后来，我才明白了一个道理：我们要学会利用现有的资金、关系、技术、知识、经验，从调动这些已有资源开始，一边做事情一边积累更多的资源。</p>
-<p>方法29 概率思维：结果取决于行动的量</p>
-<p>◆ 方法29 概率思维：结果取决于行动的量如果你觉得自己总是失败，就多试几次，因为有时候你欠缺的不是“能力”，而是“行动”</p>
-<p>◆ 即使命中率只有10%，如果你出击10次，也有命中的可能</p>
-<p>方法30 焦点思维：只关注你能做到的事</p>
-<p>◆ 方法30 焦点思维：只关注你能做到的事因自己无法控制的事情而烦恼，这是精神压力的最大来源</p>
-<p>◆ 很多人之所以有精神压力，是因为他们有自己无法控制的事情，并为此而感到烦恼。</p>
-<p>◆ 书中有这么一句话：“请区分您能够控制的事情和控制不了的事情，然后将注意力集中在您能够控制的事情上。”</p>
-<p>◆ 我不能改变自己的过去和他人的想法，但我可以改变自己的未来。</p>
-<p>方法31 发散思维：寻找更多选项</p>
-<p>◆ 我会问一问身边的朋友，如果公司倒闭，他们有没有其他选择我会事先准备10种方案</p>
-<p>方法32 量变思维：只做1%的改变</p>
-<p>◆ 方法32 量变思维：只做1%的改变如果你有10个行动方案，那么请先选3个试试</p>
-<p>◆ 我建议大家一边行动一边思考，不要琢磨太多，而要把注意力集中在行动上。</p>
-<p>◆ 如果你把注意力集中在思考问题上，总是踌躇不前，就会导致自己迟迟不能行动。所以，请把注意力集中在行动上，能做出1%的改善就很好。</p>
-<p>方法33 共赢思维：如何让双方都满意</p>
-<p>◆ 不要妥协，而要成全</p>
-<p>◆ 例如，到了周末，丈夫可以抽出时间陪孩子玩，再去做一顿饭，给妻子创造一些自由时间，让她也有时间上网、回复Facebook上的消息。</p>
-<p>◆ 妻子说：“我只是想发泄一下情绪，不要给我意见。”孩子说：“我想自己做决定，不要老管着我。”同事说：“我要全力以赴，不要打扰我。”</p>
-<p>方法34 去结果思维：尽力去做就好</p>
-<p>◆ 方法34 去结果思维：尽力去做就好不必在意结果，享受过程吧</p>
-<p>◆ 如果我们过于注重结果和对方的反应，就会感到压力很大、进展缓慢。在这种情况下，我建议你只要明确自己的态度就好，至于对方是否采纳你的意见，那是对方的事情。</p>
-<p>◆ 考前请努力复习，考完后就不要去想能不能考好了，因为这已经毫无意义了。</p>
-<p>◆ 我不在意，因为提案能否通过取决于领导，我尽力就好我不在意，因为我不能掌控台下听众的反应，自己享受其中就好</p>
-<p>方法35 “接力棒”思维：今天我做这么多就可以了</p>
-<p>◆ 方法35 “接力棒”思维：今天我做这么多就可以了将“接力棒”交给明天的自己</p>
-<p>◆ “现在这样就可以了”与“可以一直这样下去”是不同的。前者可以消除我的不安，让我不再认为自己可能写不出更好的东西了。</p>
-<p>◆ 虽然我动作僵硬，但我记住了舞步，我跳成这样已经很不错了我写的博客虽然内容一般，但我每天都坚持更新，这已经很难得了</p>
-<p>方法36 底线思维：降低你的期望值</p>
-<p>◆ 方法36 底线思维：降低你的期望值如果现实很“骨感”，不必烦恼，只要降低你的期望值就好了</p>
-<p>◆ 我现在已经意识到，虽然自己看到没洗的碗筷就会不舒服，想赶紧收拾干净，但是老公可能并不在意这些，而我也不能勉强他。从那以后，我转变了对做家务这件事的看法，什么时候想做就什么时候做吧。</p>
-<p>◆ 我们要将这些问题视为“永久性问题”，并学会与之友好相处。吉田女士的观点非常新颖：“我早就把它当作‘不治之症’看待了。”“我可以控制这种不满情绪。”这些正是她的生活智慧和思维习惯，她根本就不打算改变对方，而是调整自己的期望值。</p>
-<p>◆ 一个人不可能是完美无缺的。你的不安和不满都来自“理应如此”这种想法和现实之间的差异。这时，我建议你不要试图改变对方和现实，而要试着改变自己对所谓“理应如此”的执念。</p>
-<p>方法37 长期思维：做好失败的思想准备</p>
-<p>◆ 方法37 长期思维：做好失败的思想准备只要坚持下去，终有一天你会成功</p>
-<p>◆ 我把这种最初慢慢成长，然后突然呈现成果的现象称为“裂变式成长”。就像池塘里的睡莲到了第29天会突然绽放那样，你的努力有时会经历这样的“裂变”过程。</p>
-<p>方法38 初心思维：给自己找一个坚持下去的理由</p>
-<p>◆ 方法38 初心思维：给自己找一个坚持下去的理由不能只想“怎样才能坚持下去”，也要想想“为什么要坚持下去”</p>
-<p>◆ 加班、睡懒觉、熬夜“刷手机”等各种诱惑都还存在</p>
-<p>◆ 为了养成微习惯，我建议大家从明确自己的理想开始，请你问问自己：“我想成为什么样的人？我想实现什么目标？”</p>
-<p>方法39 故事思维：被感动的能力</p>
-<p>◆ 方法39 故事思维：被感动的能力当我们意志消沉时，那些感人的故事能让我们振奋起来</p>
-<p>◆ 动画片《灌篮高手》中的安西教练曾说过这样一句话：“如果你现在放弃，这场比赛就结束了。”这句话让我深受鼓舞</p>
-<p>方法40 价值思维：发现做这件事的意义</p>
-<p>◆ 方法40 价值思维：发现做这件事的意义如果你能够理解做这件事的意义，那么再难也能坚持下去</p>
-<p>◆ 做一件事情的意义不是被他人赋予的，而是要靠我们自己去发现的。</p>
-<p>◆ 负责处理投诉的不是卖出商品的那位销售员，而是当时接电话的那个人。</p>
-<p>◆ 我要与愤怒的顾客产生共情，小心谨慎地说出每一句话，争取对方的理解。它要求我具备推测对方心情和意图的能力、瞬间想出理由的脑力，以及面对激烈的言辞无所畏惧的胆量。</p>
-<p>◆ 我的领导很严厉，这也不是一件坏事，至少我的“抗打击能力”有了明显的提高我被调到别的部门了，很不爽。但这也是一次换个角度了解公司的机会</p>
-<p>方法41 联想思维：想一想以前的成功经验</p>
-<p>◆ 方法41 联想思维：想一想以前的成功经验结合以前的成功经验想一想，总会有一些灵感</p>
-<p>方法42 成长思维：你可以换个说法</p>
-<p>◆ 方法42 成长思维：你可以换个说法换一种思考方式，你就会发现自己能做的事</p>
-<p>◆ 我找不到自己想做的事情，怎样才能找到我一生都喜欢的工作呢？”作家回答他说：“请问您寻找了多久呢？‘找到’是‘寻找’这个行为的结果！</p>
-<p>◆ 我还发现一个问题，如果你对一种说法稍加改变，就可以改变思维方式。再看刚才所举的例子，你不要说“找不到自己想做的事情”，而应该说“我要寻找自己想做的事情”。</p>
-<p>◆ 不知道”这个词会让你停止思考，但是如果你能使用“学习”“尝试”这些词，就会有动力。</p>
-<p>◆ 例如，如果有人问我“我的个人形象不好，怎样才能提升”，我就会反问他：“你是怎样塑造个人形象的呢？”</p>
-<p>◆ ● 被动性词语：找不到、不会、不明白、太难。● 主动性词语：尝试、学习、寻找、探求、培育。</p>
-<p>方法43 “生活禅”思维：任何事物都有它存在的价值</p>
-<p>◆ 方法43 “生活禅”思维：任何事物都有它存在的价值干哪一行都有价值</p>
-<p>◆ 人生经历的一切都有意义，如果你这样想，就会对眼前发生的事情有不同的见解</p>
-<p>方法44 感恩思维：我要说声“谢谢你”</p>
-<p>◆ 方法44 感恩思维：我要说声“谢谢你”如果常怀感恩之心，你就会感到幸福</p>
-<p>◆ 据说，容易陷入消极情绪的人如果开始写“感恩日记”，他的烦恼就会变少。因此，在面对容易让你产生消极情绪的事情时，如果你心怀感恩，就会觉得“那件事情本身就是好事情”。常怀感恩之情，你的想法就会发生变化。</p>
-<p>第3章 掌控情绪的15种微习惯</p>
-<p>◆ 第3章 掌控情绪的15种微习惯找到自己想做的事情</p>
-<p>有温度的习惯</p>
-<p>◆ ● 积极的情绪：安心、放松、自我肯定、成就感、感谢。● 消极的情绪： 不安、焦虑、自我厌恶、挫败感、后悔、恐惧、绝望、担心。</p>
-<p>◆ 我们在行动和思考方面各有不同，在情绪方面也同样如此。我把它叫作“情绪习惯”。要想度过幸福的人生、有所成就，就要拥有良好的“情绪习惯”。</p>
-<p>◆ 在积极心理学中有“3∶1法则”这一概念。人要想感受到幸福，积极情绪和消极情绪的比例就要为3∶1。</p>
-<p>◆ 要控制好消极情绪所占的比例。如果这个比例反过来，即积极情绪和消极情绪的比例为1∶3，你就会经常被不安、焦虑、无力感、自我厌恶感所困扰。</p>
-<p>◆ 例如，当对方的生活被一些不好的行为习惯搅乱时，我几乎可以断定他的情绪习惯也出了问题。工作和生活变得一塌糊涂，他想通过深夜喝酒、暴饮暴食等方式消除精神压力。精神压力越大，越容易陷入不好的行为习惯。</p>
-<p>◆ ，最重要的是去挖掘沉睡在内心深处的“着迷”和“狂热”这两种欲求。如果这两种欲求爆发，感情的巨大能量就会喷涌出来，你就会找到答案</p>
-<p>◆ 那么，这种强烈的感情从何而来呢？其实它是从信念和本质这两种力量中诞生的。有的人相信“自己能做”，有的人认为“自己不会”，这两种人哪怕处在同样的状态下，产生的情绪也完全不同。前者能够感受到希望、可能性、干劲，而后者的内心却被绝望、无力感所占据。</p>
-<p>方法45 高能的情绪：减少放电，增加充电</p>
-<p>◆ 方法45 高能的情绪：减少放电，增加充电当内心的能量达到最大值时，你就能够获得极大的满足感</p>
-<p>方法46 投入的情绪：感受你的心流</p>
-<p>◆ 方法46 投入的情绪：感受你的心流瞬间集中注意力能减小精神压力</p>
-<p>◆ 冥想其实很简单，你只要坐在那里伸直后背，数着呼吸就可以了。最初的10分钟你会感觉有杂念涌出来，心不在焉的状态会持续一段时间，但是不久你就会进入只有呼吸存在的全身心投入状态。虽然这还算不上心无杂念的境界，你却能够感觉自己就存在于“此时此刻的瞬间”，内心仿佛进入深渊般的宁静境界。</p>
-<p>◆ 当我们潜入平和静寂的内心深处时，那些以前扰乱内心的东西就显得微不足道了。</p>
-<p>◆ 内心的沉静将把你带入一个平和的世界里，你能看到以前因陷入压力而忽略的东西，整个人都会变得豁达起来。</p>
-<p>◆ 相反，酗酒、沉迷网络等行为虽然也可以让你暂时忘记其他事情，但一旦失控就会很麻烦，这样不仅会让你损失金钱，还会给你的身心健康带来危害。</p>
-<p>方法47 主动的情绪：夺回生活的主动权</p>
-<p>◆ 方法47 主动的情绪：夺回生活的主动权如果能够掌握生活的主动权，你的幸福指数就会提升50%</p>
-<p>◆ 要想拥有积极的情绪，就要夺回生活的主动权。在幸福公式中，“自发活动”掌控着50%的幸福。</p>
-<p>◆ 为了夺回主动权，我给大家一个建议：请你先写出自己被什么所束缚，然后制订一份计划并执行下去。这样做的话，你的情绪就会发生改变。</p>
-<p>◆ ● 早晨比以前提前一个小时起床→你可以从忙乱中解放出来。● 早晨花10分钟制订一天的工作计划→结束被工作追赶的窘境。● 来到公司先不看邮件，用30分钟集中精力写报告→ 不被突发性工作所干扰。● 比约定时间提前15分钟到达→ 以防因地铁晚点或堵车而产生急躁情绪。● 每天晚上10点准时关手机→摆脱手机依赖症。● 每天写日记，回顾一天都做了什么→即使忙碌了一天也很有成就感。</p>
-<p>方法48 好奇的情绪：做10件让自己心动的事</p>
-<p>◆ 3.一个人去酒吧，回忆人生。</p>
-<p>◆ 生活需要突破，不要让你的思考方式和生活方式限制了自己。拥有好奇的情绪，你就会发现更多有趣的事情。试试做出一些心动，甚至“出格”的事吧，你的人生可能会迎来转折。</p>
-<p>世界因信念而改变</p>
-<p>◆ “你认为自己行，你就能行；你认为自己不行，你就不行。”这句话听起来像一种精神论，但其实是一种信念。</p>
-<p>◆ 相信“只要去做就能成功”的人会强化这一想法，让自己进入一种良性循环的状态；相反，相信“我不会”的人，随着一次次的失败，“我不会”这种信念会越来越强烈。</p>
-<p>方法49 戒掉否定的情绪：接受真实的自己</p>
-<p>◆ 方法49 戒掉否定的情绪：接受真实的自己不是“差距”，而是“不同”</p>
-<p>◆ 接受真实的自己就是在与别人相比时，要把认为是“差距”的东西理解为“不同”。</p>
-<p>方法50 戒掉讨好的情绪：没有附加条件的爱</p>
-<p>◆ 方法50 戒掉讨好的情绪：没有附加条件的爱生活已经很艰难，有时也要放自己一马</p>
-<p>方法51 戒掉被外界左右的情绪：面对好评依然保持清醒的头脑</p>
-<p>◆ 方法51 戒掉被外界左右的情绪：面对好评依然保持清醒的头脑遵循自己的原则，就不容易动摇</p>
-<p>方法52 戒掉不安的情绪：接受失败</p>
-<p>◆ 方法52 戒掉不安的情绪：接受失败不要为没有一直走上坡路而耿耿于怀，请放下这个包袱</p>
-<p>方法53 戒掉慌乱的情绪：搜索过去的成功经验</p>
-<p>◆ 迷茫时立即行动起来不仅是我的信念，也是我不断成功的原因。</p>
-<p>方法54 戒掉消极的情绪：找到一个座右铭，将它铭记于心</p>
-<p>◆ 方法54 戒掉消极的情绪：找到一个座右铭，将它铭记于心把名言作为自己的座右铭</p>
-<p>◆ “没有失败，只有反馈。”</p>
-<p>◆ “你打算怎样活下去，你的内心和直觉早已知晓。”</p>
-<p>◆ 人生就像背负着重担旅行，不能急着赶路。”</p>
-<p>◆ 当我被眼前的利益和结果所吸引时，我会想起这句话。人生应以百年为计，将目光放远，去思考10年、30年、50年后自己将成为什么样的人。</p>
-<p>方法55 分清“应该做”和“想做”</p>
-<p>◆ 方法55 分清“应该做”和“想做”如果不明白自己的真心，就问问自己是“应该做”还是“想做”</p>
-<p>◆ 那件事是你应该做的，还是你想做的？</p>
-<p>◆ 我认为应该坚持运动，可我打心底里就不想运动我认为应该去参加公司的聚餐，但实际上并不想去</p>
-<p>方法56 了解自己的性格类型</p>
-<p>◆ 不会卷入事情的漩涡中，懂得退让。</p>
-<p>方法57 重视自己热衷的事情</p>
-<p>◆ 方法57 重视自己热衷的事情回忆小时候的经历，找出自我欲望的根源</p>
-<p>◆ 高田先生现在做的事情和小时候着迷的事情之间是有关联的。高田先生着迷的是“全面收集信息，把它分析到能够完全理解的程度为止”。“收集信息”“了解”“分析”“解释”“归纳整理”都是他“自我欲望”的关键词。</p>
-<p>◆ 自我欲望并不是什么特别的东西，每个人身上都有。</p>
-<p>方法58 谁都想听好话</p>
-<p>◆ 方法58 谁都想听好话别人说什么你才高兴呢？探求他人欲望吧</p>
-<p>有意识地选择适合自己成长的环境</p>
-<p>◆ 每个人在行为、思考、情绪等习惯方面都会受到同伴的影响，环境对你有着强烈的影响，反过来讲，你通过选择环境可以改变整个人生。</p>
-<p>方法60 尝试改变环境</p>
-<p>◆ 方法60 尝试改变环境遇到正在实现理想的人是你的运气</p>
-<p>方法61 和自己的榜样成为朋友</p>
-<p>◆ 方法61 和自己的榜样成为朋友为了赶上他，你会一直努力下去</p>
-<p>方法62 结交志同道合的伙伴</p>
-<p>◆ 方法62 结交志同道合的伙伴尝试加入不同的团体，找到你的位置</p>
-<p>方法63 提高发现机会的敏感度</p>
-<p>◆ 方法63 提高发现机会的敏感度机会就像天上的流星一样，会突然造访</p>
-<p>方法64 等待好机会的到来</p>
-<p>◆ 方法64 等待好机会的到来做好准备，等最佳时机到来时立即出手</p>
-<p>方法65 获得最好的反馈</p>
-<p>◆ 方法65 获得最好的反馈“差评”是你成长的营养品</p>
-<p>后记</p>
-<p>◆ 人就是习惯的产物。</p>
-<p>◆ 喜欢才能做得更好。</p>
-<p>◆ 如果发现有让自己着迷和热衷的事情，就要对其倾注全部的力量，我希望你赶紧去寻找</p>
-]]></content>
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>《关于【一日男友】的幻想、沉迷和破灭》播客笔记</title>
+      <link href="/2024/12/24/%E3%80%8A%E5%85%B3%E4%BA%8E%E3%80%90%E4%B8%80%E6%97%A5%E7%94%B7%E5%8F%8B%E3%80%91%E7%9A%84%E5%B9%BB%E6%83%B3%E3%80%81%E6%B2%89%E8%BF%B7%E5%92%8C%E7%A0%B4%E7%81%AD%E3%80%8B%E6%92%AD%E5%AE%A2%E7%AC%94%E8%AE%B0/"/>
+      <url>/2024/12/24/%E3%80%8A%E5%85%B3%E4%BA%8E%E3%80%90%E4%B8%80%E6%97%A5%E7%94%B7%E5%8F%8B%E3%80%91%E7%9A%84%E5%B9%BB%E6%83%B3%E3%80%81%E6%B2%89%E8%BF%B7%E5%92%8C%E7%A0%B4%E7%81%AD%E3%80%8B%E6%92%AD%E5%AE%A2%E7%AC%94%E8%AE%B0/</url>
+      
+        <content type="html"><![CDATA[<h1 id="节目：跳进兔子洞"><a href="#节目：跳进兔子洞" class="headerlink" title="节目：跳进兔子洞"></a>节目：跳进兔子洞</h1><h1 id="标题：关于【一日男友】的幻想、沉迷和破灭"><a href="#标题：关于【一日男友】的幻想、沉迷和破灭" class="headerlink" title="标题：关于【一日男友】的幻想、沉迷和破灭"></a>标题：关于【一日男友】的幻想、沉迷和破灭</h1><h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>随着个体需求的多样化和社会关系的复杂化，越来越多的人开始寻求非传统的情感满足方式。其中，“一日男友”这一现象逐渐浮出水面，成为探讨现代情感需求与消费文化交织的一个重要窗口。</p><h2 id="一日男友现象概述"><a href="#一日男友现象概述" class="headerlink" title="一日男友现象概述"></a>一日男友现象概述</h2><p>“一日男友”指的是<strong>通过线下委托或线上平台，雇佣他人扮演一天的男朋友角色</strong>，以满足个人的情感需求。这一现象在年轻女性群体中特别普遍，尤其是在那些<strong>渴望与虚拟角色或理想化伴侣建立情感联系的“梦女”群体</strong>中。</p><h2 id="委托人的心理需求"><a href="#委托人的心理需求" class="headerlink" title="委托人的心理需求"></a>委托人的心理需求</h2><p>委托人通过<strong>金钱购买爱人</strong>的方式，寻求一种<strong>完全的情感依赖和安全感</strong>。这种需求源自于对稳定关系的渴望，但却难以在现实生活中实现。通过“一日男友”的服务，委托人可以获得：</p><ol><li><strong>占有欲的满足</strong>：通过拥有一个随时可以控制和依赖的伴侣，委托人获得心理上的满足。</li><li><strong>绝对的确定性和安全感</strong>：无需担心关系中的不确定性和风险。</li></ol><p>然而，这种通过金钱购买的关系缺乏真正的情感交流，容易导致情感上的空虚和依赖性。有时甚至会引发和带来对这种情感的<strong>配得感</strong>的怀疑。</p><h2 id="被委托人的角色与挑战"><a href="#被委托人的角色与挑战" class="headerlink" title="被委托人的角色与挑战"></a>被委托人的角色与挑战</h2><p>被委托人扮演“一日男友”的角色，需要具备高度的情感模拟能力和人际交往技巧。他们的工作不仅是表面的陪伴，更涉及深层次的情感交流和关系处理。具体来说：</p><ol><li><strong>角色还原、提供陪伴</strong>：准确模仿理想中的男友形象，满足委托人的幻想。在情感上给予委托人支持和安慰，成为其情感上的依靠。</li><li><strong>关系处理</strong>：被委托人如何处理好营业和非营业状态下的区别和关系处理是一大挑战。</li></ol><p>这种工作模式对被委托人而言，既是一种情感劳动，也可能带来心理压力，尤其是在面对长期依赖的委托人时。</p><h2 id="经济因素与行业现状"><a href="#经济因素与行业现状" class="headerlink" title="经济因素与行业现状"></a>经济因素与行业现状</h2><ul><li>300r &#x2F; 天</li><li>10w+ &#x2F; 月</li></ul><h2 id="一些思考"><a href="#一些思考" class="headerlink" title="一些思考"></a>一些思考</h2><h3 id="1、幻想、沉迷与破灭的循环"><a href="#1、幻想、沉迷与破灭的循环" class="headerlink" title="1、幻想、沉迷与破灭的循环"></a>1、幻想、沉迷与破灭的循环</h3><p>“一日男友”现象不仅是<strong>个体情感需求</strong>的反映，更是<strong>现代消费文化</strong>与<strong>情感表达方式</strong>的交织。委托人在通过这种服务满足幻想的同时，容易陷入情感上的沉迷。一旦这种依赖无法得到进一步满足，或者服务无法持续提供预期的情感支持，委托人便会经历情感的破灭。这种循环不仅影响个体的心理健康，还可能对现实中的人际关系产生负面影响。长期依赖虚拟或短暂的情感连接，容易导致对真实情感交流的逃避和恐惧，进一步加剧情感上的孤独感。</p><p>这让我想到崩坏星穹铁道的<strong>匹诺康尼</strong>的剧情，<strong>如果现实带给你的大部分是痛苦甚至只有痛苦，你会认为一直沉溺在美梦之中不失为一种解脱吗？</strong></p><h3 id="2、个人主体性"><a href="#2、个人主体性" class="headerlink" title="2、个人主体性"></a>2、个人主体性</h3><p>委托人需要<strong>保持主体性</strong>，不要沉溺于幻想当中。</p><p>被委托人也要<strong>保持主体性</strong>，不被完全物化。</p><h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h2><p>“一日男友”现象是现代社会情感需求与消费文化交织的产物，反映了个体在复杂社会关系中的情感困境。通过分析其背后的幻想、沉迷与破灭，我们不仅可以更好地理解当代情感需求的多样性，也能反思情感表达方式的健康性与可持续性。未来，随着社会的发展和人际关系的演变，这一现象可能会进一步发展，值得我们持续关注和深入研究。</p>]]></content>
+      
+      
       <categories>
-        <category>读书笔记</category>
+          
+          <category> 播客笔记 </category>
+          
       </categories>
-  </entry>
-  <entry>
-    <title>《寻找直播间里最有钱的傻子》播客笔记</title>
-    <url>/2024/12/25/%E3%80%8A%E5%AF%BB%E6%89%BE%E7%9B%B4%E6%92%AD%E9%97%B4%E9%87%8C%E6%9C%80%E6%9C%89%E9%92%B1%E7%9A%84%E5%82%BB%E5%AD%90%E3%80%8B%E6%92%AD%E5%AE%A2%E7%AC%94%E8%AE%B0/</url>
-    <content><![CDATA[<h1 id="节目：跳进兔子洞"><a href="#节目：跳进兔子洞" class="headerlink" title="节目：跳进兔子洞"></a>节目：跳进兔子洞</h1><h1 id="标题：寻找直播间里最有钱的傻子"><a href="#标题：寻找直播间里最有钱的傻子" class="headerlink" title="标题：寻找直播间里最有钱的傻子"></a>标题：寻找直播间里最有钱的傻子</h1><h2 id="1、谁是”神豪“大哥？"><a href="#1、谁是”神豪“大哥？" class="headerlink" title="1、谁是”神豪“大哥？"></a>1、谁是”神豪“大哥？</h2><p><strong>“神豪大哥”</strong>是直播平台中非常特殊的一类用户。他们不仅是<strong>某位主播的“榜一大哥”</strong>，还往往是<strong>平台的 VIP 用户</strong>。这类用户在直播平台中有着独特的地位和标志，甚至会在整个社区内形成一种独特的英雄主义与魔幻主义氛围。</p>
-<p>工作人员描述，这类人群占平台总用户的比例极小，甚至不到1%。<strong>这些“神豪大哥”的基本特征为</strong>：</p>
-<ul>
-<li><strong>时间与金钱富足</strong>：20到40岁之间，许多来自二三四线城市，尤其是北方地区的男性。很多是公务员、企业主或地方富豪</li>
-<li><strong>生活单调，寻求刺激</strong>：他们往往在经济条件上优越，但生活中缺乏有效的社交或娱乐方式。根据某直播平台的</li>
-</ul>
-<h2 id="2、做神豪大哥的舔狗"><a href="#2、做神豪大哥的舔狗" class="headerlink" title="2、做神豪大哥的舔狗"></a>2、做神豪大哥的舔狗</h2><h3 id="2-1、平台"><a href="#2-1、平台" class="headerlink" title="2.1、平台"></a>2.1、平台</h3><p>对于平台，这群神豪大哥的价值不言而喻，这也是为什么平台内部会专门设置一个运营团队来维系大哥们，<strong>「花费比较少的运营人力，获得更高的价值」</strong>。</p>
-<ol>
-<li>大客户运营的规模在 20-30 人左右。他们一半的工作时间都是在做 24 小时客服，也就是<strong>「实时关注大客户在平台的体验以及他们反馈的问题，并帮他们跟进解决」</strong>。</li>
-<li>在平台之外，大客户运营还要和大哥们维持好线下关系。比如说最基本的逢年过节、客户生日，要送去礼物；再比如说大客户来公司附近玩了，<strong>「我们带他去这个城市转一圈」</strong>。</li>
-<li>而各种各样的线下运营招数中，最有效也最受大哥欢迎的是直播平台发起的<strong>年度庆典活动</strong>。但无论是盛装出席的主播，还是娱乐圈堪称前辈的表演嘉宾，<strong>其实都不是真正的主角，大哥才是</strong>。</li>
-</ol>
-<p><strong>大哥能重要到什么程度？</strong>富贵记得有一次庆典，平台为了等一个人在澳洲、飞机晚点的顶级大哥入场，甚至推迟了整场活动的开始时间，「这个大哥贡献了平台至少几个月的盈利，换我是组织者，我也等，我专门给他办一场都行。」</p>
-<h3 id="2-2、主播"><a href="#2-2、主播" class="headerlink" title="2.2、主播"></a>2.2、主播</h3><p><strong>但神豪大哥们真的会在乎平台的这些小恩小惠吗？</strong></p>
-<ul>
-<li><p><strong>大哥的情感诉求：</strong>运营小张认为，无论是 24 小时的客户服务，还是思虑周全的日常关怀，还是为了答谢大哥的线下庆典活动，都属于「次一点的手段」。<strong>平台更愿意用的手段，是拿主播来留住大哥</strong>，「大客户一般有他固定打赏的一个或几个主播，他很爱这几个主播。这几个主播在，大哥才会在。」主播小乐透露，部分大哥来直播平台的目的比较简单直接，「就是为了给自己找情人，说实话大部分的主播和自己的榜一都是恋爱关系」。</p>
-</li>
-<li><p><strong>主播的金钱诉求：</strong>这层情爱的关系也意味着，平台只要留得住头部主播，就能留住那些神豪大哥。<strong>那主播喜欢什么呢？</strong>小张说，自然是来自平台的让利，「就给她们更高的签约费，以及更高的直播打赏分成」。这种手段在实际的操作中屡试不爽。小张的团队就曾经以更高的收益为诱饵，把一个酷狗音乐的主播挖到了自己的平台，然后「她的大哥就全过来了，平台就是想用这个主播来赚钱」。</p>
-</li>
-</ul>
-<h2 id="3、困在情绪变现的闭环里"><a href="#3、困在情绪变现的闭环里" class="headerlink" title="3、困在情绪变现的闭环里"></a>3、困在情绪变现的闭环里</h2><h3 id="3-1、直播的本质在于情绪变现"><a href="#3-1、直播的本质在于情绪变现" class="headerlink" title="3.1、直播的本质在于情绪变现"></a>3.1、直播的本质在于情绪变现</h3><p>在娱乐直播平台，<strong>很难说你真的是通过自己的歌声留住人</strong>。相反，<strong>平台的一个玩法就是要刺激所有人的情绪</strong>，你不能光唱歌，而是要能<strong>带动情绪在这个平台上传递，最终这个情绪转化成钱才行</strong>。怎么刺激用户的情绪？一个完美的例子就是直播平台设计的直播间 PK 活动。<strong>直播间 PK</strong> ：也就是两个直播间连线，在 10-15 分钟内，哪个主播粉丝打赏的钱更多，谁就是赢家。输的一方要接受一个提前约定好的惩罚。</p>
-<h3 id="3-2、大哥的保护欲和虚荣心"><a href="#3-2、大哥的保护欲和虚荣心" class="headerlink" title="3.2、大哥的保护欲和虚荣心"></a>3.2、大哥的保护欲和虚荣心</h3><p>小乐回忆，她曾经在一次 PK 中遇到过一个非常不想接受的惩罚。「我连 PK 的对象是一个跨性别人士，他直播间的尺度非常大。他跟我说，小姑娘，咱俩谁 PK 输了就给大家表演一个生孩子。」平时走文艺范儿的小乐心里打起了退堂鼓，「我没做过这种在我看来比较低俗的表演。」直播间里的大哥仿佛看穿了小乐的心思，在短短十几分钟之内不断疯狂地上票，「然后他说，我看出来你非常不想做这个表演，你脸皮太薄，如果输了的话肯定 hold 不住，那就帮你打赢。」</p>
-<p>情感刺激最终转化成了真金白银。而对于大哥来说，付出也是有回报的。怡霖发现，在大哥的概念里，<strong>打赢一场 PK 赛，意味着可以在短时间里提高自己的等级和地位。</strong></p>
-<h3 id="3-3、直播抽奖是变相的灰色赌场"><a href="#3-3、直播抽奖是变相的灰色赌场" class="headerlink" title="3.3、直播抽奖是变相的灰色赌场"></a>3.3、直播抽奖是变相的灰色赌场</h3><p>这种带有赌徒色彩的心态体现在玩法上，就是每个平台都会有的抽奖礼物。比如怡霖入驻的陌陌直播设计的抽奖转盘，「欢乐盘 10 元&#x2F;次，黄金盘 100 元&#x2F;次。玩家就会不断地想花 10 元去抽到 1000 元的东西。最后发现自己可能充了 2 万元，才抽了 2000 元的东西。」</p>
-<p>这种玩法虽然听起来像是赔本的买卖，但大哥们似乎不这么想。怡霖发现，正是这种类似赌博的玩法让用户更有动力充值刷礼物。怡霖举例，这就好比你在现实中花 1 万元买了一个包，「然后你把这个包送出去，它就是值 1 万。但<strong>如果他花 10 万才得到这个 1 万的包，他心里想的这个东西就值 10 万。</strong>」</p>
-<h2 id="4、神豪大哥的算盘"><a href="#4、神豪大哥的算盘" class="headerlink" title="4、神豪大哥的算盘"></a>4、神豪大哥的算盘</h2><h3 id="4-1、大哥到底是谁？"><a href="#4-1、大哥到底是谁？" class="headerlink" title="4.1、大哥到底是谁？"></a>4.1、大哥到底是谁？</h3><p>怡霖怀疑，<strong>这些深藏不露的人或许并不是真实的</strong>，「有多少人在一个平台上能消费上千万？这上千万中又有多少是他自己的钱？」尽管怡霖对这些神豪大哥的身份存疑，但<strong>「无论是平台、公会还是主播，这都是他们不愿意让外界知晓的」</strong>。</p>
-<p><strong>那么他们到底是谁？</strong></p>
-<p>富贵提供了一个思路，<strong>「大哥也不是大哥，就是个运营的号。」</strong>在做了榜一大哥后，富贵以好朋友的身份帮几个主播管理过直播间。他发现，一些平台会和运营主播的 MCN 公司进行所谓的合作，也就是平台会以一个折扣价向 MCN 公司出售虚拟货币，MCN 公司的号购买后，货币只能在自家主播的直播间里才生效，<strong>「相当于是演给其他人看的」</strong>。</p>
-<h3 id="4-2、到底谁是傻子"><a href="#4-2、到底谁是傻子" class="headerlink" title="4.2、到底谁是傻子"></a>4.2、到底谁是傻子</h3><p><strong>那其他人又是谁？</strong></p>
-<p>在怡霖的研究中，除了极少数的“顶级大哥”，平台中还有一类被称为<strong>“腰部大哥”</strong>的用户。这些腰部大哥虽然打赏金额通常不到百万，但他们依然在几个月内花费数十万。他们是平台上的“傻子”，但怡霖认为，<strong>他们只是“有钱的傻子”，而非真正意义上的最有钱的用户，因为这些用户的钱财并不持久。</strong></p>
-<p>许多腰部大哥来自中小型企业，尤其是工程施工和装修行业的老板。由于业务周期性，他们往往会在短期内获得较大一笔资金，而这些资金会迅速转化为消费。这些用户并不珍惜财富，更多的是想要即时享受。此外，一些用户通过互联网发展机会获取财富，成为<strong>“风口浪尖上的猪”</strong>。</p>
-<p>尽管这些“腰部大哥”在外界看起来阔气大方，深入了解后却发现，他们的<strong>身份和社交关系都相对脆弱</strong>。许多腰部大哥并非大城市人，他们在城市中虽有财富，但无法真正融入，缺乏归属感，生活在一定的孤独与不安全感中。</p>
-<h2 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h2><ol>
-<li><p><strong>消费主义的极端体现。</strong>“神豪大哥”这一现象反映了现代消费主义的一种极端形态，尤其是在直播平台这种高度娱乐化和虚拟化的环境中，极少数人通过巨额的资金投入在社会中展现存在感和身份认同。这种行为引发了关于消费主义、财富分配与社会结构的广泛讨论。</p>
-</li>
-<li><p><strong>媒体与平台责任。</strong>直播平台作为这些现象的“温床”，在吸引这类用户时是否应当承担起更多的社会责任？平台是否应该设立更多的监管机制，避免这种行为造成社会的负面影响，尤其是对其他年轻群体的价值观形成潜在影响？</p>
-<ul>
-<li><p>平台、主播、大哥：不禁让我想到maiyin，只不过用了一种让人挑不出毛病的方式，一种falv之内的灰色地带。</p>
-</li>
-<li><p>魔化的直播的抽奖机制：更容易联想到dubo，利用简单的经济学原理，可以欺骗更多有钱无脑的冲动人士入局。</p>
-</li>
-</ul>
-</li>
-<li><p><strong>贫富差距与虚拟消费的交织。</strong>从经济学的角度看，神豪现象反映了当今社会贫富差距的进一步拉大。大量的虚拟消费并不意味着实体经济的增长，反而可能加剧社会的不公平感。人们在虚拟空间中的消费方式与现实经济环境之间的脱节，可能成为未来社会治理的新挑战。</p>
-</li>
-<li><p><strong>心理需求和自我认同感、存在感的空缺。</strong>“神豪大哥”背后的消费行为，暴露了现代人心理需求的空缺，尤其是关于自我认同感和存在感的需求。这种虚拟世界的行为可能会促使更多人寻求在数字世界中通过消费获得满足，而不是通过实际的社会交往或物质创造。</p>
-</li>
-</ol>
-]]></content>
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>IDEA使用Tomcat运行Web项目及其常见报错</title>
+      <link href="/2024/12/20/IDEA%E4%BD%BF%E7%94%A8Tomcat%E8%BF%90%E8%A1%8CWeb%E9%A1%B9%E7%9B%AE%E5%8F%8A%E5%85%B6%E5%B8%B8%E8%A7%81%E6%8A%A5%E9%94%99/"/>
+      <url>/2024/12/20/IDEA%E4%BD%BF%E7%94%A8Tomcat%E8%BF%90%E8%A1%8CWeb%E9%A1%B9%E7%9B%AE%E5%8F%8A%E5%85%B6%E5%B8%B8%E8%A7%81%E6%8A%A5%E9%94%99/</url>
+      
+        <content type="html"><![CDATA[<p>@[toc]</p><h1 id="IDEA使用Tomcat运行Web项目及其常见报错"><a href="#IDEA使用Tomcat运行Web项目及其常见报错" class="headerlink" title="IDEA使用Tomcat运行Web项目及其常见报错"></a>IDEA使用Tomcat运行Web项目及其常见报错</h1><h2 id="一、Project-Structure"><a href="#一、Project-Structure" class="headerlink" title="一、Project Structure"></a>一、Project Structure</h2><blockquote><p>目的：让IDEA知道这是个Web项目</p></blockquote><ol><li><p><strong>Modules</strong></p><blockquote><p>目的：加载Web相关的配置和资源</p></blockquote><p><code>右键</code>目标模块 - <code>Add</code> - <code>Web</code></p><p><strong>Web配置窗口</strong></p><ol><li><p>确认<code>web.xml</code>路径是否正确，不正确需要手动修改</p><blockquote><p>web.xml即Deployment Descripters下的Path</p></blockquote></li><li><p>确认<code>Web资源目录</code>是否正确，不正确需要手动修改</p><blockquote><p><code>web资源目录</code>即<code>WEB-INF</code>上级路径（<code>JSP</code>等放置的位置）</p></blockquote><blockquote><p>应用程序一般默认为<code>web</code>文件夹，但是我的项目为<code>webapp</code>文件夹，改为正确的<code>webapp</code></p></blockquote></li></ol></li><li><p><strong>Artifacts</strong></p><blockquote><p>即编译后的Java类，Web资源等的整合，用以测试、部署等工作</p><p>白话一点，就是说某个module要如何打包，例如war exploded、war、jar、ear等等这种打包形式</p><p>某个module有了 Artifacts 就可以部署到应用服务器中了</p></blockquote><p><code>＋</code> - <code>Add</code> - <code>Web Application: Exploded</code> -  <code>From Modules...</code> - 选择我们的项目or模块</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">区分：</span><br><span class="line">（1）jar：Java ARchive，通常聚合Java类文件、相关数据和资源（文本、图片等）到一个文件，以便分发Java平台应用软件或库；</span><br><span class="line">（2）war：Web application ARchive，一种JAR文件，其中包含用来分发的JSP、Java Servlet、Java类、XML文件、标签库、静态网页（HTML和相关文件），以及构成Web应用程序的其他资源；</span><br><span class="line">（3）war exploded：展开，不压缩。直接把文件夹、jsp页面 、classes等移到Tomcat 部署文件夹里面</span><br><span class="line">因此这种方式支持热部署，建议在开发的时候使用这种模式，便于修改了文件的效果立刻显现出来</span><br><span class="line">热部署：对于Java应用程序来说，热部署就是在运行时更新Java类文件。</span><br></pre></td></tr></table></figure></li></ol><h2 id="二、Tomcat配置"><a href="#二、Tomcat配置" class="headerlink" title="二、Tomcat配置"></a>二、Tomcat配置</h2><ol><li><p>点击IDEA右上方执行的<code>Add Configuration...</code></p></li><li><p>弹出的窗口中点击<code>+</code>，出现的选项中往下滑，选择<code>Tomcat Server</code> - <code>Local</code></p><blockquote><p>这步添加Tomcat配置</p></blockquote></li><li><p>点击<code>Deployement</code>页签，点击<code>+</code>，选择<code>Artifact...</code></p><blockquote><p>这里IDEA会将刚才的<code>项目</code>的<code>artifact</code>放入窗口中</p><p>但也有可能存在其他的<code>artifact</code>，选择我们需要的</p></blockquote></li><li><p>修改<code>Application context</code>，可以只保留一个<code>/</code></p><blockquote><p>IDEA会自动为我们生成项目根路径</p><p>如果其他配置没问题结果访问404很可能是因为这个没改</p></blockquote></li><li><p>点击<code>Server</code>页签，检查<code>URL</code>处是否与步骤<code>4</code>中设置的同步</p><blockquote><p>IDEA会自动同步</p></blockquote></li></ol><h2 id="三、Tomcat运行"><a href="#三、Tomcat运行" class="headerlink" title="三、Tomcat运行"></a>三、Tomcat运行</h2><p>给我点那个绿色的<code>Run</code>！！！！</p><h3 id="当你点击运行Tomcat时，IDEA在做什么"><a href="#当你点击运行Tomcat时，IDEA在做什么" class="headerlink" title="当你点击运行Tomcat时，IDEA在做什么"></a>当你点击运行Tomcat时，IDEA在做什么</h3><ol><li><p><strong>编译</strong>。</p><p>IDEA在保存后不会做编译，不像Eclipse的保存即编译，</p><p>因此在运行server前会做一次编译，</p><p>编译后class文件存放在指定的项目<u>编译输出目录</u>下；</p></li><li><p>根据artifact中的设定对目录结构进行<strong>创建</strong>；</p></li><li><p>拷贝<strong>web资源</strong>的根目录下的所有文件到artifact的目录下（见1.2.3）；</p></li><li><p>拷贝<u>编译输出目录</u>下的<strong>classes目录</strong>到artifact下的WEB-INF下（见1.2.2）；</p></li><li><p>拷贝<strong>lib目录</strong>下所需的jar包到artifact下的WEB_INF下；</p></li><li><p>运行server，运行成功后，如有需要，会自动打开浏览器访问指定url。</p></li></ol><h2 id="四、一些报错及解决"><a href="#四、一些报错及解决" class="headerlink" title="四、一些报错及解决"></a>四、一些报错及解决</h2><h3 id="4-1、org-springframework-xxx不存在"><a href="#4-1、org-springframework-xxx不存在" class="headerlink" title="4.1、org.springframework..xxx不存在"></a>4.1、org.springframework..xxx不存在</h3><h4 id="4-1-1、情况一：pom-xml中的maven的dependency没加载好（红色version）"><a href="#4-1-1、情况一：pom-xml中的maven的dependency没加载好（红色version）" class="headerlink" title="4.1.1、情况一：pom.xml中的maven的dependency没加载好（红色version）"></a>4.1.1、情况一：pom.xml中的maven的dependency没加载好（红色version）</h4><ol><li><p><strong>方法一：头铁再试一次</strong></p><p><code>右击项目</code> - <code>Maven</code> - <code>Reimport</code></p><blockquote><p>IDEA将通过网络自动下载相关依赖，并存放在Maven的本地仓库中</p></blockquote></li><li><p><strong>方法二：换个version罢</strong></p><p>如果还不行，可能的原因及解决：<br>原因一：你的<code>maven</code>配置了从<code>aliyun</code>镜像下载，而<code>aliyun仓库</code>中恰好没有对应<code>version</code><br>原因二：<code>版本号version</code>暂时用不了（我也不知道是什么缘故），换个<code>版本号</code>就好了<br>解决：访问<code>https://mvnrepository.com/</code>（需要梯子）<br>            搜索需要的<code>artifact</code>，复制其他<code>version</code>的<code>dependency</code>并粘贴到<code>pom.xml</code>中</p></li><li><p><strong>方法三：你是不是装过不止一个maven</strong></p><p>检查<code>File</code> - <code>Settings</code> - <code>Build,Execution,Deployment</code> - <code>Maven</code> </p><p><code>Maven home directory</code>选择你本次项目要用的maven</p><p><code>User settings file</code>的<code>settings.xml</code>里可能配置了从<code>aliyun</code>下载（自己权衡要不要改）</p></li><li><p><strong>方法四：手动下载jar包</strong></p><p>如果上面的你都尝试过了，还是不行（哦，可怜的人儿）：<br>你需要<code>baidu.com</code>搜索对应版本的jar包并下载<br>把<code>jar包</code>放到<code>maven</code>的<code>本地repository文件夹</code>中的对应位置（这个对应位置要<u>点进一个个小文件夹</u>）<br>注意<u>删除</u>最里面那个文件夹里以 .lastUpdated为后缀的文件（下载失败的），然后粘贴<br><u>刷新</u>一下maven依赖</p></li></ol><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">将Maven的刷新设置为自动，配置方法为：</span><br><span class="line">（1）打开File-Settings-Maven</span><br><span class="line">（2）勾选Import Maven projects automatically</span><br></pre></td></tr></table></figure><h4 id="4-2-2、情况二：pom文件相关的依赖明明都下载好了，但运行还是找不到XXX相关的包"><a href="#4-2-2、情况二：pom文件相关的依赖明明都下载好了，但运行还是找不到XXX相关的包" class="headerlink" title="4.2.2、情况二：pom文件相关的依赖明明都下载好了，但运行还是找不到XXX相关的包"></a>4.2.2、情况二：pom文件相关的依赖明明都下载好了，但运行还是找不到XXX相关的包</h4><p><strong>方法一：</strong>删除<code>target文件夹</code>下所有文件，重新编译运行。</p><p><strong>方法二：</strong><code>File</code> - <code>Settings</code> - <code>Build,Execution,Deployment</code> - <code>Maven</code> - <code>Runner</code></p><pre><code>            勾选`Delegate IDE build/run actions to Maven`            选择自己安装的`JRE的路径`</code></pre><hr><h3 id="4-2、java-io-FileNotFoundException-class-path-resource-spring-cannot-be-resolve"><a href="#4-2、java-io-FileNotFoundException-class-path-resource-spring-cannot-be-resolve" class="headerlink" title="4.2、java.io.FileNotFoundException: class path resource [spring&#x2F;] cannot be resolve"></a>4.2、java.io.FileNotFoundException: class path resource [spring&#x2F;] cannot be resolve</h3><p><strong>描述：</strong>此异常是说找不到<code>spring</code>的配置文件。</p><p><strong>原因：</strong>为了防止<code>mybatis</code>的<code>mapper</code>文件被过滤掉，在<code>pom.xml</code>的<code>build</code>节点下加入了如下代码</p><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!--如果不加如下配置maven打包时不会将mapper文件打包进去--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">resources</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">resource</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">directory</span>&gt;</span>src/main/java<span class="tag">&lt;/<span class="name">directory</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">includes</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">include</span>&gt;</span>**/*.properties<span class="tag">&lt;/<span class="name">include</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">include</span>&gt;</span>**/*.xml<span class="tag">&lt;/<span class="name">include</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">includes</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">filtering</span>&gt;</span>false<span class="tag">&lt;/<span class="name">filtering</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">resource</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">resources</span>&gt;</span></span><br></pre></td></tr></table></figure><p><strong>解决：</strong><code>maven</code>默认扫描<code>src/main/java</code>中的文件但并不理会<code>src/main/resources</code>中的xml文件，</p><pre><code>        因此，添加resource节点，使其扫描`src/main/resources`中的xml文件</code></pre><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!--如果不加如下配置maven打包时不会将mapper文件打包进去--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">resources</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">resource</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">directory</span>&gt;</span>src/main/java<span class="tag">&lt;/<span class="name">directory</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">includes</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">include</span>&gt;</span>**/*.properties<span class="tag">&lt;/<span class="name">include</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">include</span>&gt;</span>**/*.xml<span class="tag">&lt;/<span class="name">include</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">includes</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">filtering</span>&gt;</span>false<span class="tag">&lt;/<span class="name">filtering</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">resource</span>&gt;</span></span><br><span class="line">&lt;！--修改后的文件--&gt;</span><br><span class="line"><span class="comment">&lt;!--如果不加此节点，resources文件中的spring配置文件将会找不到--&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">resource</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">directory</span>&gt;</span>src/main/resources<span class="tag">&lt;/<span class="name">directory</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">includes</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">include</span>&gt;</span>**/*.properties<span class="tag">&lt;/<span class="name">include</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">include</span>&gt;</span>**/*.xml<span class="tag">&lt;/<span class="name">include</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">includes</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">filtering</span>&gt;</span>false<span class="tag">&lt;/<span class="name">filtering</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">resource</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">resources</span>&gt;</span></span><br></pre></td></tr></table></figure><hr><h3 id="4-3、maven依赖的多个版本依赖冲突"><a href="#4-3、maven依赖的多个版本依赖冲突" class="headerlink" title="4.3、maven依赖的多个版本依赖冲突"></a>4.3、maven依赖的多个版本依赖冲突</h3><p><strong>描述</strong>：当出现下面问题异常的时候，如果clean jar包之后还是无法成功启动项目，可以考虑是这个问题</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">1、NoDefClassException</span><br><span class="line">2、ClassNotFoundException</span><br><span class="line">3、NoSuchMethodError</span><br><span class="line">4、NoSuchFieldError</span><br></pre></td></tr></table></figure><p><strong>查看</strong>：在界面右侧可找到<code>Maven</code>，点开，小图标里找到<code>Show Dependencies</code>，</p><pre><code>        点击后即可查看当前`maven模块的依赖结构图`，&lt;u&gt;红色的线&lt;/u&gt;即为&lt;u&gt;依赖冲突&lt;/u&gt;。</code></pre><p><strong>解决：</strong></p><ol><li><code>File</code> - <code>Settings</code> - <code>Plugins</code> - 搜索 <code>maven helper</code> - <code>install</code></li><li>打开<code>pom.xml</code>，在编辑器下方 控制台上方，点击text旁边的<code>Dependency Analyzer</code></li><li>左侧为<code>冲突的jar包</code>，挨个点开，把右侧红色的挨个右击<code>exclude</code></li></ol><h2 id="五、参考博客"><a href="#五、参考博客" class="headerlink" title="五、参考博客"></a>五、参考博客</h2><ol><li>IDEA使用Tomcat运行web项目教程：<a href="http://t.csdn.cn/44qjF">http://t.csdn.cn/44qjF</a></li><li>idea运行项目 程序包org.springframework..xxx不存在的解决办法：<a href="http://t.csdn.cn/kzfyg">http://t.csdn.cn/kzfyg</a></li><li>解决idea打开的项目中maven依赖下载失败问题：<a href="http://t.csdn.cn/6nNLs">http://t.csdn.cn/6nNLs</a></li><li>如何将下载到本地的JAR包手动添加到Maven仓库：<a href="http://t.csdn.cn/82XIn">http://t.csdn.cn/82XIn</a></li><li>war和war exploded的区别：<a href="http://t.csdn.cn/quYCO">http://t.csdn.cn/quYCO</a></li><li>IDEA项目运行项目报404错误——org.apache.jasper.servlet.TldScanner.scanJars 至少有一个JAR被扫描用于TLD但尚未包含TLD。：<a href="http://t.csdn.cn/CY4WI">http://t.csdn.cn/CY4WI</a></li><li>IDEA部署项目到tomcat运行成功但是页面404的两种原因：<a href="http://t.csdn.cn/E3IBU">http://t.csdn.cn/E3IBU</a></li><li>java.io.FileNotFoundException: class path resource [spring&#x2F;] cannot be resolve 《异常信息》：<a href="http://t.csdn.cn/5JDz8">http://t.csdn.cn/5JDz8</a></li><li>idea如何解决jar包冲突：<a href="http://t.csdn.cn/qyKTp">http://t.csdn.cn/qyKTp</a></li></ol>]]></content>
+      
+      
       <categories>
-        <category>播客笔记</category>
+          
+          <category> 环境配置 </category>
+          
       </categories>
-  </entry>
-  <entry>
-    <title>《关于【一日男友】的幻想、沉迷和破灭》播客笔记</title>
-    <url>/2024/12/24/%E3%80%8A%E5%85%B3%E4%BA%8E%E3%80%90%E4%B8%80%E6%97%A5%E7%94%B7%E5%8F%8B%E3%80%91%E7%9A%84%E5%B9%BB%E6%83%B3%E3%80%81%E6%B2%89%E8%BF%B7%E5%92%8C%E7%A0%B4%E7%81%AD%E3%80%8B%E6%92%AD%E5%AE%A2%E7%AC%94%E8%AE%B0/</url>
-    <content><![CDATA[<h1 id="节目：跳进兔子洞"><a href="#节目：跳进兔子洞" class="headerlink" title="节目：跳进兔子洞"></a>节目：跳进兔子洞</h1><h1 id="标题：关于【一日男友】的幻想、沉迷和破灭"><a href="#标题：关于【一日男友】的幻想、沉迷和破灭" class="headerlink" title="标题：关于【一日男友】的幻想、沉迷和破灭"></a>标题：关于【一日男友】的幻想、沉迷和破灭</h1><h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>随着个体需求的多样化和社会关系的复杂化，越来越多的人开始寻求非传统的情感满足方式。其中，“一日男友”这一现象逐渐浮出水面，成为探讨现代情感需求与消费文化交织的一个重要窗口。</p>
-<h2 id="一日男友现象概述"><a href="#一日男友现象概述" class="headerlink" title="一日男友现象概述"></a>一日男友现象概述</h2><p>“一日男友”指的是<strong>通过线下委托或线上平台，雇佣他人扮演一天的男朋友角色</strong>，以满足个人的情感需求。这一现象在年轻女性群体中特别普遍，尤其是在那些<strong>渴望与虚拟角色或理想化伴侣建立情感联系的“梦女”群体</strong>中。</p>
-<h2 id="委托人的心理需求"><a href="#委托人的心理需求" class="headerlink" title="委托人的心理需求"></a>委托人的心理需求</h2><p>委托人通过<strong>金钱购买爱人</strong>的方式，寻求一种<strong>完全的情感依赖和安全感</strong>。这种需求源自于对稳定关系的渴望，但却难以在现实生活中实现。通过“一日男友”的服务，委托人可以获得：</p>
-<ol>
-<li><strong>占有欲的满足</strong>：通过拥有一个随时可以控制和依赖的伴侣，委托人获得心理上的满足。</li>
-<li><strong>绝对的确定性和安全感</strong>：无需担心关系中的不确定性和风险。</li>
-</ol>
-<p>然而，这种通过金钱购买的关系缺乏真正的情感交流，容易导致情感上的空虚和依赖性。有时甚至会引发和带来对这种情感的<strong>配得感</strong>的怀疑。</p>
-<h2 id="被委托人的角色与挑战"><a href="#被委托人的角色与挑战" class="headerlink" title="被委托人的角色与挑战"></a>被委托人的角色与挑战</h2><p>被委托人扮演“一日男友”的角色，需要具备高度的情感模拟能力和人际交往技巧。他们的工作不仅是表面的陪伴，更涉及深层次的情感交流和关系处理。具体来说：</p>
-<ol>
-<li><strong>角色还原、提供陪伴</strong>：准确模仿理想中的男友形象，满足委托人的幻想。在情感上给予委托人支持和安慰，成为其情感上的依靠。</li>
-<li><strong>关系处理</strong>：被委托人如何处理好营业和非营业状态下的区别和关系处理是一大挑战。</li>
-</ol>
-<p>这种工作模式对被委托人而言，既是一种情感劳动，也可能带来心理压力，尤其是在面对长期依赖的委托人时。</p>
-<h2 id="经济因素与行业现状"><a href="#经济因素与行业现状" class="headerlink" title="经济因素与行业现状"></a>经济因素与行业现状</h2><ul>
-<li>300r &#x2F; 天</li>
-<li>10w+ &#x2F; 月</li>
-</ul>
-<h2 id="一些思考"><a href="#一些思考" class="headerlink" title="一些思考"></a>一些思考</h2><h3 id="1、幻想、沉迷与破灭的循环"><a href="#1、幻想、沉迷与破灭的循环" class="headerlink" title="1、幻想、沉迷与破灭的循环"></a>1、幻想、沉迷与破灭的循环</h3><p>“一日男友”现象不仅是<strong>个体情感需求</strong>的反映，更是<strong>现代消费文化</strong>与<strong>情感表达方式</strong>的交织。委托人在通过这种服务满足幻想的同时，容易陷入情感上的沉迷。一旦这种依赖无法得到进一步满足，或者服务无法持续提供预期的情感支持，委托人便会经历情感的破灭。这种循环不仅影响个体的心理健康，还可能对现实中的人际关系产生负面影响。长期依赖虚拟或短暂的情感连接，容易导致对真实情感交流的逃避和恐惧，进一步加剧情感上的孤独感。</p>
-<p>这让我想到崩坏星穹铁道的<strong>匹诺康尼</strong>的剧情，<strong>如果现实带给你的大部分是痛苦甚至只有痛苦，你会认为一直沉溺在美梦之中不失为一种解脱吗？</strong></p>
-<h3 id="2、个人主体性"><a href="#2、个人主体性" class="headerlink" title="2、个人主体性"></a>2、个人主体性</h3><p>委托人需要<strong>保持主体性</strong>，不要沉溺于幻想当中。</p>
-<p>被委托人也要<strong>保持主体性</strong>，不被完全物化。</p>
-<h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h2><p>“一日男友”现象是现代社会情感需求与消费文化交织的产物，反映了个体在复杂社会关系中的情感困境。通过分析其背后的幻想、沉迷与破灭，我们不仅可以更好地理解当代情感需求的多样性，也能反思情感表达方式的健康性与可持续性。未来，随着社会的发展和人际关系的演变，这一现象可能会进一步发展，值得我们持续关注和深入研究。</p>
-]]></content>
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>新手入门 Git &amp; GitHub</title>
+      <link href="/2024/12/20/%E6%96%B0%E6%89%8B%E5%85%A5%E9%97%A8%20Git%20&amp;%20GitHub/"/>
+      <url>/2024/12/20/%E6%96%B0%E6%89%8B%E5%85%A5%E9%97%A8%20Git%20&amp;%20GitHub/</url>
+      
+        <content type="html"><![CDATA[<p>@[TOC](新手入门 Git &amp; GitHub)</p><h1 id="零、命令行小抄"><a href="#零、命令行小抄" class="headerlink" title="&#x3D;&#x3D;零、命令行小抄&#x3D;&#x3D;"></a>&#x3D;&#x3D;零、命令行小抄&#x3D;&#x3D;</h1><blockquote><p>本小抄适用于：远程仓库new了repo、本地有（要上传的）文件夹、SSH已绑定好<br>供有一定基础、但不常用的同学（包括我自己）查阅</p></blockquote><ol><li><code>ssh-keygen -t rsa -C &quot;12345678@qq.com&quot;</code>，生成rsa（用于本地电脑和远程仓库绑定，详见下文3.3）</li><li>进入要上传的文件夹，<code>git init</code> ，创建本地仓库</li><li><code>git remote add origin git@github.com:xxx/yyy.git</code>，本地仓库连接远程仓库</li><li>做完修改后，<code>git add .</code>，添加到临时缓冲区</li><li><code>git commit -m &quot;添加了/修改了...&quot;</code>，提交到本地仓库</li><li><code>git push -u origin master</code>，提交到远程仓库的master分支</li><li><code>git log</code>，查看已有的commitID（为7准备）</li><li><code>git reset --hard commitID</code>，撤销 commit、撤销 git add . 操作、撤销修改代码（在以下情况常用：（1）添加了一个怎么也传不上去的大文件；（2）push时候发生由于commit引起的不知名error）</li><li><code>&quot;ssh:connect to host github.com port 22: Connection timed out&quot;</code>问题的解决<br> 首先，<code>vim ~/.ssh/config</code><br> 其次，添加以下代码 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># Default github user self</span><br><span class="line">Host github.com</span><br><span class="line">port 443 # 默认是22端口</span><br><span class="line">HostName ssh.github.com</span><br><span class="line">IdentityFile ~/.ssh/id_rsa</span><br></pre></td></tr></table></figure> 最后，<code>:wq</code>保存并退出vim模式</li></ol><h1 id="一、前言"><a href="#一、前言" class="headerlink" title="&#x3D;&#x3D;一、前言&#x3D;&#x3D;"></a>&#x3D;&#x3D;一、前言&#x3D;&#x3D;</h1><p><strong>学习Git</strong>真的是我学习路上的一道“<strong>槛</strong>”；<br>&emsp;&emsp;一方面，不断接触的信息告诉我“<strong>学习Git很重要</strong>”；<br>&emsp;&emsp;另一方面，每次找到的教程都有那么几步<strong>看不懂</strong>，或是<strong>看懂了记不住</strong>。</p><blockquote><p>我前前后后学了三四次了，<br>或被GitHub英文劝退， （不会翻墙的时候打开还会很慢）<br>或因安装软件繁琐放弃， （啥是Git？？啥是Github？？）<br>或成功按部就班实现了一次demo，但没有实践下去于是忘了</p></blockquote><p>谨以此篇献给想学习并且在学习<strong>Git版本控制</strong>的小白。<br>&nbsp;</p><h1 id="二、原理描述"><a href="#二、原理描述" class="headerlink" title="&#x3D;&#x3D;二、原理描述&#x3D;&#x3D;"></a>&#x3D;&#x3D;二、原理描述&#x3D;&#x3D;</h1><h2 id="2-1-四句话讲明白"><a href="#2-1-四句话讲明白" class="headerlink" title="2.1 四句话讲明白"></a>2.1 四句话讲明白</h2><p><strong>Git</strong> 狭义上来说是一个版本控制软件，广义上简单理解成<code>代码的仓库</code>；<br><strong>GitHub</strong> 一个远程仓库，白话就是<code>程序员专用的“某度网盘”</code>；<br><strong>网盘会用吧？</strong> 从本地的一个文件夹<code>上传</code>到网盘，或从网盘<code>下载</code>到本地。<br><strong>Git你就会了。</strong> 从本地仓库（repository）<code>上传（push）</code>到远程仓库，或从远程仓库<code>下载（pull）</code>到本地。<br>&nbsp;</p><h2 id="2-2-补充说明"><a href="#2-2-补充说明" class="headerlink" title="2.2 补充说明"></a>2.2 补充说明</h2><h3 id="（1）本地仓库"><a href="#（1）本地仓库" class="headerlink" title="（1）本地仓库"></a>（1）本地仓库</h3><ol><li>电脑上的一个文件夹就是一个本地仓库</li><li>只是文件夹当然不行（就像没名没证空有房屋和物资，别人怎么知道是仓库）</li><li>下载Git后可以在文件夹下通过命令行输入命令建立仓库（告诉别人，我这个文件夹，是仓库）</li></ol><h3 id="（2）远程仓库"><a href="#（2）远程仓库" class="headerlink" title="（2）远程仓库"></a>（2）远程仓库</h3><ol><li>GitHub就是一个远程仓库</li><li>一个GitHub账号对应一个专属于你的仓库</li><li>也许你访问GitHub官网会很慢（这需要花点小费翻墙解决）</li><li>也许你读不懂英文，但我相信你可以磕磕碰碰注册成功！</li></ol><h3 id="（3）相互绑定"><a href="#（3）相互绑定" class="headerlink" title="（3）相互绑定"></a>（3）相互绑定</h3><ol><li>有了本地和远程仓库还不够（远程仓库怎么知道该不该接收呢，我不认识你）</li><li>我们需要一个SSH安全协议（远程仓库把该本地仓库的名字加入联系人名单，可以接收）</li></ol><h3 id="（4）上传下载"><a href="#（4）上传下载" class="headerlink" title="（4）上传下载"></a>（4）上传下载</h3><ol><li>一般该操作在本地仓库进行</li><li>我们通过Git提供的命令行命令实现push和pull</li><li>远程仓库有时也需要做一些操作（仓库收到物资后也需要整理的嘛）</li><li>即对别人提交的修改更新做审核和合并（初学我们不涉及）<br>&nbsp;</li></ol><h1 id="三、保姆教程"><a href="#三、保姆教程" class="headerlink" title="&#x3D;&#x3D;三、保姆教程&#x3D;&#x3D;"></a>&#x3D;&#x3D;三、保姆教程&#x3D;&#x3D;</h1><p>我将对步骤进行概述性描述，因为有一位大佬已经发过知乎，<br>我觉得写的很好，也不多赘述，各位循着我的大纲去他那亲自体验就好~<br>（链接我放评论区，欢迎大家去瞅瞅！真的很棒很棒！）</p><h2 id="3-1-本地仓库（Git）"><a href="#3-1-本地仓库（Git）" class="headerlink" title="3.1 本地仓库（Git）"></a>3.1 本地仓库（Git）</h2><p>（1）下载安装git提供命令行工具  <code>[对应知乎文章 第六点]</code><br>（2）一个文件夹demo做本地仓库（这个不用教吧？？新建文件夹即可）</p><h2 id="3-2-远程仓库（GitHub）"><a href="#3-2-远程仓库（GitHub）" class="headerlink" title="3.2 远程仓库（GitHub）"></a>3.2 远程仓库（GitHub）</h2><p>（1）如有需要，付费翻墙（白话就是，通过歪果的节点上外网，没有阻碍速度更快）<br>（2）一个GitHub注册账号 <code>[对应知乎文章 第二点]</code><br>（3）新建一个远程仓库repository <code>[对应知乎文章中 第四点]</code></p><h2 id="3-3-相互绑定（SSH）"><a href="#3-3-相互绑定（SSH）" class="headerlink" title="3.3 相互绑定（SSH）"></a>3.3 相互绑定（SSH）</h2><p>（1）在本地生成SSH key  <code>[对应知乎文章中 第八点]</code><br>（2）向GitHub添加SSH key <code>[对应知乎文章中 第八点]</code></p><h2 id="3-4-上传下载（Git命令介绍）"><a href="#3-4-上传下载（Git命令介绍）" class="headerlink" title="3.4 上传下载（Git命令介绍）"></a>3.4 上传下载（Git命令介绍）</h2><p>（1）本地仓库的更新与整理 <code>[对应知乎文章中 第七点]</code><br>（2）本地仓库通过Git命令行上传下载 <code>[对应知乎文章中 第九点]</code><br>（3）远程仓库查看效果<code>[对应知乎文章中 第九点]</code></p><h1 id="结语"><a href="#结语" class="headerlink" title="&#x3D;&#x3D;结语&#x3D;&#x3D;"></a>&#x3D;&#x3D;结语&#x3D;&#x3D;</h1><p>如果对你有帮助的话给个赞吧，顺带附一张自制的说明图~</p><img src="/2024/12/20/%E6%96%B0%E6%89%8B%E5%85%A5%E9%97%A8%20Git%20&%20GitHub/0f33782c01e099ef1daa513c4129d8f5.png" class="" title="在这里插入图片描述">]]></content>
+      
+      
       <categories>
-        <category>播客笔记</category>
+          
+          <category> 讲解教程 </category>
+          
       </categories>
-  </entry>
-  <entry>
-    <title>《认知觉醒：开启自我改变的原动力》读书笔记</title>
-    <url>/2024/12/20/%E3%80%8A%E8%AE%A4%E7%9F%A5%E8%A7%89%E9%86%92%EF%BC%9A%E5%BC%80%E5%90%AF%E8%87%AA%E6%88%91%E6%94%B9%E5%8F%98%E7%9A%84%E5%8E%9F%E5%8A%A8%E5%8A%9B%E3%80%8B%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/</url>
-    <content><![CDATA[<p>认知觉醒：开启自我改变的原动力</p>
-<p>周岭</p>
-<p>208个笔记</p>
-<p>◆ 上篇 内观自己，摆脱焦虑</p>
-<p>&gt;&gt; 事实上理智脑很少有主见，大多数时候我们以为自己在思考，其实都是在对自身的行为和欲望进行合理化，这正是人类被称作“自我解释的动物”的原因。</p>
-<p>&gt;&gt; 习惯之所以难以改变，就是因为它是自我巩固的——越用越强，越强越用。要想从既有的习惯中跳出来，最好的方法不是依靠自制力，而是依靠知识</p>
-<p>◆ 第二节 焦虑：焦虑的根源</p>
-<p>&gt;&gt; 读书的“艰难”与买书的“惬意”简直相差十万八千里。</p>
-<p>&gt;&gt; 归结起来，焦虑的原因就两条：想同时做很多事，又想立即看到效果。王小波说：人的一切痛苦，本质上都是对自己无能的愤怒。焦虑的本质也契合这一观点：自己的欲望大于能力，又极度缺乏耐心。焦虑就是因为欲望与能力之间差距过大。</p>
-<p>◆ 第三节 耐心：得耐心者得天下</p>
-<p>&gt;&gt; 很多人虽然嘴上说要保持耐心，但身体却诚实地游走在即时满足的边缘。他们总是从最简单、最舒适的部分开始一天的工作，然后沉迷于娱乐信息、醉心于周边琐事，就是无力去做重要的事情；</p>
-<p>&gt;&gt; 从权重上看，改变量﹥行动量﹥思考量﹥学习量</p>
-<p>&gt;&gt; 很多人之所以痛苦焦虑，就是因为只盯着表层的学习量。他们读了很多书、报了很多课，天天打卡、日日坚持，努力到感动自己，但就是没有深入关注过自己的思考、行动和改变，所以总是感到学无所获，甚至会认为是自己不够努力，应该继续加大学习量，结果陷入了“越学越焦虑，越焦虑越学”的恶性循环。</p>
-<p>&gt;&gt; 一旦觉察自己开始失去耐心了，就温和地对自己说：“你看，我身体里那个原始人又出来了，让他离开丛林到城市生活，确实挺不容易的，要理解他。”</p>
-<p>&gt;&gt; 温和地告诉它们：“该有的享受一点都不会少，只是不是现在享受，而是在完成重要的事情之后。”</p>
-<p>&gt;&gt; 这种“后娱乐”的好处是，将享乐的快感建立在完成重要任务后的成就感之上，很放松、踏实，就像一种奖赏；而“先娱乐”虽然刚开始很快活，但精力会无限发散，拖延重要的工作，随着时间的流逝，人会空虚、焦虑。</p>
-<p>◆ 第二章 潜意识——生命留给我们的彩蛋</p>
-<p>&gt;&gt; 反本能成长</p>
-<p>&gt;&gt; ·《思考力》一书的作者上田正仁提示：思考力的本质就是“丢弃所有已经消化的信息，让问题的核心浮出水面”；</p>
-<p>·《刻意练习》中的核心方法论是：不要重复练习已经会的，要不断寻找那些稍有难度的部分；</p>
-<p>·《原则》一书的作者瑞·达利欧罗列了工作和生活中的原则，用以清晰地指导自己行事；</p>
-<p>·《超越感觉》一书告诉我们，想拥有清晰的逻辑，就坚持一点：凡事不要凭模糊的感觉判断，要寻找清晰的证据。</p>
-<p>&gt;&gt; 提升思考能力的方法正是不断明确核心困难和心得感悟，并专注于此。</p>
-<p>&gt;&gt; 优秀的人更倾向于做高耗能的事，比如“学霸”的秘诀往往在他们的错题本上——他们更愿意花时间明确错误，并集中精力攻克。</p>
-<p>&gt;&gt; 多数人为了逃避真正的思考，愿意做任何事情。</p>
-<p>&gt;&gt; 具体事件一旦变模糊，其边界就会无限扩大，原本并不困难的小事，也会在模糊的潜意识里变得难以解决。</p>
-<p>&gt;&gt; 真正的困难总比想象的要小很多。人们拖延、纠结、畏惧、害怕的根本原因往往不是事情本身有多难，而是内心的想法变得模糊。就像在3 000米跑步考核开始前，那种不知名的恐惧会让人紧张得全身发抖，而我们一旦开跑、不得不与这种恐惧正面交锋时，就会发现3 000米考核也不过如此。如果我们再积极些，学会从一开始就主动正视它、拆解它、看清它，或许那种紧张就不困扰自己了，我们甚至能从容地“享受”比赛。</p>
-<p>&gt;&gt; 要想不受其困扰，唯一的办法就是正视它、看清它、拆解它、化解它，不给它进入潜意识的机会，不给它变模糊的机会；即使已经进入潜意识，也要想办法将它挖出来。所以，当你感到心里有说不清、道不明的难受的感觉时，赶紧坐下来，向自己提问。</p>
-<p>&gt;&gt; ·到底是什么让自己烦躁不安？是上台演讲、会见某人，还是思绪纷乱？</p>
-<p>·具体是什么让自己恐惧担忧？是能力不足、准备不够，还是害怕某事发生？</p>
-<p>·面对困境，我能做什么？不能做什么？如果做不到或搞砸了，最坏的结果是什么？</p>
-<p>&gt;&gt; 恐惧就是一个欺软怕硬的货色，你躲避它，它就张牙舞爪，你正视它，它就原形毕露。一旦把它看得清清楚楚，情绪就会慢慢从潜意识中消散，你的生活将会舒畅无比。</p>
-<p>◆ 第二节 感性：顶级的成长竟然是“凭感觉”</p>
-<p>&gt;&gt; 先用感性能力帮助自己选择，再用理性能力帮助自己思考。</p>
-<p>&gt;&gt; 那些一眼就能看出答案的题目，不用理它；一眼看过去就头痛、不知道在说什么的题目，也不用理它；只有那种大致能看出点思路，但又要动点脑筋的题目，一定要多做。这个就是中间地带，是你能够进步最快的地方。</p>
-<p>&gt;&gt; 只取一个全书最触动自己的点，然后尽可能去实践、改变。这样读书不仅收获更大，而且也不会焦虑。</p>
-<p>&gt;&gt; 如果你感受到的总是痛苦和无趣，那十有八九是感觉不对——要么在困难区煎熬，要么在舒适区打转。</p>
-<p>&gt;&gt; 我们需要用心去感受什么事情让自己最触动，而不是用脑去思考什么事情最有利。</p>
-<p>&gt;&gt; 直视死亡可以简化一切事物</p>
-<p>◆ 第三章 元认知——人类的终极能能力</p>
-<p>&gt;&gt; 元认知能力就是我们习以为常、见怪不怪的反思能力。</p>
-<p>&gt;&gt; 如果说学习和反思是静态的，那处于当下的、动态的自已又该如何主动运用元认知呢？很简单，启用你的“灵魂伴侣”啊！让他时刻监控你，就像电脑系统里的杀毒软件，监控着你的每一次操作，一旦发现可疑文件就立即发出警报。</p>
-<p>&gt;&gt; 我们总是这样，一开始只想找一根绳子，最后却牵出一头大象。</p>
-<p>&gt;&gt; 这些都是元认知能力不足的表现——顺着自己的本性做喜欢和舒服的事，精力发散，缺乏觉知，任何偶发的干扰都会分散注意力。</p>
-<p>&gt;&gt; 这个事情可做可不做，还是先忍一下，等做完重要的事情再说；停下来，先想清楚什么事情是最重要的，不能盲目地做那些容易但不重要的事；再过几年回头看，现在的烦恼不值一提，与其消耗自己，不如把情绪收起来，干点有用的事……</p>
-<p>&gt;&gt; 元认知能力总能让你站在高处俯瞰全局，不会让你一头扎进生活的细节，迷失其中。</p>
-<p>&gt;&gt; 监控自己的注意力，然后将其集中到自己需要关注的地方</p>
-<p>◆ 第二节 自控力：我们生而为人就是为了成为思维舵手</p>
-<p>&gt;&gt; 很多人为了获得美好的人生，常常给自己立下早起、跑步、阅读、写作等目标，但是没过几天就放弃了，因为那些目标大多是受大环境影响而跟风设定的——别人说好，自己也想要，但实际上，自己并不需要。</p>
-<p>&gt;&gt; 比如，当我们漫步街头时，元认知能力弱的人总会被路边的音乐、屏幕广告、叫卖声或突发事件轻易地吸引，而元认知能力强的人则会花那么一两秒去思考这事值不值得关注。</p>
-<p>&gt;&gt; 教育的意义就是教你在遇到一件事的时候如何看待它。</p>
-<p>&gt;&gt; 在生活中更是如此。早上醒来时，如果能有几秒的时间用来思考，我们就可能在起床和看手机之间做出更好的选择；看到微信有未读消息提示时，如果能先停留几秒，我们就可能决定先去做重要的事，而不是点击那个小红点</p>
-<p>&gt;&gt; 一定要在选择节点上多花“元时间”。</p>
-<p>&gt;&gt; “元时间”是我自创的概念。这是一个极好的概念，因为一天24小时看起来每分每秒都一样，但实际上并不相同，有些时间的权重要远远大于其他时间，我把这些权重大的时间叫作“元时间”。</p>
-<p>&gt;&gt; 元时间通常分布在“选择的节点”上，比如一件事情、一个阶段或一天开始或结束时。善用这些时间会极大程度地优化后续时间的质量。</p>
-<p>&gt;&gt; 同样，早上醒来的那一瞬间、拿起手机的那一瞬间、回到家的那一瞬间……我们都要面临新的选择，要主动消耗脑力去审视它们。虽然这样做会更累，但这正是锻炼元认知能力的最佳时机，就像是在举思想哑铃，让自己的理智脑变得更强大。</p>
-<p>&gt;&gt; 元认知能力强的一个突出表现是：对模糊零容忍。</p>
-<p>&gt;&gt; 模糊，不仅需要在这些小事上消除，在选择人生目标等大事上也是如此。现实生活中，我们总是想都不想就一头扎进具体事情里，对什么事情更重要、什么事情最重要、做这件事对自己到底意味着什么等长远意义却极不清楚。</p>
-<p>&gt;&gt; 焦虑的人很少有“元时间”的意识，他们习惯不动脑子、直接行动，喜欢用饱和的行动来感动自己，想与做的时间配比差距悬殊，他们甚至连一丁点儿深入思考的时间都不愿意花，任由本能欲望让自己迷失在自我满足的行动里。</p>
-<p>&gt;&gt; 高尔基曾经说：每一次克制自己，就意味着比以前更强大。</p>
-<p>◆ 下篇 外观世界，借力前行</p>
-<p>&gt;&gt; 缺少感受的行动，就像失去灵魂的躯壳；缺少感受的人对凡事都心不在焉、视而不见、听而不闻。更准确地说，我们在躯壳内装了一个混乱的灵魂，这个灵魂总是“做A想B”：刷牙的时候走神，走路的时候走神，洗澡的时候走神……无时无刻不在走神。</p>
-<p>&gt;&gt; 分心走神的原因无非两个：一是觉得当下太无聊，所以追求更有意思的事情；二是觉得当下太痛苦，于是追求更舒适的事情。因为身体受困于现实，只好让思想天马行空。</p>
-<p>&gt;&gt; 生命是由当下的一个个片段组成的，身心合一的片段组成的就是幸福专注的高质量人生，身心分离的片段组成的就是分心走神的低质量人生。</p>
-<p>&gt;&gt; 可见，分心走神的本质是逃避，所以，面对困难时，身心分离的人总会不自觉地退回舒适区，而身心合一的人则更容易跳出舒适区，直面困难。</p>
-<p>&gt;&gt; 如果一个人从小就养成了全情投入和界限清晰的专注习惯，那他不仅能获得智力上的聪慧，也能获得情绪上的平和。</p>
-<p>◆ 第二节 学习专注：深度沉浸是进化双刃剑的安全剑柄</p>
-<p>&gt;&gt; 练习时极度专注。谁都知道专注的重要性，但沉浸的关键是要做到“极度”专注，也就是说，在短时间内投入100%的精力比长时间投入70%的精力好，因为专注的真正动力并不是毅力和耐心，而是不断发现技巧上的微妙差异和持续存在的关注点，精力越集中则感知越细微。</p>
-<p>&gt;&gt; 先保持极度专注，想不出答案时再将注意力转换到另一件与此毫不相干的事情上。即事前聚精会神，让意识极度投入；事后完全忘记，让意识彻底撒手。这样，灵感和答案就会大概率地出现。</p>
-<p>&gt;&gt; 审视自己的注意力——是被动吸引还是主动选择？</p>
-<p>·审视自己的沉浸度——是分心走神还是极度专注？</p>
-<p>·审视自己的练习量——是浅尝辄止还是大量投入？</p>
-<p>◆ 第五章 学习力——学习不是一味地努力</p>
-<p>&gt;&gt; 第一件事说的是跑步，她说：“之前我要求自己每天跑步1小时，靠意志力，我坚持了蛮长一段时间，但是最后还是中断了。最近我调整了跑步的时间，改为每次30分钟，最好不要少于一周4次。调整以后发现，我可以不用太靠意志力去做这件事，而且会主动想办法坚持，并且跑完后会很放松，不像之前那样连续跑1小时会很累、很难受。我真的能感觉到现在这种‘主动做’和原先那种‘靠意志力做’完全不一样。”</p>
-<p>第二件事说的是学英语，她说：“原来每天学习1小时我会烦躁，但现在改为每天学习30分钟，时间一到就不学了。这样，我反而可以坚持每天学，不厌倦。”</p>
-<p>&gt;&gt; 找一个自己能坚持做下去的方式，比单纯按照标准化的时间和方式做更重要。以前一直以为多花时间才能学好、才能达到效果，其实那是因为自己急于求成，想要快速见效，这样反而不容易坚持。现在降低了难度和标准，自己的行动力反而能持续增强，虽然达到目标所需的时间可能会变长，但是我相信这样的坚持最终可以产生复利效应。”</p>
-<p>&gt;&gt; 我们只需每次到舒适区的边缘坚持一下，然后回到舒适区停留一下，调整好了再到舒适区边缘……如此反复。</p>
-<p>&gt;&gt; 梳理那些“会做但特别容易错或不会做但稍微努力就能懂”的内容，然后在这个区域内努力。</p>
-<p>&gt;&gt; 距离我们太远的事物，我们通常无法把握，无论它们是令人痛苦的还是令人享受的。</p>
-<p>&gt;&gt; 千万不要认为没有管束的生活很美好，一旦进入完全自由的时间，虽然开始会很舒服，但很快，我们就会迷失在众多选项中——做这个也行，做那个也行。</p>
-<p>&gt;&gt; 做选择是一件极为耗能的事情，如果没有与之匹配的清醒和定力，绝大多数人最终都会被强大的天性支配，去选择娱乐消遣。在有约束的环境下我们反而效率更高，生活更充实。</p>
-<p>&gt;&gt; 能解释的现象越多，这个概念就越底层。</p>
-<p>&gt;&gt; 不管你遇到的是什么问题，其根源都是一样的，那就是：这个问题太大、太模糊。</p>
-<p>所以，你只要拆解目标——把大目标拆分为小目标，任务就会立即从困难区转移到拉伸区，这样你就愿意行动了。不信的话，你可以细心观察一下，几乎所有的行动达人都是拆解任务的高手。</p>
-<p>&gt;&gt; 学习不只是一味地努力，成长也不只需要“打鸡血”、拼意志力。只要站在舒适区边缘，一点一点往外走，同时和时间做朋友，你肯定会在不经意间发生蜕变。</p>
-<p>◆ 第二节 深度：深度学习，人生为数不多的好出路</p>
-<p>&gt;&gt; 我隐约看到：一小部分知识精英依旧直面核心困难，努力地进行深度钻研，生产内容；而大多数信息受众始终在享受轻度学习，消费内容。如果我们真的希望在时代潮流中占据一席之地，那就应该尽早抛弃轻松学习的幻想，锤炼深度学习能力，逆流而上，成为稀缺人才，否则人生之路势必会越走越窄。</p>
-<p>&gt;&gt; 罗振宇曾提到他是这样学习的：“我每天要求自己写够五篇阅读心得，不用长篇大论，短短几个词就行。因为真正的学习就像是缝扣子，把新知识缝接到原有的知识结构中，每天写五篇阅读心得就是逼迫自己原来的知识结构对新知识做出反应，然后把这些反应用文字固化下来，缝接的过程就完成了。”</p>
-<p>&gt;&gt; 专注于深度学习，同时对浅学习保持开放。</p>
-<p>&gt;&gt; 选择一些值得关注的人，和他们保持联结。他们释放的一些有价值的信息会引领我们走向更广阔的世界，但无论如何，最终要自己去读、自己去想、自己去做。</p>
-<p>◆ 第三节 关联：高手的“暗箱”</p>
-<p>&gt;&gt; 这既是有效阅读的三个步骤，也是深度学习的三个层次：</p>
-<p>·知道信息点</p>
-<p>·关联信息点</p>
-<p>·行动和改变</p>
-<p>&gt;&gt; 孤立的知识就像沙粒，只有关联才能将其聚沙成塔，形成稳固的知识晶体，最终构建自己的认知体系</p>
-<p>&gt;&gt; 绝大多数人习惯以孤立的思维看待事物，喜欢花大量时间收集和占有信息；而另一批先行者则更喜欢拨弄信息之间的关联，从而在不知不觉间变得聪明了起来。</p>
-<p>&gt;&gt; 我们在关联时，需要牢牢聚焦自身最迫切的需求，换句话说，就是让一切与自己有关。</p>
-<p>&gt;&gt; 知识的获取不在于多少，而在于是否与自己有关联，以及这种关联有多充分。</p>
-<p>&gt;&gt; 当然，还有一个更重要的隐蔽条件不能忽视：你需要明确的目标或强烈的需求。</p>
-<p>&gt;&gt; 这个道理还能用在什么地方？</p>
-<p>◆ 第四节 体系：建立个人认知体系其实很简单</p>
-<p>&gt;&gt; 只有当知识能够帮助你做实际决策的时候，它才是你的知识。</p>
-<p>&gt;&gt; 在阅读时，我唯一要做的事情就是：寻找触动点。我会在触动自己的地方做标记，在空白处写下大量能联想到的思考，书读完之后，我会放上几天，然后问自己：“这本书最触动自己的是哪个点？”这个点可以是一个理论、一个案例，甚至是一句话，只要它真正触动我，并能让我发生真实的改变，我就认为这本书超值了，至于其他，忘记就忘记了，我一点也不觉得可惜。</p>
-<p>&gt;&gt; 这就是搭建个人认知体系的真相：打碎各家的认知体系，只取其中最触动自己的点或块，然后将其拼接成自己的认知网络。</p>
-<p>&gt;&gt; 一个触动点若是能转化成一个认知晶体，我们的生命质量和密度将远远超过那些不反思的人。</p>
-<p>◆ 第五节 打卡：莫迷恋打卡，打卡打不出未来</p>
-<p>&gt;&gt; 时下，学习成长蔚然成风。</p>
-<p>&gt;&gt; 不排名不要紧，一排名，有些事就变了。</p>
-<p>&gt;&gt; 一开始，人们的行动动机全都出于学习成长本身，一想到自己今后能够轻松早起，享受美好时光；锻炼塑身，拥有美好身材；热爱阅读，成为博识智者……就顿时信心满满，动力十足。出于这种目的，打卡更像是锦上添花，即使不用任何意志力支撑，人们也能持续行动。然而打卡一旦开始，任务心态其实已经锚下了。</p>
-<p>&gt;&gt; 一些“中毒”更深的人，他们的学习动机转移了，甚至连学习的目标也转移了。他们起初还记得做某件事的意义，比如知道学英语是为了与外国人流利地交谈，但时间一长，目标就被简化为每天背20个单词，于是他们每天只是机械地完成、打钩，却忘了所学为何，从此陷入为学而学的境地。</p>
-<p>&gt;&gt; 一件事若迟迟没有完成，心里就总是记挂，期盼着早点结束；此事一旦完成，做这件事的动机就会立即趋向于零。</p>
-<p>&gt;&gt; 这就是打卡心态的特性：学不到，假装一下；学到了，立即停止。</p>
-<p>&gt;&gt; 同时，我们在任务设置时要使用新策略：设下限，不设上限。</p>
-<p>◆ 第六节 反馈：是时候告诉你什么是真正的学习了</p>
-<p>&gt;&gt; 是否有及时、持续的正向反馈，正是产生学习效果差异的关键。</p>
-<p>&gt;&gt; 比如一名大二学生“无悔”曾告诉我，他每天从早学到晚，学6天休1天，如此付出，收获的却是无力和疲累；而另一位读者“傅琴”女士也说，为了应对生活危机，她不停地学习瑜伽、写作、肚皮舞、英语口语、绘画、茶道等各种技能，但内心始终得不到满足，感受不到自我价值。</p>
-<p>&gt;&gt; 也许是因为在人造的学习体制内待久了，有些人很难相信“跳过原理，直接实操”的方式是有效的，他们认为这种方法不过是奇技淫巧，强大的毅力和认知才是学习的正道。</p>
-<p>&gt;&gt; 但它们超强的欲望和情绪力量却是非常宝贵的行动力资源，如果能让它们感受到学习的乐趣，它们同样会展现强大的行动力，让自己像沉迷娱乐一样沉迷于学习。</p>
-<p>&gt;&gt; 所以科学的学习策略是产出作品、获取反馈，驱动本能脑和情绪脑去“玩玩玩”，而不是一味地努力坚持，让理智脑苦苦地去“学学学”。</p>
-<p>&gt;&gt; 有作品意识才有未来</p>
-<p>&gt;&gt; 有了这种认知，人是会迅速改变的——会拥有清晰而强烈的作品意识，会更加重视输出和运用，会倾心打磨作品，主动换取外界的反馈。</p>
-<p>&gt;&gt; 比如以前你学习英语可能会选择每日打卡的方式，但现在你可能会选择直接用：直接翻译一段美文、查询英文文档、阅读英文原版书，或者把手机语言设置成英文……这么做当然会造成一些困难，但为了解决问题，你必定会想办法补全相关知识，所以你的学习行为都能得到即时反馈：要么帮自己或他人解决了一个问题，要么产出了一个有价值的作品，这些反馈带给自己的必然是强烈的成就感和继续行动的欲望。</p>
-<p>&gt;&gt; ：想创造全新的学习动机，就得放弃一味打卡输入的做法，想办法直接运用或产出作品，获取反馈。</p>
-<p>&gt;&gt; ·教是最好的学；</p>
-<p>·用是最好的学；</p>
-<p>·输出倒逼输入；</p>
-<p>·请用作品说话……</p>
-<p>&gt;&gt; 那些先行者确实都有相同的品质，他们在学习的时候经常不按常理出牌，不管是不是新知识、技能，他们都直接用、直接做。当然，一开始常常用不好、做不好，但他们肯定要“鼓捣”出一个东西，然后抛出去获取反馈，不断打磨迭代。</p>
-<p>&gt;&gt; 如果对方除了情绪上的攻击再无其他内容，那你大可哈哈一笑，忽略就好了。这说明对方不但嫉妒你，还不如你，因为他没法拿出更好的作品或观点来回应，只会发泄情绪、肆意谩骂。在鸡蛋里挑骨头，这事谁不会呢？</p>
-<p>&gt;&gt; 他们背单词，不是一遍一遍地看，让所有单词都“看着眼熟”，而是合上书测试自己能否精确地说出含义、发音，并拼写出来；他们练听力，不指望每天重复听音频就能毫不费力地“熏耳朵”，而是回过头来对照原文，不断重听没听懂的地方。</p>
-<p>&gt;&gt; 对于背记理解类的学习，自我测试就是最好的反馈。哪里会、哪里不会，通过测试便立即掌握得清清楚楚，我们可以精准消灭盲点，让自己始终处在学习舒适区边缘。那种“翻开书全会，合上书全废”的无反馈式努力正是你被动、落后的根源。《学习之道》一书的作者芭芭拉·奥克利也曾明确指出：主动的回想测试是最好的学习方法之一，比坐在那儿被动地重读材料要好得多。</p>
-<p>&gt;&gt; 只是很多同学对错题本不以为意，要么不去写，要么写了不去看，要么去看时因为碰到痛苦而回避，转头回到舒适区里转悠。在没有让自己的情绪脑体会到学习的快感之前，我们总得先逼自己一把，对吧？</p>
-<p>&gt;&gt; 这印证了古典的跃迁理论：打磨作品—到达一个小山的头部—受到更多关注—移动到一个更大山头的头部—借助系统推力，实现人生跃迁。</p>
-<p>&gt;&gt; 反馈的规律是贯穿始终的，无论什么时候，只要能通过产出换取反馈，你就会不自觉地去钻研探索。</p>
-<p>◆ 第七节 休息：你没成功，可能是因为太刻苦了</p>
-<p>&gt;&gt; 问题就出在这里，那些持续刻苦、争分夺秒、舍不得休息一下的人，他们的精力总量势必呈一条持续下降的曲线</p>
-<p>&gt;&gt; 刻苦者看似无比勤奋，可效果却越来越差，过程中感受到的多是痛苦而不是乐趣，精力消耗严重，以致一旦放松就完全不想再次投入，他们更容易沉溺于舒适的娱乐活动。</p>
-<p>&gt;&gt; 反观那些轻松的学霸，他们学习时从不过度消耗自己，只要感到精力不足，就停下来主动休息，这反而使他们精力桶的水位得到快速回升。</p>
-<p>&gt;&gt; 不难发现，高效学习的关键在于保持极度专注，而不是靠意志力苦苦支撑，谁能保持长时间的专注，谁就能够在竞争中胜出。然而专注这个品质在信息时代已日渐成为稀缺品质。</p>
-<p>&gt;&gt; 大多数人只会本能地告诉自己要更刻苦、更努力，却很少有人能意识到，更科学的模式应该是：极度专注+主动休息，如此反复。</p>
-<p>&gt;&gt; 有人会反问：现实生活中哪有这么多“刚好的事情”，难道在面对老师和老板时，自己还能挑三拣四？其实这并不难办：要么重新设定学习内容，调整为合适的难度，要么将目标拆解为更具体的小目标，降低工作的难度，总之，想办法把难度控制在拉伸区范围内就对了。不管面对多么棘手的任务，只要我们愿意动脑筋，总能找到主动调整的空间。</p>
-<p>&gt;&gt; 也难怪，当我们忙了一整天，精疲力竭地回到家中，第一件事情往往是往沙发上一倒，此时除了看看微信、刷刷抖音，用轻松的信息给自己来个精神按摩，其他事都懒得做，如果经历了情绪上的波动，精力透支的影响可能会持续很久。</p>
-<p>&gt;&gt; 所以，一个真正的自控高手，不是一个只知道冲刺的人，而是一个善于主动休息、保持平衡的人。</p>
-<p>&gt;&gt; 一个简单又通用的方法正是前文说的主动培养“极度专注+主动休息”的行为模式。具体的做法就是：只要开始学习或工作，就尽量保持极度专注的状态，哪怕保持专注的时间很短也是有意义的；一旦发现自己开始因为精力不足而分心走神，就主动停下来调整片刻。</p>
-<p>&gt;&gt; 符合学霸模式的所有特征：极度专注、主动休息、循环往复。</p>
-<p>&gt;&gt; 时间一到，我会立即合上书本或让双手马上离开键盘，然后开始5分钟的休息计时。在这5分钟里，我会做与阅读或写作无关的事情，比如：看看窗外、收收衣服、拆拆包裹，等等，但刷手机、玩游戏这些被动使用注意力的事情我不推荐，因为它们仍然是消耗精力的。</p>
-<p>&gt;&gt; 刻苦，是一种宏观态度，轻松，是一种微观智慧。在学习这件事上，普通人的策略往往是“天赋不够，刻苦来凑”。好在我们已经知道学习的秘密不完全在于刻苦，还在于“会玩”，希望你在今后的学习成长中也能玩出水平，玩出风格，成为他人眼中的学霸。</p>
-<p>◆ 第六章 行动力——没有行动世界只是个概念</p>
-<p>&gt;&gt; 行动力——没有行动世界只是个概念</p>
-<p>&gt;&gt; 时常有人夸我行动力强，说我在这个年纪，还能克服惰性、抵制诱惑，在大家都熬夜、刷手机的时候坚持早起锻炼、读书写作，甚是难得，并得出结论：周岭是个自制力很强的人。</p>
-<p>&gt;&gt; 整个人浑浑噩噩的，就像一条无人掌舵的小船在生活的洪流里随波逐流，根本无力掌控方向。</p>
-<p>&gt;&gt; 或许你并没有意识到，每天早上醒来，我们都会收到一份礼物——纯净的注意力。不管你昨天经历了什么，经过一晚的睡眠，你的精力总会得以“重启”。</p>
-<p>&gt;&gt; 但反过来，我们也可能进入另外一种状态。如果起床后我们能刻意避开轻松和娱乐的吸引，先去读书、锻炼，或者做些重要的工作，精力就会呈聚合状态，并自动增强。比如起床后先去锻炼，就能让自己头脑清晰、精力充沛，在这种状态下做重要的工作就会非常顺利，工作越顺利，状态就越好，回路逐渐增强；再比如早起后先去阅读，读得越多，脑子里的问题和感触就越多，反过来又会产生更强烈的阅读欲望，回路逐渐增强。</p>
-<p>&gt;&gt; 就像你明明准备第二天早起锻炼、读书或是做重要的工作，然而醒来后还是鬼使神差地拿起了手机——群消息、朋友圈、公众号、抖音、今日头条……一眨眼，半个小时过去了，你还躺在床上。实在没什么新鲜事了，还要把App再点开一次，看看有没有什么惊喜，等到刺激消耗殆尽，无聊渗透全身，再漫不经心地起床，此时的你精神萎靡，内心只希望用更多刺激来填补空虚，哪还有心思去做重要的事呢？</p>
-<p>&gt;&gt; 知道和做到相差十万八千里，这其中的差距到底在哪里呢？</p>
-<p>答案正是前文所说的“模糊”。</p>
-<p>&gt;&gt; 行动力最怕模糊</p>
-<p>&gt;&gt; 如果我们的头脑中一直有很多模糊的选项存在，我们就需要花心力不断做选择，而做选择是一件非常耗脑力的事情。我们的大脑有可能为了省点力气，而不自觉地选择那个它最熟悉、最确定的选项——做那些轻松、愉快但不重要的事情。</p>
-<p>&gt;&gt; 你陷入怠惰、懒散、空虚的情绪中动弹不得时，往往是因为你的大脑处于模糊状态。</p>
-<p>&gt;&gt; 大脑要么不清楚自己想要什么；要么同时想做的事太多，无法确定最想实现的目标是什么；要么知道目标，但没想好具体要在什么时候以什么方式去实现。</p>
-<p>&gt;&gt; 认知越清晰，行动越坚定。</p>
-<p>&gt;&gt; 正如爱因斯坦所说：“如果给我1小时解答一道决定我生死的问题，我会花55分钟弄清楚这道题到底在问什么。一旦清楚它到底在问什么，剩下的5分钟足够回答这个问题。”</p>
-<p>◆ 第二节 “傻瓜”：这个世界会奖励那些不计得失的“傻瓜”</p>
-<p>&gt;&gt; 我敢打赌，凡是买了一堆书没读、报了一堆课没上、心中有无数欲望的人，几乎没有主动做成过一件事，比如养成早起、跑步、阅读的习惯，练就写作、画画的技能，考个好成绩，开个好公司，有高收入，等等。这个判断是我基于很多人的经历做出的。</p>
-<p>&gt;&gt; 一是凡事必须在看到明确的结果后才行动，如果前景不确定、不明朗，即使别人说得再有道理，我也不愿意投入；二是如果一个道理或方法不能让自己快速发生变化，就不是最优的，所以要不断寻找，这样才有希望找到最好的方法。</p>
-<p>当时觉得自己能这么想还挺聪明的，现在回头看，发现自己是精明过了头。这种精明让自己在成长的路上遇到了阻碍，就像一道无形的门槛把我挡在了成长的门外，怎么也跨不过去。</p>
-<p>&gt;&gt; 按照他“只字不差”的阅读要求，我竟鬼使神差地做了一个决定：把文章全部用键盘重敲一遍，包括文后重要的留言。一年52周，每周4天，每天约2小时，我就这样“读”完了这些内容。</p>
-<p>&gt;&gt; 以前的我爱耍一点小聪明，总希望能先看到结果再行动，反而浪费了很多时间。</p>
-<p>&gt;&gt; 自己从来没有主动做成过一件事情的时候，总会以为做成一件事很容易，于是生出很多不切实际的欲望和想法，而欲望越多，就越做不成事</p>
-<p>&gt;&gt; 如果我想养成一个习惯，通常不会以21天为标准，而是要求自己至少做半年。我相信一件事情要是能被持续做180天，它就会成为习惯。</p>
-<p>&gt;&gt; 做一个有理有据的“傻瓜”</p>
-<p>之所以在“傻瓜”这两个字上加上引号，说明我并不认为这样的人真的傻，有时反而是一种聪明，这里的“傻”，并不是盲目和冲动，而是有原理、有依据的坚定。</p>
-<p>&gt;&gt; 如果你觉得别人讲的道理有理有据，而自己暂时无法反驳，碰巧自己又非常想做这件事，那就相信他们说的是对的，然后笃定地行动</p>
-<p>&gt;&gt; 同样的道理摆在面前，有的人觉得那是鸡汤，没什么用，而有的人却觉得那是干货，好用得不得了。如果你能够持续行动，我相信，这个世界一定会特别偏爱你。</p>
-<p>◆ 第三节 行动：“道理都懂，就是不做”怎么破解</p>
-<p>&gt;&gt; 他们阅读了很多有道理的书，收藏了很多有道理的文章，觉得自己无所不知，却始终不能俯下身子去行动。因为他们总认为自己还没准备好，担心方法不是最优的，贸然行动会走弯路等，殊不知，这样的观望、等待本身就无效率可言。更使人困扰的是，道理知道得越多，行动力反而越弱，因为似乎总有更好的道理等着我们去发现。</p>
-<p>&gt;&gt; 很多人因为缺乏耐心、急于求成，总想跳过行动环节，寻求捷径，最后发现：这才是走了弯路，真正的捷径正是那条看起来漫长且低效的行动之路。</p>
-<p>&gt;&gt; 当我们领悟“一天不看手机也不会有任何损失”时，头脑一下子就清醒了，对手机信息的危害看得无比通透，然而没过几天，再次碰到这种情况时，我们又会把书放到一边，掏出手机开始玩。</p>
-<p>&gt;&gt; 当然，如果你现在就是一个“知而不行”的人，千万不要自责，因为“避难趋易”是人类的天性，这种选择取向深深地刻在了我们的基因里，所以凡是能简单得到的，人就不会选难的；有短的反馈回路，人自然不会选择长的——这就是大脑做选择时的默认逻辑。在缺少觉知的情况下，我们很难察觉这一点。</p>
-<p>&gt;&gt; 把认知当成技能，知道或想通一个道理时，不要高兴得太早，想想后面还要做大量的练习，这样就不浮躁了。</p>
-<p>&gt;&gt; 当你每次产生一个想法时，带有这个想法的神经通路中的生化电磁阻力就会减少一些，就像在丛林里清出一条小路一样。一开始非常费劲，但是随着你经过这条路次数的增加，这条路也会开辟得越来越彻底，你所遇到的阻力也会慢慢变小。到最后，这条小路会变得平坦而宽阔。</p>
-<p>&gt;&gt; 不发生真正改变的学习都是无效的学习。</p>
-<p>&gt;&gt; 现实和理论都告诉我们：懂得百点不如改变一点。真正的成长不在于自己懂得了多少道理，而在于自己改变了多少。</p>
-<p>&gt;&gt; 对成长来讲，道理都是“空头支票”，改变才是“真金白银”。当你凡事都以改变为标准时，你的成长路径会更加清晰。</p>
-<p>◆ 第七章 情绪力——情绪是多角度看问题的智慧</p>
-<p>&gt;&gt; 在一定的前提下，贫穷确实会使人变笨，这不是因为贫穷让人能力不足，而是因为贫穷造成的稀缺俘获了人的注意力，进而降低了人的心智带宽。</p>
-<p>&gt;&gt; 每个人的头脑配置都差不多，但短缺压力会让人多一个后台运行的隐藏程序，虽看不见却消耗着大量的心智资源，所以有人会将剩菜剩饭留到第二天继续吃，他们认为这样很节俭；有外债压力的人，更容易在辅导孩子写作业的时候对孩子发火；而终日忧心忡忡的人，也很难静下心来学习。这些现象的出现都是因为当事人心智带宽不足，自己无力考虑长远问题，难以保持耐心和专注，在面临选择的时候不自觉地偏向那个最安全、最能快速见效的选项。</p>
-<p>&gt;&gt; 事实上，任何能制造压力的事件都会挤占我们的心智带宽，比如明天的演讲、考试的期限、失业的担忧，等等。只要我们的注意力被某一个巨大的事物吸引，我们就有可能进入稀缺状态，进而降低心智带宽，做出不明智的行为。</p>
-<p>&gt;&gt; 这么多欲望就像多线程任务同时在电脑中运行，心智带宽被占用殆尽，自然就没有心力支撑自己的远见、耐心、行动力和自控力了，最终只能让自己在痛苦中彷徨，甚至做不好当下的小事。</p>
-<p>&gt;&gt; 当一个人同时面临很多任务的时候，他的心智带宽就会降低，反而没有了行动力和自控力。</p>
-<p>&gt;&gt; 现代生活虽然缓解了生存压力，却又带来了自控上的压力。抵制诱惑和欲望无一不消耗我们的心智带宽，而那些有着大把时间和金钱的人士，如果没有足够的心智带宽，也会让自己陷入无聊和空虚之中。</p>
-<p>&gt;&gt; 第一帖，保持环境觉知，理智选择。</p>
-<p>&gt;&gt; 第二帖，保持目标觉知，少即是多。</p>
-<p>&gt;&gt; 《见识》的作者吴军曾说：“很多人认为我是个善于利用时间的高手，问我如何才能同时做更多的事情。事实上，我做事的诀窍恰恰和大家想的相反，就是少做事，甚至不做事。我时常站在一生的高度去审视自己真正要做的是什么，然后打破思维定式，拒绝所有那些即使不去做天也不会塌下来的事情。”</p>
-<p>&gt;&gt; 知道自己想要什么，才能免于盲目奔波，才能让自己从忙碌中解脱，才有时间使用心智带宽审视自己，把更多的精力集中到最重要的事情上去。</p>
-<p>&gt;&gt; 第三帖，保持欲望觉知，审视决策。</p>
-<p>&gt;&gt; 脑子里存在大量任务和念头的时候，往往是我们行动力最弱的时候。</p>
-<p>&gt;&gt; 真正的行动力高手不是有能耐在同一时间做很多事的人，而是会想办法避免同时做很多事的人。</p>
-<p>&gt;&gt; 第四帖，保持情绪觉知，谨慎决定。</p>
-<p>&gt;&gt; 第五帖，保持闲余觉知，自我设限。</p>
-<p>◆ 第二节 单一视角：你的坏情绪，源于视角单一</p>
-<p>&gt;&gt; 我们就很容易以偏概全地对待这个世界，然后产生各种偏误。</p>
-<p>&gt;&gt; 只是有的人面对再好的事情时都盯着一点瑕疵不放，而有的人却能从任何一件糟糕的事情中找到闪光点并放大，忽视其他不足之处。</p>
-<p>&gt;&gt; 《反本能》一书的作者卫蓝曾这样描述路径依赖：当我们长期进行一种行为的时候，大脑会慢慢形成一个专门处理这个行为的“绿色通道”，所以当自己面临相似的场景时，大脑会对这种行为进行优先选择，并进一步形成自动化反应。</p>
-<p>&gt;&gt; 很多人情绪不好，是因为他们把自己做的假设当成了事实，在不确定对方真实想法的情况下，直接把情绪发泄了出来。</p>
-<p>&gt;&gt; 五是多运动。适当的有氧运动会提升我们体内多巴胺的水平，而多巴胺对于创造力和多角度思考能力来说都很重要。锻炼不仅能帮我们从负面情绪中快速走出来，也会引导大脑从新的角度看待事物，或者从不同角度观察问题，所以，越是心情不好的时候就越要多运动，越是想不通的时候越要多运动。</p>
-<p>&gt;&gt; 这种经历我也经常有，因为我有每日反思的习惯。所以每当自己心情郁闷、无法排解的时候，我就会打开电脑，把心中的烦恼全部倒出来进行复盘，梳理的过程中，自己往往会拨云见日，真的很神奇。</p>
-<p>无论什么时候，你的笔或键盘都能帮你跳出单一视角，看到更多维度。</p>
-<p>◆ 第三节 游戏心态：幸福的人，总是在做另外一件事</p>
-<p>&gt;&gt; 所有人都备感煎熬，每次都是“跑前很紧张、跑时很痛苦、跑后很无奈”。</p>
-<p>&gt;&gt; 不要让事情本身束缚了你的情绪和注意力。</p>
-<p>&gt;&gt; 一个人如果整天做自己不想做但又必须做的事情，日子就会变得灰暗无趣，然而面对压力，我们真的就只能承受吗？未必。或许我们的情绪和注意力只是被事情本身给占据了，因为困难和压力总能把人的情绪和注意力抓得死死的，让你很难看到其他角度。</p>
-<p>&gt;&gt; ·我并不是在做跑步测试，我只是在玩追逐游戏；</p>
-<p>·我并不是在写作业，我只是在挑战自己的速度；</p>
-<p>·我并不是在洗衣服，我只是在活动自己的手脚；</p>
-<p>·我并不是去见领导，我只是和一个普通人聊天；</p>
-<p>·我并不是为老板做事，我只是为了提升自己。</p>
-<p>&gt;&gt; 事情本身并不重要，我们只是在通过它获取另外一种乐趣，顺便把这件事给做了。在心理学上，这个方法叫作“动机转移”。</p>
-<p>&gt;&gt; 胡适先生也说：怕什么真理无穷，进一寸有进一寸的欢喜。</p>
-<p>&gt;&gt; 一定有人会对这些方法嗤之以鼻，因为从本质上看，这更像是一种自我欺骗。事实上，人是一种自我解释的动物，世界的意义是人类赋予的。</p>
-<p>&gt;&gt; 为自己而做可以解放情绪，为玩而做可以解放注意力。</p>
-<p>◆ 第八章 早冥读写跑，人生五件套——成本最低的成长之道</p>
-<p>&gt;&gt; 清晰的时间安排、强健的体魄、良好的精神状态、不受干扰的锻炼氛围、专注的学习环境、从容的工作心态、持续的个人成长等。</p>
-<p>&gt;&gt; 六、提前准备。除了晚上提前准备好衣物，更重要的是要提前想好起床之后具体要做什么，比如第二天早上要是下雨了（不能外出跑步）应该怎么调整事项，如果晚醒了半个小时又该安排哪些学习内容……总之，要针对各种可能出现的情况做好预案。当脑中有具体清晰的目标、规划和步骤时，第二天起床才不会犹豫，否则很容易临时改变主意再睡一会儿。情绪脑追求舒适的意愿是很强烈的，但如果理智脑提前和它沟通好，行动的阻力就会小很多。</p>
-<p>&gt;&gt; 七、明确遇到哪些情况时可以不早起。早起要考虑实际情况。偶尔几次无法早起时不要焦虑或内疚，只要给自己定好原则就行，比如遇到以下几个场景我就允许自己晚起床：</p>
-<p>·生理低谷期；</p>
-<p>·前一天晚上参加聚会，睡得太晚；</p>
-<p>·第二天需要开长途车或做其他需要消耗大量精力的重要活动；</p>
-<p>·环境突然变化，不适合早起活动……</p>
-<p>&gt;&gt; 成功人士一旦发现别人的好习惯，就会立刻将这个习惯变成自己的。</p>
-<p>◆ 第二节 冥想：终有一天，你要解锁这条隐藏赛道</p>
-<p>&gt;&gt; 普通人和聪明人最大的能力差异是什么？是长时间保持极度专注的能力。正如《暗时间》一书的作者刘未鹏所说：能够迅速进入专注状态，以及能够长期保持专注状态，是高效学习的两个最重要的习惯。</p>
-<p>&gt;&gt; 闭眼静坐，专注于自己的呼吸，每天持续15分钟以上……你会感受到它的效果。</p>
-<p>&gt;&gt; 所以人们一旦在现实世界中受困受阻，就会不自觉地去虚拟世界体验舒适与自由，人类避难趋易的天性也正好有了出口。</p>
-<p>&gt;&gt; 还有些人会因这种习惯，每天睡觉前不自觉地开启“胡思乱想”模式，杂念丛生，无法安然入睡。他们虽躺在床上，脑子里却像一壶刚烧开的沸水，思绪难以平静，彻夜不眠。</p>
-<p>&gt;&gt; 人们既无法赶走它，又不愿去碰它，于是不得不让它长期占据着自己的心智带宽，让人无心做事、郁郁寡欢。</p>
-<p>&gt;&gt; 对于那些过轻的小球，保持专注就能给它们加码，让它们稳定下来；对于那些过重的小球，你冥想时必须正视它们、接纳它们，否则你无法做到专注。一旦正视、接纳之后，那些隐性的压力也就不那么让你伤神了，这也是我一直倡导大家把心中的困惑写出来的原因，因为只要写出来，那些紧张、担忧、畏惧、害怕等情绪就会在清晰的观察下无处遁形，小球的重量自然会减轻。只要持续练习，脑中的小球就能保持最佳质量，既稳定，又可控，人们就能把注意力和情绪锁定在一个相对理想的状态下。</p>
-<p>◆ 第三节 阅读：如何让自己真正爱上阅读</p>
-<p>&gt;&gt; 读书这件事虽然好，但陷阱不少，不是想读就能读的。</p>
-<p>&gt;&gt; 想要快速成为一个行业的高手，最好的方法就是和行业专家交流，直接向他们请教</p>
-<p>&gt;&gt; 我们每天花费在阅读上的时间越多，花在无意义的娱乐活动上的时间就会越少，思维密度就会越来越大。</p>
-<p>&gt;&gt; 只要紧紧盯住“改变”这个根本目标，很多阅读障碍就会立即消失。</p>
-<p>&gt;&gt; 第一个是要特别注意自己在阅读时产生的关联。如果一个知识点让你想起了其他的知识、引发了关联，一定要留意，并把它记下来。知识产生关联说明知识网络正在形成或加固，这么做还可能创造新知识，这正是学习的核心方法之一。</p>
-<p>◆ 第四节 写作：谢谢你，费曼先生</p>
-<p>&gt;&gt; 比如有一次他给小费曼读《大英百科全书》中关于恐龙的知识：“恐龙的身高有25英尺[1]，头有6英尺宽。”读到这儿，他没有继续念下去，而是停下来对费曼说：“我们来看看这句话是什么意思。也就是说，假如那东西站在我们家的前院，它那么高，足以把头伸进楼上的窗户。不过呢，由于它的脑袋比窗户稍微大了些，它要是硬把头挤进来，就会弄坏窗户。”这样一解释，原本陌生的概念就有了熟悉的事物作为参照物。</p>
-<p>&gt;&gt; 无论学习什么东西，都要努力琢磨它们究竟在讲什么，它们的实际意义是什么，然后用自己的话将其重新讲出来。</p>
-<p>&gt;&gt; 所谓费曼技巧就是通过自己的语言，用最简单的话把一件事情讲清楚，最好让外行人也能听懂。</p>
-<p>&gt;&gt; 你不能自己站在11层，然后假设你的读者站在第10层，指望着只要告诉他第11层有哪些内容就让他明白。你的读者站在第一层，你必须知道你脚下踩着的另外10层到底是怎么构造的。这就迫使你对所掌握的，或之前认为正确的那些东西做彻彻底底的、深刻的反思，你的受众越是不懂，你需要反思的就越深刻。</p>
-<p>&gt;&gt; 又一次，读者“晴天”问我：前额皮质、元认知、理智脑这三个概念是什么关系？我突发灵感，想到了一个类比：前额皮质就是理智脑和元认知的“肉身”。这次算我扳回一局，因为想到一个合适的类比是一件非常难得和宝贵的事。</p>
-<p>&gt;&gt; 用自己的语言重新表达就是在调动自己的千军万马。</p>
-<p>&gt;&gt; 所以，一个人想要真正成长，一定要学会写作，因为“只读不写”的学习是不完整的，是低效的。而写作时如果不学会用自己的语言转述，则是无用的。</p>
-<p>◆ 第五节 运动：灵魂想要走得远，身体必须在路上</p>
-<p>&gt;&gt; 所以运动不是关键，运动之后的活动安排及环境刺激才是关键。有效的模式是这样的：在运动后的1~2小时内进行高强度、高难度的脑力活动，比如阅读、解题、背记、写作、编程，等等，或是一些需要复杂技巧的体力活动，诸如舞蹈、钢琴，以及参加不同于以往的社交活动，如接触新的环境、人物或事物，这么做可以让新的神经元受到刺激，不断生长。换句话说，运动之后，脑子需要充分接受考验或挑战，才能让自己不断地变“聪明”。</p>
-<p>&gt;&gt; 让自己保持做有氧运动时有些气喘的状态。比如跑步时，保持足够快的速度直到有些气喘，持续1~2分钟，然后改为快走，调整呼吸，重复即可，这个活动量几乎每个人都可以达到。</p>
-<p>◆ 结语 一流的生活不是富有，而是觉知</p>
-<p>&gt;&gt; 眼前就像出现了一个真空地带，我竟想不起自己这几年到底做了什么，甚至说不出一两件印象深刻的事。虽然我每天按部就班地生活，但好像什么也没做，生活就像无声的溪水，每天从身边流过，但定睛一看，什么也没有留下。那一瞬间，我产生了一种深深的失重感，第一次体会到了焦虑。</p>
-<p>&gt;&gt; 记录日程虽然没有让我成为像柳比歇夫那样厉害的人，但提高了我对时间的敏感度。因为我每记录一笔浪费掉的时间，比如因看手机荒废了2小时，心里就会有一种愧疚感，进而就会不自觉地希望自己减少这种浪费，毕竟记录这样的日志并不光彩，谁愿意自己的生命都是由这些无聊的事情组成的呢？当然我有时候也过得异常忙碌，常常忙得晕头转向，看着密密麻麻的日志，也不禁会想：“自己到底在忙什么？”因为这些忙碌往往都是在被动应付外界的压力，而非自己主动在追求什么。于是我问自己：如果一直被外界的安排牵着走，即便每天过得很“充实”，又有什么意义呢？</p>
-<p>&gt;&gt; 比如有一次开车后我觉得很累，在当天的反思中，我发现自己在开车时，身体的一些部位会不自觉地保持紧张和僵硬，从那以后，我便刻意提醒自己保持放松，用最小的力气去完成动作，尽量让汽车在启动和停止时柔和顺畅。不久后，开车成了我的一种享受，家人也反馈坐在车里非常舒适，没有之前的急停、急刹了。</p>
-<p>比如有一次被领导批评。他用词刻薄，让我当场就想回击。在当天的反思中，我认真分析了他的批评，觉得他指出的问题还是很到位的，虽然他情绪不好，但出发点是好的，而且他对大多数人都是这样的脾气，并非单独针对我。想到这里，我当即就释然了</p>
-<p>&gt;&gt; 无论何时，都要把对方的情绪和意见分开对待，这样，即使在最糟糕的事情中也能学到有用的东西。</p>
-<p>&gt;&gt; 好的反思是感知生活中最触动自己的点，难受的、欣喜的、念念不忘的……这些点正是处在自己成长的舒适区边缘的感悟，人在舒适区边缘学习，成长是最快的。</p>
-<p>&gt;&gt; 反思天然有正视痛苦的力量。去反思，去记录，你就会发现，痛苦哪里是什么坏事，那简直是上天给我们的成长信号与提示！</p>
-<p>&gt;&gt; 反思的最终目的是改变，而不是形式的完美</p>
-<p>&gt;&gt; 对自己极度坦诚。</p>
-<p>&gt;&gt; 我一直很想知道，一个人觉醒的起点到底在哪儿？现在大致有了一个答案，那就是：觉知。当一个人能够觉知到什么是好，什么是不好的时候，就必然会主动做出新的选择。</p>
-<p>◆ 后记 共同改变，一起前行</p>
-<p>&gt;&gt; 封面中的蓝色和红色是本书的两种主题颜色，它们分别代表大脑的理性力量和感性力量，中间的留白隐约构成了人的大脑，寓意是一个人若是学会了用知识和智慧驱动理性和感性这两种力量，就可以获得认知觉醒。希望本书能帮助人们走出混沌，通过思考获得清醒的认知、清楚的目标、清晰的路径和清爽的情绪。</p>
-]]></content>
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>Esko Ukkonen On-line Construction of Suffix Trees</title>
+      <link href="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/"/>
+      <url>/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/</url>
+      
+        <content type="html"><![CDATA[<h1 id="Esko-Ukkonen-On-line-Construction-of-Suffix-Trees"><a href="#Esko-Ukkonen-On-line-Construction-of-Suffix-Trees" class="headerlink" title="Esko Ukkonen: On-line Construction of Suffix Trees"></a>Esko Ukkonen: On-line Construction of Suffix Trees</h1><p>@[toc]</p><h1 id="一、后缀树的概念及应用【详见刘方州同学报告】"><a href="#一、后缀树的概念及应用【详见刘方州同学报告】" class="headerlink" title="一、后缀树的概念及应用【详见刘方州同学报告】"></a>一、后缀树的概念及应用【详见刘方州同学报告】</h1><h2 id="1-1-字典树-Trie"><a href="#1-1-字典树-Trie" class="headerlink" title="1.1 字典树 Trie"></a>1.1 字典树 Trie</h2><p>定义：字典树，又称单词查找树或键树，是一种树形结构，是一种哈希树的变种。<br>用途：用于统计和排序大量的字符串（但不仅限于字符串），所以经常被搜索引擎系统用于文本词频统计。<br>优点：最大限度地减少无谓的字符串比较，查询效率比哈希表高。<br>核心思想：空间换时间，利用字符串的公共前缀来降低查询时间的开销以达到提高效率的目的。<br>基本性质：<br>（1）根节点不包含字符，除根节点外每一个节点都只包含一个字符。<br>（2）从根节点到某一节点，路径上经过的字符连接起来，为该节点对应的字符串。<br>（3）每个节点的所有子节点包含的字符都不相同。</p><h2 id="1-2-后缀树-Suffix-Tree"><a href="#1-2-后缀树-Suffix-Tree" class="headerlink" title="1.2 后缀树 Suffix Tree"></a>1.2 后缀树 Suffix Tree</h2><p>后缀树是一种数据结构，能快速解决很多关于字符串的问题。后缀树的概念最早由Weiner于1973年提出，既而由McCreight在1976年和Ukkonen在1992年和1995年加以改进完善。<br>给定一长度为n的字符串T&#x3D;T_1 T_2 〖…T〗<em>n和整数i (1&lt;&#x3D;i&lt;&#x3D;n)，子串T_i T</em>(i+1) 〖…T〗_n便都是字符串T的后缀。以字符串T&#x3D;abcabxabcd为例，它的长度为10，所以abcabxabcd、bcabxabcd、cabxabcd、…、d都是T的后缀。规定空字串也是后缀。后缀树，就是包含一则字符串所有后缀的压缩字典树，压缩过程如图1所示。把abcabxabcd的所有后缀加入字典树并压缩后，我们得到如图2的后缀树。</p><img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/6acacda119cab9dd2e567502e3677939.png" class="" title="图1 后缀字典树到后缀树的压缩过程"><img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/441b6b774ab91a0a40e2b0edd0232d4e.png" class="" title="图2 abcabxabcd的后缀树"><p>如图2所示，Suffix Tree与Trie的不同在于边不再只代表单个字符，而是每个边可以表示任意的长度，实操过程中用两个指针[from， to]实现，耗费O(1)的空间。</p><h2 id="2-后缀树的应用"><a href="#2-后缀树的应用" class="headerlink" title="2 后缀树的应用"></a>2 后缀树的应用</h2><p>2.1 最长重复子串<br>2.2 最长公共子串<br>2.3 最长回文子串</p><h1 id="二、朴素后缀树构造方法及问题"><a href="#二、朴素后缀树构造方法及问题" class="headerlink" title="二、朴素后缀树构造方法及问题"></a>二、朴素后缀树构造方法及问题</h1><p>略 </p><h1 id="三、线性时间内后缀树在线构造方法"><a href="#三、线性时间内后缀树在线构造方法" class="headerlink" title="三、线性时间内后缀树在线构造方法"></a>三、线性时间内后缀树在线构造方法</h1><p>McCreight最初的构造法原则上要按逆序构造，也就是说字符要从末端开始插入。如此一来便不能作为在线算法， 它变得更加难以应用于实际问题，如数据压缩。<br>20年后，来自赫尔辛基理工大学的Esko Ukkonen把原算法作了一些改动，实现了线性时间内对字符串从左往右的后缀树在线构造方法。<br>对于所给的文本T，由一棵空树开始逐步构造T的后缀树。以abcabxabcd为例，先由a开始，接着是ab，然后abc，…，不断更新直到构造出abcabxabcd的后缀树。</p><h2 id="3-1-概念引入"><a href="#3-1-概念引入" class="headerlink" title="3.1 概念引入"></a>3.1 概念引入</h2><h3 id="（1）隐式后缀树-Implicit-Suffix-Tree"><a href="#（1）隐式后缀树-Implicit-Suffix-Tree" class="headerlink" title="（1）隐式后缀树 Implicit Suffix Tree"></a>（1）隐式后缀树 Implicit Suffix Tree</h3><p>按上述方法在线构造abcabxabcd的后缀树的过程中，我们必然会构造出字符串abcab的后缀树，对其所有后缀枚举如下：abcab、bcab、cab、ab、b。观察发现：后缀ab被包含在abcab中作为其前缀；后缀b被包含在bcab中作为其前缀。<br>如果为ab或b单独开辟新的分支，则不符合字典树的性质，即每个节点的所有子节点包含的字符都不相同。因此我们选择暂时认为ab、b隐式包含在已有分支里，这样构造出来的后缀树称为隐式后缀树。<br>在我看来，隐式后缀树是在扫描和构建过程中节省时间的一步操作。因为字符串尚未扫描结束，所以这些操作可以先记录着而暂时不去执行，其代价是需要引入接下来要提及的活动点和剩余后缀数。</p><h3 id="（2）终止符"><a href="#（2）终止符" class="headerlink" title="（2）终止符 $"></a>（2）终止符 $</h3><p><strong>问题：如何确定查找后缀树得到的子串是一个后缀还是后缀的一部分？</strong><br>解决：在文本后添加字母表以外的字符，比如$。这样，当查找到ab$或b$就说明这是一个后缀，避免了二义性。对abcab$的所有后缀重新枚举如下：xabxa$、abxa$、bxa$、xa$、a$、$。观察发现：xa$不再是xabxa$的前缀；a$不再是bcab$的前缀。</p><h3 id="（3）活动点active-point、剩余后缀数-remainder"><a href="#（3）活动点active-point、剩余后缀数-remainder" class="headerlink" title="（3）活动点active point、剩余后缀数 remainder"></a>（3）活动点active point、剩余后缀数 remainder</h3><p><strong>问题：我们提到了隐式后缀树，隐式什么时候变为显式？怎么变为显式？</strong><br>比喻：隐式就像瘦子躲在胖子后面，瘦子露出马脚的时候就是变为显式的时候。<br>举例：以最终构建abcabx为例。第一阶段，我们从左到右在线构建abc的后缀树，如图3所示。<br> <img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/dd57f4da725c038161235b3f84657b20.png" class="" title="在这里插入图片描述"><br>图3 abc的后缀树<br>第二阶段，我们需要构建abcab的后缀树，如图4所示。新增字符a新增字符b的情况下，不必大刀阔斧改变树的结构，只要悄悄在每条边后面追加a追加b即可。枚举abcab的后缀集合：abcab、bcab、cab、ab、b。观察发现，abcab、bcab、cab即为三条边，而ab、b隐式地包含其中。</p> <img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/7bf70b3bdbcbf172481964a86f221193.png" class="" title="在这里插入图片描述"><p>图4 abcab的后缀树<br>第三阶段，我们需要构建abcabx的后缀树。新增字符x，x就是露出的马脚，因为已有的后缀树的边里没有包含abx的。露出马脚之时就是变为显式之日，通过裂变出新的边变为显式，如图5所示。<br> <img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/2a784f64875c60a2bb00befdfcab4329.png" class="" title="在这里插入图片描述"><br>图5 abcabx的后缀树</p><p><strong>问题：如何确定裂变的位置？</strong><br>解决：引入活动点active point，用于确定裂变的位置。活动点active point是一个包括(active_node, active_edge, active_length)的三元组。该三元组在每次后缀树的搜索中更新。<br>根据active_node确定结点，根据active_edge确定结点的某一条边，根据active_length确定边上的某个位置。举例来说，如图6所示，active_node为0，即根节点，active_edge为a，即从根节点出发、字符为a的这条边，active_length为2，即该边索引为2的地方，即符号|所在位置。<br> <img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/0cd8b06ef3a341b25445a60cac7e6b1c.png" class="" title="在这里插入图片描述"><br>图6 active point的含义解释</p><p><strong>问题：裂变具体怎么做？</strong><br>解决：如图7所示，以abcab-&gt;abcabx为例，裂变时进行以下操作：<br>① 根据活动点确定裂变位置（ab|cab），在|处添加节点。<br>② 在新增的节点后分裂出一个边为x的节点。</p><img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/33d19f111e79fc01e511eed4fd34410c.png" class="" title="在这里插入图片描述"><p>图7 裂变的过程<br>至此由于添加abx后缀引发的裂变完成。<br><strong>问题：只裂变一次就够了吗？</strong><br>思考：未必够。以abcab到abcabx为例，abcab的后缀树表示如图8所示。<br> <img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/916ab767229cd8688ecede1d6214c4df.png" class="" title="在这里插入图片描述"><br>图8 abcab的后缀树<br>已知abcabx的后缀集合：abcabx、bcabx、cabx、abx、bx、x。<br>如果仅在已有的边后面添加x，只能覆盖abcabx、bcabx、cabx，剩下abx、bx、x。由于每次裂变能得到1个新后缀，直觉上来说需要进行3次裂变，事实上也是如此。上述过程只完成了添加abx后缀引发的裂变。<br>解决：引入剩余后缀数remainder，表示还需要插入多少个新的后缀，即还需要裂变几次。remainder&#x3D;0时，表示当前新增字符处理完毕，继续扩展下一字符。</p><h3 id="（4）后缀链接-Suffix-Link"><a href="#（4）后缀链接-Suffix-Link" class="headerlink" title="（4）后缀链接 Suffix Link"></a>（4）后缀链接 Suffix Link</h3><p>根据上述问题思考已经明确了两个事实：<br>① 活动点active point指向要裂变的位置。<br>② 要裂变的位置可能不止一个。<br><strong>问题：每次都重新从根节点搜索下一裂变处吗？</strong><br>解决：不需要。引入后缀链接Suffix Link，用于快速找到下一裂变处。<br><strong>问题：后缀链接怎么创建？</strong><br>规则：每进行一次裂变，会新增非叶节点和新边。后缀链接从该新增的非叶节点出发，指向下一次裂变新增的非叶节点，用虚线连接。<br><strong>问题：为什么后缀链接可以快速找到下一裂变处？</strong><br>观察：后缀链接连接的节点存在的关系：如果有一个从A指向B的后缀链接，那么从根节点到A节点表示的子串剔除第首个字符后得到的即为从根节点到B节点表示的子串。<br>举例：图9中节点4表示字符串ab，节点6表示字符串b，ab剔除掉首个字符a后得到b。实际处理时，每一次裂变意味着一个待添加后缀的成功插入（abx），下一次裂变的工作就是插入下一个待添加后缀（bx），下一个待添加后缀（bx）与当前成功插入的后缀（abx）的关系也是这样。<br>好处：可以方便地从一个后缀跳到另一个后缀，降低算法的时间复杂度。</p><img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/adeeca639e49e547a5b54e7b817e1c59.png" class="" title="在这里插入图片描述"><h2 id="3-2-过程演示"><a href="#3-2-过程演示" class="headerlink" title="3.2 过程演示"></a>3.2 过程演示</h2><img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/76d05959648ed4212fe1c0ccaa09e7cd.png" class="" title="图10 后缀树构建过程演示Step 1-空树"><img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/e91af3d53f2bb9ee38567cf6045e1cc6.png" class="" title="图11 后缀树构建过程演示Step 2-a"><img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/d3851a90bc2f300a0fc14dffa770f4e5.png" class="" title="图12 后缀树构建过程演示Step 3-ab"><img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/53309f726a393bced86746c7a838c6f1.png" class="" title="图13 后缀树构建过程演示Step 4-abc"><img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/d45b48924e9a6f7252b6f2b0ce4aad13.png" class="" title="图14 后缀树构建过程演示Step 5-abca"><p>注意到已经存在的第一条边前缀中隐式包含了a。隐式包含在实操过程中的做法就是更新活动点active point和剩余后缀数remainder。<br>单就后缀树而言，这颗后缀树没有准确地描述当前读到的字符串abca。如何保证最后扫描结束的时候后缀树可以准确表示呢？回扣前文终结符的引入：在遇到$并做完相应操作后，后缀树可以准确地描述abca$。</p><img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/3e305edbd22d407d460daf5833cba095.png" class="" title="图15 后缀树构建过程演示Step 6-abcab"><p>更新active point：a后面有b，length+1，往后挪；还在同一条边上，node和edge不变；<br>更新remainder+1&#x3D;2：表示需要插入两个后缀ab、b。<br><strong>问题：为什么remainder+1？</strong><br>因为上一步的a实际上没有被插入树中，所以它被remain了下来，而后我们又继续处理b了，所以上一步没插入的a延长成了ab。加入的1即需要插入新的后缀b。<br><strong>问题：再看active point和remainder记录信息似乎是缺失的：记录了后缀ab即将添加的位置，记录了2个待添加后缀，却没有记录b即将添加的位置？为什么呢？</strong><br>先说结论：“既然第一条边有ab|cab，那在第一条边后面（也就是第二条第三条边里）一定存在去掉a以b开头的后缀”。<br>再详细解释：回顾一下这里第二条边是如何产生的？正是因为后缀树的逐步构建过程中a后接了b，所以我们先在第一条边的a追加成ab，再为b开辟新的边，即第二条边，所以这个第二条边就是显然的以b开头的后缀。换句话说，即使a后面不是紧跟的b，而是紧跟的是个x，那也会新开一条边以x开头的。</p><img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/a22f32c30e4b711815f8af1b5f9e5f9f.png" class="" title="图16 后缀树构建过程演示Step 7-abcabx-插入abx"><p>remainder&#x3D;3，表示有3个待添加的后缀：abx、bx、x<br>我们按之前的逻辑来试图更新active point：ab之后找x，找不到！因此在裂变位置添加新的节点4、新的边x。这一步完成了后缀abx的添加。但是active point怎么更新呢？ </p><h3 id="Rule-1（活动点更新规则1）"><a href="#Rule-1（活动点更新规则1）" class="headerlink" title="Rule 1（活动点更新规则1）"></a>Rule 1（活动点更新规则1）</h3><p>当active_node &#x3D; root 时遵循：<br>    active_node 保持为 root；<br>    active_edge 被设置为即将被插入的新后缀的首字符；<br>    active_length 减1；</p><img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/a64832fcdb1136281c02cdf2fbdf0854.png" class="" title="图17 后缀树构建过程演示Step 7-abcabx-插入abx后更新active point"><p>根据Rule 1规则更新active point：<br>    active_node 保持为 root；<br>    active_edge 被设置为即将被插入的新后缀bx的首字符b；<br>    active_length-1&#x3D;1；<br>更新remainder：remainder-1&#x3D;2，表示还有2个后缀待添加：bx、x。</p><img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/63436a9acf538d6d203988fdae7ab973.png" class="" title="图18 后缀树构建过程演示Step 8-abcabx-插入bx"><p>裂变过程与abx的插入相似，不多赘述。依据Rule 1更新active point为 (0, ‘x’, 0)。<br>更新remainder-1&#x3D;1，表示还有1个后缀x没有插入。<br>注：图里的remainder&#x3D;0，我认为其意思是在扫描到x时回头处理之前的ab，但其实并没有真的扫描x，就像一个人往前走路只是把脚伸过去但没有迈过去踩实，所以默认观察到了x并处理了之前遗留的a和b，但尚未处理x，现在remainder&#x3D;0说明a和b处理好了，开始处理下一个字符x，直接在根节点加边x。<br>除此以外，该步骤还需要创建后缀链接。</p><h3 id="Rule-2（后缀链接创建规则）"><a href="#Rule-2（后缀链接创建规则）" class="headerlink" title="Rule 2（后缀链接创建规则）"></a>Rule 2（后缀链接创建规则）</h3><p>如果我们分裂一条边并且插入一个新的节点，并且如果该新节点不是创建的第一个节点，则将先前插入的节点与该新节点通过一个特殊的指针连接，称为后缀链接，通过一条虚线来表示。<br>在图18中，因插入bx新裂变出来的节点6，不是扫描到x后创建的第一个节点了（第一个节点是因插入abx新裂变出来的节点4），因此创建后缀链接：4-&gt;6。<br>我的理解是“前人栽树，后人乘凉”，这条后缀链接在下一次碰到ab时会有用。</p><img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/241229f58f6858bce3fdc663271d3a02.png" class="" title="图19 后缀树构建过程演示Step 9-abcabx-插入x"><p>active point为 (0, x, 0)，length&#x3D;0，所以在根节点创建边x。<br>remainder-1&#x3D;0，表示可以处理下一个字符了。</p><img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/8d808c8cb610ac0bae0578d2a0f076e4.png" class="" title="图20 Step 10 后缀树构建过程演示-abcabxa"><img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/1c1968d58f4f4c5bc7683d5b16938455.png" class="" title="图21 后缀树构建过程演示Step 11-abcabxab"><img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/c0ae42f9a7da011ee79ddb8dc51b280e.png" class="" title="图22 后缀树构建过程演示Step 12-abcabxabc"><p>更新active point(4,’c’,1)；<br>更新remainder&#x3D;3，表示需要插入abc、bc、c三个后缀。</p><img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/2bc2d57804e9482ce96f46ece0d7cf3e.png" class="" title="图23 后缀树构建过程演示Step 13-abcabxabcd"><p>更新remainder &#x3D; 4，需要插入abcd、bcd、cd、d四个后缀；<br>更新active point：abc之后找d，找不到！因此在裂变位置添加新的节点9、新的边d。<br><strong>问题：此时active point如何更新的？</strong></p><h3 id="Rule-3（活动点更新规则2）"><a href="#Rule-3（活动点更新规则2）" class="headerlink" title="Rule 3（活动点更新规则2）"></a>Rule 3（活动点更新规则2）</h3><p>当从active_node从不为root的节点分裂边时，我们沿着后缀链接的方向寻找节点：<br>    如果存在一个节点，则设置该节点为 active_node；<br>    如果不存在，则设置 active_node 为 root。<br>上述两种情况的active_edge 和 active_length 保持不变。</p><p>根据Rule 3，图23的active point为(6, c, 1)。<br>更新remainder &#x3D; 3，并且开始处理下一个剩余后缀bcd。<br>bc后并没有没出现d，裂变。</p><img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/65e0df16b2dc3965f7e7c0189a225f24.png" class="" title="图24 后缀树构建过程演示Step 14-abcabxabcd-插入bcd"><p>裂变创建了节点11和边d。除了更新之外，根据Rule2创建后缀链接：9-&gt;11。<br>此时，我们观察两个后缀链接：<br>    4 (ab) -&gt; 6 (b)<br>    9 (abc) -&gt; 11 (bc)<br>remainder-1&#x3D;2，表示还需要插入cd、d；<br>根据Rule 3更新active point为(root, c, 1)。</p><img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/386d3504718fddf9b0ce651c7dc86a79.png" class="" title="图25 后缀树构建过程演示Step 15-abcabxabcd-插入cd"><p>更新active point时：由于找不到后续d，因此裂变：新建节点13和边d；<br>更新remainder-1 &#x3D; 1；<br>依据Rule 2创建后缀链接：11 -&gt; 13。</p><img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/fddc1ff5489a9a7cae0c61c89f034748.png" class="" title="图26 后缀树构建过程演示Step 16-abcabxabcd-插入d"><p>更新active point时：由于找不到后续d，因此裂变，新建边d；<br>更新remainder-1&#x3D;0。</p><img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/d892500e7a996e91ed73317b7618ce7b.png" class="" title="图27 后缀树构建过程演示Step 17-abcabxabcd$"><p>对树结构的改变仅需在根节点上插入一条新边$。<br>整个后缀树构建完成。</p><h2 id="3-3-复杂度分析"><a href="#3-3-复杂度分析" class="headerlink" title="3.3 复杂度分析"></a>3.3 复杂度分析</h2><p>关于隐式后缀树，如果扫描发现要被插入的字符已经存在于树中，则无需修改树的结构。原因是要被插入的字符实际上已经隐式地被包含在了当前的树中。而active point和remainder的更新记录了这部分信息，确保了在后续的操作中会进行处理。</p><p><strong>问题：算法结束时remainder &gt; 0的情况存在吗？</strong><br>解决： remainder &gt; 0意味着当前仍为隐式后缀树，虽然隐式包含着后缀信息，但是整个树并没有准确表达所有后缀。<br>我们在字符串末尾添加$以避免这种情况。由于$一定不同于字符串中任一字符的特性，使得在扫描到$时一定将之前所有隐式包含的后缀暴露出来并处理，处理的过程中remainder递减至0，最终完成整个后缀树的构建。<br>remainder记录了还余下多少后缀需要插入。这些插入操作将逐个的与当前位之前的后缀进行对应，我们需要一个接着一个的处理。每次插入需要O(1)时间。active point记录了插入（裂变）的位置。仅需在该位置新增一个字符，因为其他字符都被隐式地包含了。每次插入后：对于remainder，相应减少；对于active point：如果存在后缀连接的node续接至下一个节点；如果不存在则返回root节点；如果已经是在root节点了，则依据Rule1来修改活动点。无论哪种情况，仅需O(1)时间。<br>如果这些插入操作中，如果发现要被插入的字符已经存在于树中，则什么也不做，即使 remainder&gt;0。原因是要被插入的字符实际上已经隐式地被包含在了当前的树中。而 remainder&gt;0 则确保了在后续的操作中会进行处理。</p><p><strong>整体算法复杂度是多少？</strong><br>如果输入字符串的长度为n，则有n步需要执行，加上$有n+1步。在每一步中：<br>    要么消耗O(1) 时间更新active point和remainder；<br>    要么消耗O(1) 时间执行裂变插入操作；<br>因此整体算法复杂度为O(n)。</p>]]></content>
+      
+      
       <categories>
-        <category>读书笔记</category>
+          
+          <category> 讲解教程 </category>
+          
       </categories>
-  </entry>
-  <entry>
-    <title>新手入门 Git &amp; GitHub</title>
-    <url>/2024/12/20/%E6%96%B0%E6%89%8B%E5%85%A5%E9%97%A8%20Git%20&amp;%20GitHub/</url>
-    <content><![CDATA[<p>@[TOC](新手入门 Git &amp; GitHub)</p>
-<h1 id="零、命令行小抄"><a href="#零、命令行小抄" class="headerlink" title="&#x3D;&#x3D;零、命令行小抄&#x3D;&#x3D;"></a>&#x3D;&#x3D;零、命令行小抄&#x3D;&#x3D;</h1><blockquote>
-<p>本小抄适用于：远程仓库new了repo、本地有（要上传的）文件夹、SSH已绑定好<br>供有一定基础、但不常用的同学（包括我自己）查阅</p>
-</blockquote>
-<ol>
-<li><code>ssh-keygen -t rsa -C &quot;12345678@qq.com&quot;</code>，生成rsa（用于本地电脑和远程仓库绑定，详见下文3.3）</li>
-<li>进入要上传的文件夹，<code>git init</code> ，创建本地仓库</li>
-<li><code>git remote add origin git@github.com:xxx/yyy.git</code>，本地仓库连接远程仓库</li>
-<li>做完修改后，<code>git add .</code>，添加到临时缓冲区</li>
-<li><code>git commit -m &quot;添加了/修改了...&quot;</code>，提交到本地仓库</li>
-<li><code>git push -u origin master</code>，提交到远程仓库的master分支</li>
-<li><code>git log</code>，查看已有的commitID（为7准备）</li>
-<li><code>git reset --hard commitID</code>，撤销 commit、撤销 git add . 操作、撤销修改代码（在以下情况常用：（1）添加了一个怎么也传不上去的大文件；（2）push时候发生由于commit引起的不知名error）</li>
-<li><code>&quot;ssh:connect to host github.com port 22: Connection timed out&quot;</code>问题的解决<br> 首先，<code>vim ~/.ssh/config</code><br> 其次，添加以下代码 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># Default github user self</span><br><span class="line">Host github.com</span><br><span class="line">	port 443 # 默认是22端口</span><br><span class="line">	HostName ssh.github.com</span><br><span class="line">	IdentityFile ~/.ssh/id_rsa</span><br></pre></td></tr></table></figure>
- 最后，<code>:wq</code>保存并退出vim模式</li>
-</ol>
-<h1 id="一、前言"><a href="#一、前言" class="headerlink" title="&#x3D;&#x3D;一、前言&#x3D;&#x3D;"></a>&#x3D;&#x3D;一、前言&#x3D;&#x3D;</h1><p><strong>学习Git</strong>真的是我学习路上的一道“<strong>槛</strong>”；<br>&emsp;&emsp;一方面，不断接触的信息告诉我“<strong>学习Git很重要</strong>”；<br>&emsp;&emsp;另一方面，每次找到的教程都有那么几步<strong>看不懂</strong>，或是<strong>看懂了记不住</strong>。</p>
-<blockquote>
-<p>我前前后后学了三四次了，<br>或被GitHub英文劝退， （不会翻墙的时候打开还会很慢）<br>或因安装软件繁琐放弃， （啥是Git？？啥是Github？？）<br>或成功按部就班实现了一次demo，但没有实践下去于是忘了</p>
-</blockquote>
-<p>谨以此篇献给想学习并且在学习<strong>Git版本控制</strong>的小白。<br>&nbsp;</p>
-<h1 id="二、原理描述"><a href="#二、原理描述" class="headerlink" title="&#x3D;&#x3D;二、原理描述&#x3D;&#x3D;"></a>&#x3D;&#x3D;二、原理描述&#x3D;&#x3D;</h1><h2 id="2-1-四句话讲明白"><a href="#2-1-四句话讲明白" class="headerlink" title="2.1 四句话讲明白"></a>2.1 四句话讲明白</h2><p><strong>Git</strong> 狭义上来说是一个版本控制软件，广义上简单理解成<code>代码的仓库</code>；<br><strong>GitHub</strong> 一个远程仓库，白话就是<code>程序员专用的“某度网盘”</code>；<br><strong>网盘会用吧？</strong> 从本地的一个文件夹<code>上传</code>到网盘，或从网盘<code>下载</code>到本地。<br><strong>Git你就会了。</strong> 从本地仓库（repository）<code>上传（push）</code>到远程仓库，或从远程仓库<code>下载（pull）</code>到本地。<br>&nbsp;</p>
-<h2 id="2-2-补充说明"><a href="#2-2-补充说明" class="headerlink" title="2.2 补充说明"></a>2.2 补充说明</h2><h3 id="（1）本地仓库"><a href="#（1）本地仓库" class="headerlink" title="（1）本地仓库"></a>（1）本地仓库</h3><ol>
-<li>电脑上的一个文件夹就是一个本地仓库</li>
-<li>只是文件夹当然不行（就像没名没证空有房屋和物资，别人怎么知道是仓库）</li>
-<li>下载Git后可以在文件夹下通过命令行输入命令建立仓库（告诉别人，我这个文件夹，是仓库）</li>
-</ol>
-<h3 id="（2）远程仓库"><a href="#（2）远程仓库" class="headerlink" title="（2）远程仓库"></a>（2）远程仓库</h3><ol>
-<li>GitHub就是一个远程仓库</li>
-<li>一个GitHub账号对应一个专属于你的仓库</li>
-<li>也许你访问GitHub官网会很慢（这需要花点小费翻墙解决）</li>
-<li>也许你读不懂英文，但我相信你可以磕磕碰碰注册成功！</li>
-</ol>
-<h3 id="（3）相互绑定"><a href="#（3）相互绑定" class="headerlink" title="（3）相互绑定"></a>（3）相互绑定</h3><ol>
-<li>有了本地和远程仓库还不够（远程仓库怎么知道该不该接收呢，我不认识你）</li>
-<li>我们需要一个SSH安全协议（远程仓库把该本地仓库的名字加入联系人名单，可以接收）</li>
-</ol>
-<h3 id="（4）上传下载"><a href="#（4）上传下载" class="headerlink" title="（4）上传下载"></a>（4）上传下载</h3><ol>
-<li>一般该操作在本地仓库进行</li>
-<li>我们通过Git提供的命令行命令实现push和pull</li>
-<li>远程仓库有时也需要做一些操作（仓库收到物资后也需要整理的嘛）</li>
-<li>即对别人提交的修改更新做审核和合并（初学我们不涉及）<br>&nbsp;</li>
-</ol>
-<h1 id="三、保姆教程"><a href="#三、保姆教程" class="headerlink" title="&#x3D;&#x3D;三、保姆教程&#x3D;&#x3D;"></a>&#x3D;&#x3D;三、保姆教程&#x3D;&#x3D;</h1><p>我将对步骤进行概述性描述，因为有一位大佬已经发过知乎，<br>我觉得写的很好，也不多赘述，各位循着我的大纲去他那亲自体验就好~<br>（链接我放评论区，欢迎大家去瞅瞅！真的很棒很棒！）</p>
-<h2 id="3-1-本地仓库（Git）"><a href="#3-1-本地仓库（Git）" class="headerlink" title="3.1 本地仓库（Git）"></a>3.1 本地仓库（Git）</h2><p>（1）下载安装git提供命令行工具  <code>[对应知乎文章 第六点]</code><br>（2）一个文件夹demo做本地仓库（这个不用教吧？？新建文件夹即可）</p>
-<h2 id="3-2-远程仓库（GitHub）"><a href="#3-2-远程仓库（GitHub）" class="headerlink" title="3.2 远程仓库（GitHub）"></a>3.2 远程仓库（GitHub）</h2><p>（1）如有需要，付费翻墙（白话就是，通过歪果的节点上外网，没有阻碍速度更快）<br>（2）一个GitHub注册账号 <code>[对应知乎文章 第二点]</code><br>（3）新建一个远程仓库repository <code>[对应知乎文章中 第四点]</code></p>
-<h2 id="3-3-相互绑定（SSH）"><a href="#3-3-相互绑定（SSH）" class="headerlink" title="3.3 相互绑定（SSH）"></a>3.3 相互绑定（SSH）</h2><p>（1）在本地生成SSH key  <code>[对应知乎文章中 第八点]</code><br>（2）向GitHub添加SSH key <code>[对应知乎文章中 第八点]</code></p>
-<h2 id="3-4-上传下载（Git命令介绍）"><a href="#3-4-上传下载（Git命令介绍）" class="headerlink" title="3.4 上传下载（Git命令介绍）"></a>3.4 上传下载（Git命令介绍）</h2><p>（1）本地仓库的更新与整理 <code>[对应知乎文章中 第七点]</code><br>（2）本地仓库通过Git命令行上传下载 <code>[对应知乎文章中 第九点]</code><br>（3）远程仓库查看效果<code>[对应知乎文章中 第九点]</code></p>
-<h1 id="结语"><a href="#结语" class="headerlink" title="&#x3D;&#x3D;结语&#x3D;&#x3D;"></a>&#x3D;&#x3D;结语&#x3D;&#x3D;</h1><p>如果对你有帮助的话给个赞吧，顺带附一张自制的说明图~<br>![在这里插入图片描述](新手入门 Git &amp; GitHub.assets&#x2F;0f33782c01e099ef1daa513c4129d8f5.png)</p>
-]]></content>
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>链表逆置详细讲解（图文）</title>
+      <link href="/2024/12/20/%E9%93%BE%E8%A1%A8%E9%80%86%E7%BD%AE%E8%AF%A6%E7%BB%86%E8%AE%B2%E8%A7%A3%EF%BC%88%E5%9B%BE%E6%96%87%EF%BC%89/"/>
+      <url>/2024/12/20/%E9%93%BE%E8%A1%A8%E9%80%86%E7%BD%AE%E8%AF%A6%E7%BB%86%E8%AE%B2%E8%A7%A3%EF%BC%88%E5%9B%BE%E6%96%87%EF%BC%89/</url>
+      
+        <content type="html"><![CDATA[<h1 id="链表逆置"><a href="#链表逆置" class="headerlink" title="链表逆置"></a>链表逆置</h1><p>&nbsp;</p><h2 id="前言"><a href="#前言" class="headerlink" title="&#x3D;&#x3D;前言&#x3D;&#x3D;"></a>&#x3D;&#x3D;前言&#x3D;&#x3D;</h2><p><strong>链表逆置</strong>是初学时有困扰到我的难点.</p><p>由于链表<strong>头结点</strong>可放可不放数据，所以写代码时候 <strong>-&gt;next</strong> 用的云里雾里。</p><p>这里讲解头结点与第一结点区分的情况，即<strong>头结点</strong>你把它看作这个 <strong>链表的“文件名”</strong> 就行。<br>若头结点为L，则第一结点为L-&gt;next。</p><p>&nbsp;</p><h2 id="代码"><a href="#代码" class="headerlink" title="&#x3D;&#x3D;代码&#x3D;&#x3D;"></a>&#x3D;&#x3D;代码&#x3D;&#x3D;</h2><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> <span class="title function_">listReverse</span>(<span class="params">linkedList &amp;L</span>)</span><br><span class="line">&#123;</span><br><span class="line">node *p,*s;</span><br><span class="line"><span class="comment">//1.</span></span><br><span class="line">p = L-&gt;next;</span><br><span class="line">L-&gt;next = <span class="variable constant_">NULL</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span>(p)</span><br><span class="line">&#123;</span><br><span class="line"><span class="comment">//2.1</span></span><br><span class="line">s = p; </span><br><span class="line">p = p-&gt;next;</span><br><span class="line"><span class="comment">//2.2</span></span><br><span class="line">s-&gt;next = L-&gt;next; </span><br><span class="line">L-&gt;next = s;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p><strong>看不懂别慌。我会把代码拆解成三块为你讲解。</strong><br>讲解前，先做一个理解工作，以 L-&gt;next 为例，按在表达式<strong>左</strong>边or<strong>右</strong>边分，存在两种情况：</p><p><strong>情况一（左）：L-&gt;next &#x3D; NULL;</strong></p><blockquote><p>重点在<strong>next</strong>，即L的<strong>指针域</strong>，该表达式将指针域指向NULL。 </p></blockquote><p><strong>情况二（右）：p &#x3D; L-&gt;next;</strong></p><blockquote><p>重点在 L-&gt;next <strong>整体</strong>， 即 L-&gt;next 这个<strong>结点</strong>，-&gt;next在这里就是个形式，目的还是为了告诉你是<strong>这个结点</strong>！该表达式将p指针指向结点L-&gt;next。</p></blockquote><p>&nbsp;</p><h2 id="讲解"><a href="#讲解" class="headerlink" title="&#x3D;&#x3D;讲解&#x3D;&#x3D;"></a>&#x3D;&#x3D;讲解&#x3D;&#x3D;</h2><p>我们先看<strong>第一轮</strong>循环做了什么：</p><p><strong>建议阅读顺序：黑色（初始）、蓝色（操作）、红色（理解）</strong><br>&nbsp;</p><style>.pgmcrautnpuo{}</style><img src="/2024/12/20/%E9%93%BE%E8%A1%A8%E9%80%86%E7%BD%AE%E8%AF%A6%E7%BB%86%E8%AE%B2%E8%A7%A3%EF%BC%88%E5%9B%BE%E6%96%87%EF%BC%89/cf3babfba4681baa73937d25b54ab275.jpeg" class="pgmcrautnpuo"><p>&nbsp;<br>&nbsp;</p><p><strong>第二轮：</strong><br>&nbsp;<br><strong>建议阅读顺序：黑色（初始）、蓝色（操作）、红色（理解）</strong></p><style>.ujtyokepbjqa{}</style><img src="/2024/12/20/%E9%93%BE%E8%A1%A8%E9%80%86%E7%BD%AE%E8%AF%A6%E7%BB%86%E8%AE%B2%E8%A7%A3%EF%BC%88%E5%9B%BE%E6%96%87%EF%BC%89/b54b1f7f25db0e810e8f91b7476a517a.jpeg" class="ujtyokepbjqa"><p><strong>第三轮省略（可以自己尝试）。</strong><br>&nbsp;<br>&nbsp;</p><h2 id="总结"><a href="#总结" class="headerlink" title="&#x3D;&#x3D;总结&#x3D;&#x3D;"></a>&#x3D;&#x3D;总结&#x3D;&#x3D;</h2><p>不难发现：</p><ul><li><p>链表逆置利用了<strong>s、p两个指针</strong>的<strong>移动</strong>实现</p></li><li><p>每一轮循环体执行结束后，<strong>s</strong>指向<strong>刚刚逆置成功</strong>的结点，<strong>p</strong>指向<strong>下一轮待逆置</strong>的结点</p></li><li><p><strong>为什么需要p？</strong><br>  因为2.2步骤中s-&gt;next会<strong>被改写</strong>，<br>  若只有s，会<strong>丢失剩余的结点</strong>，<br>  这时候p起到<strong>暂存</strong>的作用，等待下一轮2.1步骤中的s&#x3D;p找到它。</p></li></ul><p>&nbsp;<br>&nbsp;</p><p><strong>最后给一份带注释的代码~</strong></p><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> <span class="title function_">listReverse</span>(<span class="params">linkedList &amp;L</span>)</span><br><span class="line">&#123;</span><br><span class="line">node *p,*s;</span><br><span class="line"><span class="comment">//1.准备工作</span></span><br><span class="line">p = L-&gt;next;</span><br><span class="line">L-&gt;next = <span class="variable constant_">NULL</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span>(p)</span><br><span class="line">&#123;</span><br><span class="line"><span class="comment">//2.1 s记录正在处理的结点，p记录下一轮待处理的结点</span></span><br><span class="line">s = p; <span class="comment">//s承接上一轮记录的位置</span></span><br><span class="line">p = p-&gt;next; <span class="comment">//p为下一轮记录位置</span></span><br><span class="line"><span class="comment">//2.2 把s插入 已逆置的部分 中</span></span><br><span class="line">s-&gt;next = L-&gt;next;  <span class="comment">// L-&gt;next代表已逆置的第一结点，s的指针域指向它</span></span><br><span class="line">L-&gt;next = s;<span class="comment">//（头结点的指针域，即）第一结点 设置为s</span></span><br><span class="line"><span class="comment">//2.2步骤相当于：</span></span><br><span class="line"><span class="comment">//s 对 队伍（已逆置部分）的队首（已逆置的第一结点）说：你不要排在柜台前了，你排在我后面</span></span><br><span class="line"><span class="comment">//等队伍排在s后面后，s自己排到了柜台前</span></span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>&nbsp;<br>&nbsp;<br><strong>有问题可以评论区交流讨论哈~</strong> </p>]]></content>
+      
+      
       <categories>
-        <category>讲解教程</category>
+          
+          <category> 讲解教程 </category>
+          
       </categories>
-  </entry>
-  <entry>
-    <title>链表逆置详细讲解（图文）</title>
-    <url>/2024/12/20/%E9%93%BE%E8%A1%A8%E9%80%86%E7%BD%AE%E8%AF%A6%E7%BB%86%E8%AE%B2%E8%A7%A3%EF%BC%88%E5%9B%BE%E6%96%87%EF%BC%89/</url>
-    <content><![CDATA[<h1 id="链表逆置"><a href="#链表逆置" class="headerlink" title="链表逆置"></a>链表逆置</h1><p>&nbsp;</p>
-<h2 id="前言"><a href="#前言" class="headerlink" title="&#x3D;&#x3D;前言&#x3D;&#x3D;"></a>&#x3D;&#x3D;前言&#x3D;&#x3D;</h2><p><strong>链表逆置</strong>是初学时有困扰到我的难点.</p>
-<p>由于链表<strong>头结点</strong>可放可不放数据，所以写代码时候 <strong>-&gt;next</strong> 用的云里雾里。</p>
-<p>这里讲解头结点与第一结点区分的情况，即<strong>头结点</strong>你把它看作这个 <strong>链表的“文件名”</strong> 就行。<br>若头结点为L，则第一结点为L-&gt;next。</p>
-<p>&nbsp;</p>
-<h2 id="代码"><a href="#代码" class="headerlink" title="&#x3D;&#x3D;代码&#x3D;&#x3D;"></a>&#x3D;&#x3D;代码&#x3D;&#x3D;</h2><figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">void</span> <span class="title function_">listReverse</span>(<span class="params">linkedList &amp;L</span>)</span><br><span class="line">&#123;</span><br><span class="line">	node *p,*s;</span><br><span class="line">	<span class="comment">//1.</span></span><br><span class="line">	p = L-&gt;next;</span><br><span class="line">	L-&gt;next = <span class="variable constant_">NULL</span>;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">while</span>(p)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="comment">//2.1</span></span><br><span class="line">		s = p; </span><br><span class="line">		p = p-&gt;next;</span><br><span class="line">		<span class="comment">//2.2</span></span><br><span class="line">		s-&gt;next = L-&gt;next; </span><br><span class="line">		L-&gt;next = s;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><strong>看不懂别慌。我会把代码拆解成三块为你讲解。</strong><br>讲解前，先做一个理解工作，以 L-&gt;next 为例，按在表达式<strong>左</strong>边or<strong>右</strong>边分，存在两种情况：</p>
-<p><strong>情况一（左）：L-&gt;next &#x3D; NULL;</strong></p>
-<blockquote>
-<p>重点在<strong>next</strong>，即L的<strong>指针域</strong>，该表达式将指针域指向NULL。 </p>
-</blockquote>
-<p><strong>情况二（右）：p &#x3D; L-&gt;next;</strong></p>
-<blockquote>
-<p>重点在 L-&gt;next <strong>整体</strong>， 即 L-&gt;next 这个<strong>结点</strong>，-&gt;next在这里就是个形式，目的还是为了告诉你是<strong>这个结点</strong>！该表达式将p指针指向结点L-&gt;next。</p>
-</blockquote>
-<p>&nbsp;</p>
-<h2 id="讲解"><a href="#讲解" class="headerlink" title="&#x3D;&#x3D;讲解&#x3D;&#x3D;"></a>&#x3D;&#x3D;讲解&#x3D;&#x3D;</h2><p>我们先看<strong>第一轮</strong>循环做了什么：</p>
-<p><strong>建议阅读顺序：黑色（初始）、蓝色（操作）、红色（理解）</strong><br>&nbsp;<br><img src="链表逆置详细讲解（图文）.assets/cf3babfba4681baa73937d25b54ab275.jpeg" width="60%" /><br>&nbsp;<br>&nbsp;</p>
-<p><strong>第二轮：</strong><br>&nbsp;<br><strong>建议阅读顺序：黑色（初始）、蓝色（操作）、红色（理解）</strong><br><img src="链表逆置详细讲解（图文）.assets/b54b1f7f25db0e810e8f91b7476a517a.jpeg" width="60%" /></p>
-<p><strong>第三轮省略（可以自己尝试）。</strong><br>&nbsp;<br>&nbsp;</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="&#x3D;&#x3D;总结&#x3D;&#x3D;"></a>&#x3D;&#x3D;总结&#x3D;&#x3D;</h2><p>不难发现：</p>
-<ul>
-<li><p>链表逆置利用了<strong>s、p两个指针</strong>的<strong>移动</strong>实现</p>
-</li>
-<li><p>每一轮循环体执行结束后，<strong>s</strong>指向<strong>刚刚逆置成功</strong>的结点，<strong>p</strong>指向<strong>下一轮待逆置</strong>的结点</p>
-</li>
-<li><p><strong>为什么需要p？</strong><br>  因为2.2步骤中s-&gt;next会<strong>被改写</strong>，<br>  若只有s，会<strong>丢失剩余的结点</strong>，<br>  这时候p起到<strong>暂存</strong>的作用，等待下一轮2.1步骤中的s&#x3D;p找到它。</p>
-</li>
-</ul>
-<p>&nbsp;<br>&nbsp;</p>
-<p><strong>最后给一份带注释的代码~</strong></p>
-<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">void</span> <span class="title function_">listReverse</span>(<span class="params">linkedList &amp;L</span>)</span><br><span class="line">&#123;</span><br><span class="line">	node *p,*s;</span><br><span class="line">	<span class="comment">//1.准备工作</span></span><br><span class="line">	p = L-&gt;next;</span><br><span class="line">	L-&gt;next = <span class="variable constant_">NULL</span>;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">while</span>(p)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="comment">//2.1 s记录正在处理的结点，p记录下一轮待处理的结点</span></span><br><span class="line">		s = p; 			<span class="comment">//s承接上一轮记录的位置</span></span><br><span class="line">		p = p-&gt;next; 	<span class="comment">//p为下一轮记录位置</span></span><br><span class="line">		<span class="comment">//2.2 把s插入 已逆置的部分 中</span></span><br><span class="line">		s-&gt;next = L-&gt;next;  <span class="comment">// L-&gt;next代表已逆置的第一结点，s的指针域指向它</span></span><br><span class="line">		L-&gt;next = s;	<span class="comment">//（头结点的指针域，即）第一结点 设置为s</span></span><br><span class="line">		<span class="comment">//2.2步骤相当于：</span></span><br><span class="line">		<span class="comment">//s 对 队伍（已逆置部分）的队首（已逆置的第一结点）说：你不要排在柜台前了，你排在我后面</span></span><br><span class="line">		<span class="comment">//等队伍排在s后面后，s自己排到了柜台前</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>&nbsp;<br>&nbsp;<br><strong>有问题可以评论区交流讨论哈~</strong> </p>
-]]></content>
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>《认知觉醒：开启自我改变的原动力》读书笔记</title>
+      <link href="/2024/12/20/%E3%80%8A%E8%AE%A4%E7%9F%A5%E8%A7%89%E9%86%92%EF%BC%9A%E5%BC%80%E5%90%AF%E8%87%AA%E6%88%91%E6%94%B9%E5%8F%98%E7%9A%84%E5%8E%9F%E5%8A%A8%E5%8A%9B%E3%80%8B%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"/>
+      <url>/2024/12/20/%E3%80%8A%E8%AE%A4%E7%9F%A5%E8%A7%89%E9%86%92%EF%BC%9A%E5%BC%80%E5%90%AF%E8%87%AA%E6%88%91%E6%94%B9%E5%8F%98%E7%9A%84%E5%8E%9F%E5%8A%A8%E5%8A%9B%E3%80%8B%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/</url>
+      
+        <content type="html"><![CDATA[<p>认知觉醒：开启自我改变的原动力</p><p>周岭</p><p>208个笔记</p><p>◆ 上篇 内观自己，摆脱焦虑</p><p>&gt;&gt; 事实上理智脑很少有主见，大多数时候我们以为自己在思考，其实都是在对自身的行为和欲望进行合理化，这正是人类被称作“自我解释的动物”的原因。</p><p>&gt;&gt; 习惯之所以难以改变，就是因为它是自我巩固的——越用越强，越强越用。要想从既有的习惯中跳出来，最好的方法不是依靠自制力，而是依靠知识</p><p>◆ 第二节 焦虑：焦虑的根源</p><p>&gt;&gt; 读书的“艰难”与买书的“惬意”简直相差十万八千里。</p><p>&gt;&gt; 归结起来，焦虑的原因就两条：想同时做很多事，又想立即看到效果。王小波说：人的一切痛苦，本质上都是对自己无能的愤怒。焦虑的本质也契合这一观点：自己的欲望大于能力，又极度缺乏耐心。焦虑就是因为欲望与能力之间差距过大。</p><p>◆ 第三节 耐心：得耐心者得天下</p><p>&gt;&gt; 很多人虽然嘴上说要保持耐心，但身体却诚实地游走在即时满足的边缘。他们总是从最简单、最舒适的部分开始一天的工作，然后沉迷于娱乐信息、醉心于周边琐事，就是无力去做重要的事情；</p><p>&gt;&gt; 从权重上看，改变量﹥行动量﹥思考量﹥学习量</p><p>&gt;&gt; 很多人之所以痛苦焦虑，就是因为只盯着表层的学习量。他们读了很多书、报了很多课，天天打卡、日日坚持，努力到感动自己，但就是没有深入关注过自己的思考、行动和改变，所以总是感到学无所获，甚至会认为是自己不够努力，应该继续加大学习量，结果陷入了“越学越焦虑，越焦虑越学”的恶性循环。</p><p>&gt;&gt; 一旦觉察自己开始失去耐心了，就温和地对自己说：“你看，我身体里那个原始人又出来了，让他离开丛林到城市生活，确实挺不容易的，要理解他。”</p><p>&gt;&gt; 温和地告诉它们：“该有的享受一点都不会少，只是不是现在享受，而是在完成重要的事情之后。”</p><p>&gt;&gt; 这种“后娱乐”的好处是，将享乐的快感建立在完成重要任务后的成就感之上，很放松、踏实，就像一种奖赏；而“先娱乐”虽然刚开始很快活，但精力会无限发散，拖延重要的工作，随着时间的流逝，人会空虚、焦虑。</p><p>◆ 第二章 潜意识——生命留给我们的彩蛋</p><p>&gt;&gt; 反本能成长</p><p>&gt;&gt; ·《思考力》一书的作者上田正仁提示：思考力的本质就是“丢弃所有已经消化的信息，让问题的核心浮出水面”；</p><p>·《刻意练习》中的核心方法论是：不要重复练习已经会的，要不断寻找那些稍有难度的部分；</p><p>·《原则》一书的作者瑞·达利欧罗列了工作和生活中的原则，用以清晰地指导自己行事；</p><p>·《超越感觉》一书告诉我们，想拥有清晰的逻辑，就坚持一点：凡事不要凭模糊的感觉判断，要寻找清晰的证据。</p><p>&gt;&gt; 提升思考能力的方法正是不断明确核心困难和心得感悟，并专注于此。</p><p>&gt;&gt; 优秀的人更倾向于做高耗能的事，比如“学霸”的秘诀往往在他们的错题本上——他们更愿意花时间明确错误，并集中精力攻克。</p><p>&gt;&gt; 多数人为了逃避真正的思考，愿意做任何事情。</p><p>&gt;&gt; 具体事件一旦变模糊，其边界就会无限扩大，原本并不困难的小事，也会在模糊的潜意识里变得难以解决。</p><p>&gt;&gt; 真正的困难总比想象的要小很多。人们拖延、纠结、畏惧、害怕的根本原因往往不是事情本身有多难，而是内心的想法变得模糊。就像在3 000米跑步考核开始前，那种不知名的恐惧会让人紧张得全身发抖，而我们一旦开跑、不得不与这种恐惧正面交锋时，就会发现3 000米考核也不过如此。如果我们再积极些，学会从一开始就主动正视它、拆解它、看清它，或许那种紧张就不困扰自己了，我们甚至能从容地“享受”比赛。</p><p>&gt;&gt; 要想不受其困扰，唯一的办法就是正视它、看清它、拆解它、化解它，不给它进入潜意识的机会，不给它变模糊的机会；即使已经进入潜意识，也要想办法将它挖出来。所以，当你感到心里有说不清、道不明的难受的感觉时，赶紧坐下来，向自己提问。</p><p>&gt;&gt; ·到底是什么让自己烦躁不安？是上台演讲、会见某人，还是思绪纷乱？</p><p>·具体是什么让自己恐惧担忧？是能力不足、准备不够，还是害怕某事发生？</p><p>·面对困境，我能做什么？不能做什么？如果做不到或搞砸了，最坏的结果是什么？</p><p>&gt;&gt; 恐惧就是一个欺软怕硬的货色，你躲避它，它就张牙舞爪，你正视它，它就原形毕露。一旦把它看得清清楚楚，情绪就会慢慢从潜意识中消散，你的生活将会舒畅无比。</p><p>◆ 第二节 感性：顶级的成长竟然是“凭感觉”</p><p>&gt;&gt; 先用感性能力帮助自己选择，再用理性能力帮助自己思考。</p><p>&gt;&gt; 那些一眼就能看出答案的题目，不用理它；一眼看过去就头痛、不知道在说什么的题目，也不用理它；只有那种大致能看出点思路，但又要动点脑筋的题目，一定要多做。这个就是中间地带，是你能够进步最快的地方。</p><p>&gt;&gt; 只取一个全书最触动自己的点，然后尽可能去实践、改变。这样读书不仅收获更大，而且也不会焦虑。</p><p>&gt;&gt; 如果你感受到的总是痛苦和无趣，那十有八九是感觉不对——要么在困难区煎熬，要么在舒适区打转。</p><p>&gt;&gt; 我们需要用心去感受什么事情让自己最触动，而不是用脑去思考什么事情最有利。</p><p>&gt;&gt; 直视死亡可以简化一切事物</p><p>◆ 第三章 元认知——人类的终极能能力</p><p>&gt;&gt; 元认知能力就是我们习以为常、见怪不怪的反思能力。</p><p>&gt;&gt; 如果说学习和反思是静态的，那处于当下的、动态的自已又该如何主动运用元认知呢？很简单，启用你的“灵魂伴侣”啊！让他时刻监控你，就像电脑系统里的杀毒软件，监控着你的每一次操作，一旦发现可疑文件就立即发出警报。</p><p>&gt;&gt; 我们总是这样，一开始只想找一根绳子，最后却牵出一头大象。</p><p>&gt;&gt; 这些都是元认知能力不足的表现——顺着自己的本性做喜欢和舒服的事，精力发散，缺乏觉知，任何偶发的干扰都会分散注意力。</p><p>&gt;&gt; 这个事情可做可不做，还是先忍一下，等做完重要的事情再说；停下来，先想清楚什么事情是最重要的，不能盲目地做那些容易但不重要的事；再过几年回头看，现在的烦恼不值一提，与其消耗自己，不如把情绪收起来，干点有用的事……</p><p>&gt;&gt; 元认知能力总能让你站在高处俯瞰全局，不会让你一头扎进生活的细节，迷失其中。</p><p>&gt;&gt; 监控自己的注意力，然后将其集中到自己需要关注的地方</p><p>◆ 第二节 自控力：我们生而为人就是为了成为思维舵手</p><p>&gt;&gt; 很多人为了获得美好的人生，常常给自己立下早起、跑步、阅读、写作等目标，但是没过几天就放弃了，因为那些目标大多是受大环境影响而跟风设定的——别人说好，自己也想要，但实际上，自己并不需要。</p><p>&gt;&gt; 比如，当我们漫步街头时，元认知能力弱的人总会被路边的音乐、屏幕广告、叫卖声或突发事件轻易地吸引，而元认知能力强的人则会花那么一两秒去思考这事值不值得关注。</p><p>&gt;&gt; 教育的意义就是教你在遇到一件事的时候如何看待它。</p><p>&gt;&gt; 在生活中更是如此。早上醒来时，如果能有几秒的时间用来思考，我们就可能在起床和看手机之间做出更好的选择；看到微信有未读消息提示时，如果能先停留几秒，我们就可能决定先去做重要的事，而不是点击那个小红点</p><p>&gt;&gt; 一定要在选择节点上多花“元时间”。</p><p>&gt;&gt; “元时间”是我自创的概念。这是一个极好的概念，因为一天24小时看起来每分每秒都一样，但实际上并不相同，有些时间的权重要远远大于其他时间，我把这些权重大的时间叫作“元时间”。</p><p>&gt;&gt; 元时间通常分布在“选择的节点”上，比如一件事情、一个阶段或一天开始或结束时。善用这些时间会极大程度地优化后续时间的质量。</p><p>&gt;&gt; 同样，早上醒来的那一瞬间、拿起手机的那一瞬间、回到家的那一瞬间……我们都要面临新的选择，要主动消耗脑力去审视它们。虽然这样做会更累，但这正是锻炼元认知能力的最佳时机，就像是在举思想哑铃，让自己的理智脑变得更强大。</p><p>&gt;&gt; 元认知能力强的一个突出表现是：对模糊零容忍。</p><p>&gt;&gt; 模糊，不仅需要在这些小事上消除，在选择人生目标等大事上也是如此。现实生活中，我们总是想都不想就一头扎进具体事情里，对什么事情更重要、什么事情最重要、做这件事对自己到底意味着什么等长远意义却极不清楚。</p><p>&gt;&gt; 焦虑的人很少有“元时间”的意识，他们习惯不动脑子、直接行动，喜欢用饱和的行动来感动自己，想与做的时间配比差距悬殊，他们甚至连一丁点儿深入思考的时间都不愿意花，任由本能欲望让自己迷失在自我满足的行动里。</p><p>&gt;&gt; 高尔基曾经说：每一次克制自己，就意味着比以前更强大。</p><p>◆ 下篇 外观世界，借力前行</p><p>&gt;&gt; 缺少感受的行动，就像失去灵魂的躯壳；缺少感受的人对凡事都心不在焉、视而不见、听而不闻。更准确地说，我们在躯壳内装了一个混乱的灵魂，这个灵魂总是“做A想B”：刷牙的时候走神，走路的时候走神，洗澡的时候走神……无时无刻不在走神。</p><p>&gt;&gt; 分心走神的原因无非两个：一是觉得当下太无聊，所以追求更有意思的事情；二是觉得当下太痛苦，于是追求更舒适的事情。因为身体受困于现实，只好让思想天马行空。</p><p>&gt;&gt; 生命是由当下的一个个片段组成的，身心合一的片段组成的就是幸福专注的高质量人生，身心分离的片段组成的就是分心走神的低质量人生。</p><p>&gt;&gt; 可见，分心走神的本质是逃避，所以，面对困难时，身心分离的人总会不自觉地退回舒适区，而身心合一的人则更容易跳出舒适区，直面困难。</p><p>&gt;&gt; 如果一个人从小就养成了全情投入和界限清晰的专注习惯，那他不仅能获得智力上的聪慧，也能获得情绪上的平和。</p><p>◆ 第二节 学习专注：深度沉浸是进化双刃剑的安全剑柄</p><p>&gt;&gt; 练习时极度专注。谁都知道专注的重要性，但沉浸的关键是要做到“极度”专注，也就是说，在短时间内投入100%的精力比长时间投入70%的精力好，因为专注的真正动力并不是毅力和耐心，而是不断发现技巧上的微妙差异和持续存在的关注点，精力越集中则感知越细微。</p><p>&gt;&gt; 先保持极度专注，想不出答案时再将注意力转换到另一件与此毫不相干的事情上。即事前聚精会神，让意识极度投入；事后完全忘记，让意识彻底撒手。这样，灵感和答案就会大概率地出现。</p><p>&gt;&gt; 审视自己的注意力——是被动吸引还是主动选择？</p><p>·审视自己的沉浸度——是分心走神还是极度专注？</p><p>·审视自己的练习量——是浅尝辄止还是大量投入？</p><p>◆ 第五章 学习力——学习不是一味地努力</p><p>&gt;&gt; 第一件事说的是跑步，她说：“之前我要求自己每天跑步1小时，靠意志力，我坚持了蛮长一段时间，但是最后还是中断了。最近我调整了跑步的时间，改为每次30分钟，最好不要少于一周4次。调整以后发现，我可以不用太靠意志力去做这件事，而且会主动想办法坚持，并且跑完后会很放松，不像之前那样连续跑1小时会很累、很难受。我真的能感觉到现在这种‘主动做’和原先那种‘靠意志力做’完全不一样。”</p><p>第二件事说的是学英语，她说：“原来每天学习1小时我会烦躁，但现在改为每天学习30分钟，时间一到就不学了。这样，我反而可以坚持每天学，不厌倦。”</p><p>&gt;&gt; 找一个自己能坚持做下去的方式，比单纯按照标准化的时间和方式做更重要。以前一直以为多花时间才能学好、才能达到效果，其实那是因为自己急于求成，想要快速见效，这样反而不容易坚持。现在降低了难度和标准，自己的行动力反而能持续增强，虽然达到目标所需的时间可能会变长，但是我相信这样的坚持最终可以产生复利效应。”</p><p>&gt;&gt; 我们只需每次到舒适区的边缘坚持一下，然后回到舒适区停留一下，调整好了再到舒适区边缘……如此反复。</p><p>&gt;&gt; 梳理那些“会做但特别容易错或不会做但稍微努力就能懂”的内容，然后在这个区域内努力。</p><p>&gt;&gt; 距离我们太远的事物，我们通常无法把握，无论它们是令人痛苦的还是令人享受的。</p><p>&gt;&gt; 千万不要认为没有管束的生活很美好，一旦进入完全自由的时间，虽然开始会很舒服，但很快，我们就会迷失在众多选项中——做这个也行，做那个也行。</p><p>&gt;&gt; 做选择是一件极为耗能的事情，如果没有与之匹配的清醒和定力，绝大多数人最终都会被强大的天性支配，去选择娱乐消遣。在有约束的环境下我们反而效率更高，生活更充实。</p><p>&gt;&gt; 能解释的现象越多，这个概念就越底层。</p><p>&gt;&gt; 不管你遇到的是什么问题，其根源都是一样的，那就是：这个问题太大、太模糊。</p><p>所以，你只要拆解目标——把大目标拆分为小目标，任务就会立即从困难区转移到拉伸区，这样你就愿意行动了。不信的话，你可以细心观察一下，几乎所有的行动达人都是拆解任务的高手。</p><p>&gt;&gt; 学习不只是一味地努力，成长也不只需要“打鸡血”、拼意志力。只要站在舒适区边缘，一点一点往外走，同时和时间做朋友，你肯定会在不经意间发生蜕变。</p><p>◆ 第二节 深度：深度学习，人生为数不多的好出路</p><p>&gt;&gt; 我隐约看到：一小部分知识精英依旧直面核心困难，努力地进行深度钻研，生产内容；而大多数信息受众始终在享受轻度学习，消费内容。如果我们真的希望在时代潮流中占据一席之地，那就应该尽早抛弃轻松学习的幻想，锤炼深度学习能力，逆流而上，成为稀缺人才，否则人生之路势必会越走越窄。</p><p>&gt;&gt; 罗振宇曾提到他是这样学习的：“我每天要求自己写够五篇阅读心得，不用长篇大论，短短几个词就行。因为真正的学习就像是缝扣子，把新知识缝接到原有的知识结构中，每天写五篇阅读心得就是逼迫自己原来的知识结构对新知识做出反应，然后把这些反应用文字固化下来，缝接的过程就完成了。”</p><p>&gt;&gt; 专注于深度学习，同时对浅学习保持开放。</p><p>&gt;&gt; 选择一些值得关注的人，和他们保持联结。他们释放的一些有价值的信息会引领我们走向更广阔的世界，但无论如何，最终要自己去读、自己去想、自己去做。</p><p>◆ 第三节 关联：高手的“暗箱”</p><p>&gt;&gt; 这既是有效阅读的三个步骤，也是深度学习的三个层次：</p><p>·知道信息点</p><p>·关联信息点</p><p>·行动和改变</p><p>&gt;&gt; 孤立的知识就像沙粒，只有关联才能将其聚沙成塔，形成稳固的知识晶体，最终构建自己的认知体系</p><p>&gt;&gt; 绝大多数人习惯以孤立的思维看待事物，喜欢花大量时间收集和占有信息；而另一批先行者则更喜欢拨弄信息之间的关联，从而在不知不觉间变得聪明了起来。</p><p>&gt;&gt; 我们在关联时，需要牢牢聚焦自身最迫切的需求，换句话说，就是让一切与自己有关。</p><p>&gt;&gt; 知识的获取不在于多少，而在于是否与自己有关联，以及这种关联有多充分。</p><p>&gt;&gt; 当然，还有一个更重要的隐蔽条件不能忽视：你需要明确的目标或强烈的需求。</p><p>&gt;&gt; 这个道理还能用在什么地方？</p><p>◆ 第四节 体系：建立个人认知体系其实很简单</p><p>&gt;&gt; 只有当知识能够帮助你做实际决策的时候，它才是你的知识。</p><p>&gt;&gt; 在阅读时，我唯一要做的事情就是：寻找触动点。我会在触动自己的地方做标记，在空白处写下大量能联想到的思考，书读完之后，我会放上几天，然后问自己：“这本书最触动自己的是哪个点？”这个点可以是一个理论、一个案例，甚至是一句话，只要它真正触动我，并能让我发生真实的改变，我就认为这本书超值了，至于其他，忘记就忘记了，我一点也不觉得可惜。</p><p>&gt;&gt; 这就是搭建个人认知体系的真相：打碎各家的认知体系，只取其中最触动自己的点或块，然后将其拼接成自己的认知网络。</p><p>&gt;&gt; 一个触动点若是能转化成一个认知晶体，我们的生命质量和密度将远远超过那些不反思的人。</p><p>◆ 第五节 打卡：莫迷恋打卡，打卡打不出未来</p><p>&gt;&gt; 时下，学习成长蔚然成风。</p><p>&gt;&gt; 不排名不要紧，一排名，有些事就变了。</p><p>&gt;&gt; 一开始，人们的行动动机全都出于学习成长本身，一想到自己今后能够轻松早起，享受美好时光；锻炼塑身，拥有美好身材；热爱阅读，成为博识智者……就顿时信心满满，动力十足。出于这种目的，打卡更像是锦上添花，即使不用任何意志力支撑，人们也能持续行动。然而打卡一旦开始，任务心态其实已经锚下了。</p><p>&gt;&gt; 一些“中毒”更深的人，他们的学习动机转移了，甚至连学习的目标也转移了。他们起初还记得做某件事的意义，比如知道学英语是为了与外国人流利地交谈，但时间一长，目标就被简化为每天背20个单词，于是他们每天只是机械地完成、打钩，却忘了所学为何，从此陷入为学而学的境地。</p><p>&gt;&gt; 一件事若迟迟没有完成，心里就总是记挂，期盼着早点结束；此事一旦完成，做这件事的动机就会立即趋向于零。</p><p>&gt;&gt; 这就是打卡心态的特性：学不到，假装一下；学到了，立即停止。</p><p>&gt;&gt; 同时，我们在任务设置时要使用新策略：设下限，不设上限。</p><p>◆ 第六节 反馈：是时候告诉你什么是真正的学习了</p><p>&gt;&gt; 是否有及时、持续的正向反馈，正是产生学习效果差异的关键。</p><p>&gt;&gt; 比如一名大二学生“无悔”曾告诉我，他每天从早学到晚，学6天休1天，如此付出，收获的却是无力和疲累；而另一位读者“傅琴”女士也说，为了应对生活危机，她不停地学习瑜伽、写作、肚皮舞、英语口语、绘画、茶道等各种技能，但内心始终得不到满足，感受不到自我价值。</p><p>&gt;&gt; 也许是因为在人造的学习体制内待久了，有些人很难相信“跳过原理，直接实操”的方式是有效的，他们认为这种方法不过是奇技淫巧，强大的毅力和认知才是学习的正道。</p><p>&gt;&gt; 但它们超强的欲望和情绪力量却是非常宝贵的行动力资源，如果能让它们感受到学习的乐趣，它们同样会展现强大的行动力，让自己像沉迷娱乐一样沉迷于学习。</p><p>&gt;&gt; 所以科学的学习策略是产出作品、获取反馈，驱动本能脑和情绪脑去“玩玩玩”，而不是一味地努力坚持，让理智脑苦苦地去“学学学”。</p><p>&gt;&gt; 有作品意识才有未来</p><p>&gt;&gt; 有了这种认知，人是会迅速改变的——会拥有清晰而强烈的作品意识，会更加重视输出和运用，会倾心打磨作品，主动换取外界的反馈。</p><p>&gt;&gt; 比如以前你学习英语可能会选择每日打卡的方式，但现在你可能会选择直接用：直接翻译一段美文、查询英文文档、阅读英文原版书，或者把手机语言设置成英文……这么做当然会造成一些困难，但为了解决问题，你必定会想办法补全相关知识，所以你的学习行为都能得到即时反馈：要么帮自己或他人解决了一个问题，要么产出了一个有价值的作品，这些反馈带给自己的必然是强烈的成就感和继续行动的欲望。</p><p>&gt;&gt; ：想创造全新的学习动机，就得放弃一味打卡输入的做法，想办法直接运用或产出作品，获取反馈。</p><p>&gt;&gt; ·教是最好的学；</p><p>·用是最好的学；</p><p>·输出倒逼输入；</p><p>·请用作品说话……</p><p>&gt;&gt; 那些先行者确实都有相同的品质，他们在学习的时候经常不按常理出牌，不管是不是新知识、技能，他们都直接用、直接做。当然，一开始常常用不好、做不好，但他们肯定要“鼓捣”出一个东西，然后抛出去获取反馈，不断打磨迭代。</p><p>&gt;&gt; 如果对方除了情绪上的攻击再无其他内容，那你大可哈哈一笑，忽略就好了。这说明对方不但嫉妒你，还不如你，因为他没法拿出更好的作品或观点来回应，只会发泄情绪、肆意谩骂。在鸡蛋里挑骨头，这事谁不会呢？</p><p>&gt;&gt; 他们背单词，不是一遍一遍地看，让所有单词都“看着眼熟”，而是合上书测试自己能否精确地说出含义、发音，并拼写出来；他们练听力，不指望每天重复听音频就能毫不费力地“熏耳朵”，而是回过头来对照原文，不断重听没听懂的地方。</p><p>&gt;&gt; 对于背记理解类的学习，自我测试就是最好的反馈。哪里会、哪里不会，通过测试便立即掌握得清清楚楚，我们可以精准消灭盲点，让自己始终处在学习舒适区边缘。那种“翻开书全会，合上书全废”的无反馈式努力正是你被动、落后的根源。《学习之道》一书的作者芭芭拉·奥克利也曾明确指出：主动的回想测试是最好的学习方法之一，比坐在那儿被动地重读材料要好得多。</p><p>&gt;&gt; 只是很多同学对错题本不以为意，要么不去写，要么写了不去看，要么去看时因为碰到痛苦而回避，转头回到舒适区里转悠。在没有让自己的情绪脑体会到学习的快感之前，我们总得先逼自己一把，对吧？</p><p>&gt;&gt; 这印证了古典的跃迁理论：打磨作品—到达一个小山的头部—受到更多关注—移动到一个更大山头的头部—借助系统推力，实现人生跃迁。</p><p>&gt;&gt; 反馈的规律是贯穿始终的，无论什么时候，只要能通过产出换取反馈，你就会不自觉地去钻研探索。</p><p>◆ 第七节 休息：你没成功，可能是因为太刻苦了</p><p>&gt;&gt; 问题就出在这里，那些持续刻苦、争分夺秒、舍不得休息一下的人，他们的精力总量势必呈一条持续下降的曲线</p><p>&gt;&gt; 刻苦者看似无比勤奋，可效果却越来越差，过程中感受到的多是痛苦而不是乐趣，精力消耗严重，以致一旦放松就完全不想再次投入，他们更容易沉溺于舒适的娱乐活动。</p><p>&gt;&gt; 反观那些轻松的学霸，他们学习时从不过度消耗自己，只要感到精力不足，就停下来主动休息，这反而使他们精力桶的水位得到快速回升。</p><p>&gt;&gt; 不难发现，高效学习的关键在于保持极度专注，而不是靠意志力苦苦支撑，谁能保持长时间的专注，谁就能够在竞争中胜出。然而专注这个品质在信息时代已日渐成为稀缺品质。</p><p>&gt;&gt; 大多数人只会本能地告诉自己要更刻苦、更努力，却很少有人能意识到，更科学的模式应该是：极度专注+主动休息，如此反复。</p><p>&gt;&gt; 有人会反问：现实生活中哪有这么多“刚好的事情”，难道在面对老师和老板时，自己还能挑三拣四？其实这并不难办：要么重新设定学习内容，调整为合适的难度，要么将目标拆解为更具体的小目标，降低工作的难度，总之，想办法把难度控制在拉伸区范围内就对了。不管面对多么棘手的任务，只要我们愿意动脑筋，总能找到主动调整的空间。</p><p>&gt;&gt; 也难怪，当我们忙了一整天，精疲力竭地回到家中，第一件事情往往是往沙发上一倒，此时除了看看微信、刷刷抖音，用轻松的信息给自己来个精神按摩，其他事都懒得做，如果经历了情绪上的波动，精力透支的影响可能会持续很久。</p><p>&gt;&gt; 所以，一个真正的自控高手，不是一个只知道冲刺的人，而是一个善于主动休息、保持平衡的人。</p><p>&gt;&gt; 一个简单又通用的方法正是前文说的主动培养“极度专注+主动休息”的行为模式。具体的做法就是：只要开始学习或工作，就尽量保持极度专注的状态，哪怕保持专注的时间很短也是有意义的；一旦发现自己开始因为精力不足而分心走神，就主动停下来调整片刻。</p><p>&gt;&gt; 符合学霸模式的所有特征：极度专注、主动休息、循环往复。</p><p>&gt;&gt; 时间一到，我会立即合上书本或让双手马上离开键盘，然后开始5分钟的休息计时。在这5分钟里，我会做与阅读或写作无关的事情，比如：看看窗外、收收衣服、拆拆包裹，等等，但刷手机、玩游戏这些被动使用注意力的事情我不推荐，因为它们仍然是消耗精力的。</p><p>&gt;&gt; 刻苦，是一种宏观态度，轻松，是一种微观智慧。在学习这件事上，普通人的策略往往是“天赋不够，刻苦来凑”。好在我们已经知道学习的秘密不完全在于刻苦，还在于“会玩”，希望你在今后的学习成长中也能玩出水平，玩出风格，成为他人眼中的学霸。</p><p>◆ 第六章 行动力——没有行动世界只是个概念</p><p>&gt;&gt; 行动力——没有行动世界只是个概念</p><p>&gt;&gt; 时常有人夸我行动力强，说我在这个年纪，还能克服惰性、抵制诱惑，在大家都熬夜、刷手机的时候坚持早起锻炼、读书写作，甚是难得，并得出结论：周岭是个自制力很强的人。</p><p>&gt;&gt; 整个人浑浑噩噩的，就像一条无人掌舵的小船在生活的洪流里随波逐流，根本无力掌控方向。</p><p>&gt;&gt; 或许你并没有意识到，每天早上醒来，我们都会收到一份礼物——纯净的注意力。不管你昨天经历了什么，经过一晚的睡眠，你的精力总会得以“重启”。</p><p>&gt;&gt; 但反过来，我们也可能进入另外一种状态。如果起床后我们能刻意避开轻松和娱乐的吸引，先去读书、锻炼，或者做些重要的工作，精力就会呈聚合状态，并自动增强。比如起床后先去锻炼，就能让自己头脑清晰、精力充沛，在这种状态下做重要的工作就会非常顺利，工作越顺利，状态就越好，回路逐渐增强；再比如早起后先去阅读，读得越多，脑子里的问题和感触就越多，反过来又会产生更强烈的阅读欲望，回路逐渐增强。</p><p>&gt;&gt; 就像你明明准备第二天早起锻炼、读书或是做重要的工作，然而醒来后还是鬼使神差地拿起了手机——群消息、朋友圈、公众号、抖音、今日头条……一眨眼，半个小时过去了，你还躺在床上。实在没什么新鲜事了，还要把App再点开一次，看看有没有什么惊喜，等到刺激消耗殆尽，无聊渗透全身，再漫不经心地起床，此时的你精神萎靡，内心只希望用更多刺激来填补空虚，哪还有心思去做重要的事呢？</p><p>&gt;&gt; 知道和做到相差十万八千里，这其中的差距到底在哪里呢？</p><p>答案正是前文所说的“模糊”。</p><p>&gt;&gt; 行动力最怕模糊</p><p>&gt;&gt; 如果我们的头脑中一直有很多模糊的选项存在，我们就需要花心力不断做选择，而做选择是一件非常耗脑力的事情。我们的大脑有可能为了省点力气，而不自觉地选择那个它最熟悉、最确定的选项——做那些轻松、愉快但不重要的事情。</p><p>&gt;&gt; 你陷入怠惰、懒散、空虚的情绪中动弹不得时，往往是因为你的大脑处于模糊状态。</p><p>&gt;&gt; 大脑要么不清楚自己想要什么；要么同时想做的事太多，无法确定最想实现的目标是什么；要么知道目标，但没想好具体要在什么时候以什么方式去实现。</p><p>&gt;&gt; 认知越清晰，行动越坚定。</p><p>&gt;&gt; 正如爱因斯坦所说：“如果给我1小时解答一道决定我生死的问题，我会花55分钟弄清楚这道题到底在问什么。一旦清楚它到底在问什么，剩下的5分钟足够回答这个问题。”</p><p>◆ 第二节 “傻瓜”：这个世界会奖励那些不计得失的“傻瓜”</p><p>&gt;&gt; 我敢打赌，凡是买了一堆书没读、报了一堆课没上、心中有无数欲望的人，几乎没有主动做成过一件事，比如养成早起、跑步、阅读的习惯，练就写作、画画的技能，考个好成绩，开个好公司，有高收入，等等。这个判断是我基于很多人的经历做出的。</p><p>&gt;&gt; 一是凡事必须在看到明确的结果后才行动，如果前景不确定、不明朗，即使别人说得再有道理，我也不愿意投入；二是如果一个道理或方法不能让自己快速发生变化，就不是最优的，所以要不断寻找，这样才有希望找到最好的方法。</p><p>当时觉得自己能这么想还挺聪明的，现在回头看，发现自己是精明过了头。这种精明让自己在成长的路上遇到了阻碍，就像一道无形的门槛把我挡在了成长的门外，怎么也跨不过去。</p><p>&gt;&gt; 按照他“只字不差”的阅读要求，我竟鬼使神差地做了一个决定：把文章全部用键盘重敲一遍，包括文后重要的留言。一年52周，每周4天，每天约2小时，我就这样“读”完了这些内容。</p><p>&gt;&gt; 以前的我爱耍一点小聪明，总希望能先看到结果再行动，反而浪费了很多时间。</p><p>&gt;&gt; 自己从来没有主动做成过一件事情的时候，总会以为做成一件事很容易，于是生出很多不切实际的欲望和想法，而欲望越多，就越做不成事</p><p>&gt;&gt; 如果我想养成一个习惯，通常不会以21天为标准，而是要求自己至少做半年。我相信一件事情要是能被持续做180天，它就会成为习惯。</p><p>&gt;&gt; 做一个有理有据的“傻瓜”</p><p>之所以在“傻瓜”这两个字上加上引号，说明我并不认为这样的人真的傻，有时反而是一种聪明，这里的“傻”，并不是盲目和冲动，而是有原理、有依据的坚定。</p><p>&gt;&gt; 如果你觉得别人讲的道理有理有据，而自己暂时无法反驳，碰巧自己又非常想做这件事，那就相信他们说的是对的，然后笃定地行动</p><p>&gt;&gt; 同样的道理摆在面前，有的人觉得那是鸡汤，没什么用，而有的人却觉得那是干货，好用得不得了。如果你能够持续行动，我相信，这个世界一定会特别偏爱你。</p><p>◆ 第三节 行动：“道理都懂，就是不做”怎么破解</p><p>&gt;&gt; 他们阅读了很多有道理的书，收藏了很多有道理的文章，觉得自己无所不知，却始终不能俯下身子去行动。因为他们总认为自己还没准备好，担心方法不是最优的，贸然行动会走弯路等，殊不知，这样的观望、等待本身就无效率可言。更使人困扰的是，道理知道得越多，行动力反而越弱，因为似乎总有更好的道理等着我们去发现。</p><p>&gt;&gt; 很多人因为缺乏耐心、急于求成，总想跳过行动环节，寻求捷径，最后发现：这才是走了弯路，真正的捷径正是那条看起来漫长且低效的行动之路。</p><p>&gt;&gt; 当我们领悟“一天不看手机也不会有任何损失”时，头脑一下子就清醒了，对手机信息的危害看得无比通透，然而没过几天，再次碰到这种情况时，我们又会把书放到一边，掏出手机开始玩。</p><p>&gt;&gt; 当然，如果你现在就是一个“知而不行”的人，千万不要自责，因为“避难趋易”是人类的天性，这种选择取向深深地刻在了我们的基因里，所以凡是能简单得到的，人就不会选难的；有短的反馈回路，人自然不会选择长的——这就是大脑做选择时的默认逻辑。在缺少觉知的情况下，我们很难察觉这一点。</p><p>&gt;&gt; 把认知当成技能，知道或想通一个道理时，不要高兴得太早，想想后面还要做大量的练习，这样就不浮躁了。</p><p>&gt;&gt; 当你每次产生一个想法时，带有这个想法的神经通路中的生化电磁阻力就会减少一些，就像在丛林里清出一条小路一样。一开始非常费劲，但是随着你经过这条路次数的增加，这条路也会开辟得越来越彻底，你所遇到的阻力也会慢慢变小。到最后，这条小路会变得平坦而宽阔。</p><p>&gt;&gt; 不发生真正改变的学习都是无效的学习。</p><p>&gt;&gt; 现实和理论都告诉我们：懂得百点不如改变一点。真正的成长不在于自己懂得了多少道理，而在于自己改变了多少。</p><p>&gt;&gt; 对成长来讲，道理都是“空头支票”，改变才是“真金白银”。当你凡事都以改变为标准时，你的成长路径会更加清晰。</p><p>◆ 第七章 情绪力——情绪是多角度看问题的智慧</p><p>&gt;&gt; 在一定的前提下，贫穷确实会使人变笨，这不是因为贫穷让人能力不足，而是因为贫穷造成的稀缺俘获了人的注意力，进而降低了人的心智带宽。</p><p>&gt;&gt; 每个人的头脑配置都差不多，但短缺压力会让人多一个后台运行的隐藏程序，虽看不见却消耗着大量的心智资源，所以有人会将剩菜剩饭留到第二天继续吃，他们认为这样很节俭；有外债压力的人，更容易在辅导孩子写作业的时候对孩子发火；而终日忧心忡忡的人，也很难静下心来学习。这些现象的出现都是因为当事人心智带宽不足，自己无力考虑长远问题，难以保持耐心和专注，在面临选择的时候不自觉地偏向那个最安全、最能快速见效的选项。</p><p>&gt;&gt; 事实上，任何能制造压力的事件都会挤占我们的心智带宽，比如明天的演讲、考试的期限、失业的担忧，等等。只要我们的注意力被某一个巨大的事物吸引，我们就有可能进入稀缺状态，进而降低心智带宽，做出不明智的行为。</p><p>&gt;&gt; 这么多欲望就像多线程任务同时在电脑中运行，心智带宽被占用殆尽，自然就没有心力支撑自己的远见、耐心、行动力和自控力了，最终只能让自己在痛苦中彷徨，甚至做不好当下的小事。</p><p>&gt;&gt; 当一个人同时面临很多任务的时候，他的心智带宽就会降低，反而没有了行动力和自控力。</p><p>&gt;&gt; 现代生活虽然缓解了生存压力，却又带来了自控上的压力。抵制诱惑和欲望无一不消耗我们的心智带宽，而那些有着大把时间和金钱的人士，如果没有足够的心智带宽，也会让自己陷入无聊和空虚之中。</p><p>&gt;&gt; 第一帖，保持环境觉知，理智选择。</p><p>&gt;&gt; 第二帖，保持目标觉知，少即是多。</p><p>&gt;&gt; 《见识》的作者吴军曾说：“很多人认为我是个善于利用时间的高手，问我如何才能同时做更多的事情。事实上，我做事的诀窍恰恰和大家想的相反，就是少做事，甚至不做事。我时常站在一生的高度去审视自己真正要做的是什么，然后打破思维定式，拒绝所有那些即使不去做天也不会塌下来的事情。”</p><p>&gt;&gt; 知道自己想要什么，才能免于盲目奔波，才能让自己从忙碌中解脱，才有时间使用心智带宽审视自己，把更多的精力集中到最重要的事情上去。</p><p>&gt;&gt; 第三帖，保持欲望觉知，审视决策。</p><p>&gt;&gt; 脑子里存在大量任务和念头的时候，往往是我们行动力最弱的时候。</p><p>&gt;&gt; 真正的行动力高手不是有能耐在同一时间做很多事的人，而是会想办法避免同时做很多事的人。</p><p>&gt;&gt; 第四帖，保持情绪觉知，谨慎决定。</p><p>&gt;&gt; 第五帖，保持闲余觉知，自我设限。</p><p>◆ 第二节 单一视角：你的坏情绪，源于视角单一</p><p>&gt;&gt; 我们就很容易以偏概全地对待这个世界，然后产生各种偏误。</p><p>&gt;&gt; 只是有的人面对再好的事情时都盯着一点瑕疵不放，而有的人却能从任何一件糟糕的事情中找到闪光点并放大，忽视其他不足之处。</p><p>&gt;&gt; 《反本能》一书的作者卫蓝曾这样描述路径依赖：当我们长期进行一种行为的时候，大脑会慢慢形成一个专门处理这个行为的“绿色通道”，所以当自己面临相似的场景时，大脑会对这种行为进行优先选择，并进一步形成自动化反应。</p><p>&gt;&gt; 很多人情绪不好，是因为他们把自己做的假设当成了事实，在不确定对方真实想法的情况下，直接把情绪发泄了出来。</p><p>&gt;&gt; 五是多运动。适当的有氧运动会提升我们体内多巴胺的水平，而多巴胺对于创造力和多角度思考能力来说都很重要。锻炼不仅能帮我们从负面情绪中快速走出来，也会引导大脑从新的角度看待事物，或者从不同角度观察问题，所以，越是心情不好的时候就越要多运动，越是想不通的时候越要多运动。</p><p>&gt;&gt; 这种经历我也经常有，因为我有每日反思的习惯。所以每当自己心情郁闷、无法排解的时候，我就会打开电脑，把心中的烦恼全部倒出来进行复盘，梳理的过程中，自己往往会拨云见日，真的很神奇。</p><p>无论什么时候，你的笔或键盘都能帮你跳出单一视角，看到更多维度。</p><p>◆ 第三节 游戏心态：幸福的人，总是在做另外一件事</p><p>&gt;&gt; 所有人都备感煎熬，每次都是“跑前很紧张、跑时很痛苦、跑后很无奈”。</p><p>&gt;&gt; 不要让事情本身束缚了你的情绪和注意力。</p><p>&gt;&gt; 一个人如果整天做自己不想做但又必须做的事情，日子就会变得灰暗无趣，然而面对压力，我们真的就只能承受吗？未必。或许我们的情绪和注意力只是被事情本身给占据了，因为困难和压力总能把人的情绪和注意力抓得死死的，让你很难看到其他角度。</p><p>&gt;&gt; ·我并不是在做跑步测试，我只是在玩追逐游戏；</p><p>·我并不是在写作业，我只是在挑战自己的速度；</p><p>·我并不是在洗衣服，我只是在活动自己的手脚；</p><p>·我并不是去见领导，我只是和一个普通人聊天；</p><p>·我并不是为老板做事，我只是为了提升自己。</p><p>&gt;&gt; 事情本身并不重要，我们只是在通过它获取另外一种乐趣，顺便把这件事给做了。在心理学上，这个方法叫作“动机转移”。</p><p>&gt;&gt; 胡适先生也说：怕什么真理无穷，进一寸有进一寸的欢喜。</p><p>&gt;&gt; 一定有人会对这些方法嗤之以鼻，因为从本质上看，这更像是一种自我欺骗。事实上，人是一种自我解释的动物，世界的意义是人类赋予的。</p><p>&gt;&gt; 为自己而做可以解放情绪，为玩而做可以解放注意力。</p><p>◆ 第八章 早冥读写跑，人生五件套——成本最低的成长之道</p><p>&gt;&gt; 清晰的时间安排、强健的体魄、良好的精神状态、不受干扰的锻炼氛围、专注的学习环境、从容的工作心态、持续的个人成长等。</p><p>&gt;&gt; 六、提前准备。除了晚上提前准备好衣物，更重要的是要提前想好起床之后具体要做什么，比如第二天早上要是下雨了（不能外出跑步）应该怎么调整事项，如果晚醒了半个小时又该安排哪些学习内容……总之，要针对各种可能出现的情况做好预案。当脑中有具体清晰的目标、规划和步骤时，第二天起床才不会犹豫，否则很容易临时改变主意再睡一会儿。情绪脑追求舒适的意愿是很强烈的，但如果理智脑提前和它沟通好，行动的阻力就会小很多。</p><p>&gt;&gt; 七、明确遇到哪些情况时可以不早起。早起要考虑实际情况。偶尔几次无法早起时不要焦虑或内疚，只要给自己定好原则就行，比如遇到以下几个场景我就允许自己晚起床：</p><p>·生理低谷期；</p><p>·前一天晚上参加聚会，睡得太晚；</p><p>·第二天需要开长途车或做其他需要消耗大量精力的重要活动；</p><p>·环境突然变化，不适合早起活动……</p><p>&gt;&gt; 成功人士一旦发现别人的好习惯，就会立刻将这个习惯变成自己的。</p><p>◆ 第二节 冥想：终有一天，你要解锁这条隐藏赛道</p><p>&gt;&gt; 普通人和聪明人最大的能力差异是什么？是长时间保持极度专注的能力。正如《暗时间》一书的作者刘未鹏所说：能够迅速进入专注状态，以及能够长期保持专注状态，是高效学习的两个最重要的习惯。</p><p>&gt;&gt; 闭眼静坐，专注于自己的呼吸，每天持续15分钟以上……你会感受到它的效果。</p><p>&gt;&gt; 所以人们一旦在现实世界中受困受阻，就会不自觉地去虚拟世界体验舒适与自由，人类避难趋易的天性也正好有了出口。</p><p>&gt;&gt; 还有些人会因这种习惯，每天睡觉前不自觉地开启“胡思乱想”模式，杂念丛生，无法安然入睡。他们虽躺在床上，脑子里却像一壶刚烧开的沸水，思绪难以平静，彻夜不眠。</p><p>&gt;&gt; 人们既无法赶走它，又不愿去碰它，于是不得不让它长期占据着自己的心智带宽，让人无心做事、郁郁寡欢。</p><p>&gt;&gt; 对于那些过轻的小球，保持专注就能给它们加码，让它们稳定下来；对于那些过重的小球，你冥想时必须正视它们、接纳它们，否则你无法做到专注。一旦正视、接纳之后，那些隐性的压力也就不那么让你伤神了，这也是我一直倡导大家把心中的困惑写出来的原因，因为只要写出来，那些紧张、担忧、畏惧、害怕等情绪就会在清晰的观察下无处遁形，小球的重量自然会减轻。只要持续练习，脑中的小球就能保持最佳质量，既稳定，又可控，人们就能把注意力和情绪锁定在一个相对理想的状态下。</p><p>◆ 第三节 阅读：如何让自己真正爱上阅读</p><p>&gt;&gt; 读书这件事虽然好，但陷阱不少，不是想读就能读的。</p><p>&gt;&gt; 想要快速成为一个行业的高手，最好的方法就是和行业专家交流，直接向他们请教</p><p>&gt;&gt; 我们每天花费在阅读上的时间越多，花在无意义的娱乐活动上的时间就会越少，思维密度就会越来越大。</p><p>&gt;&gt; 只要紧紧盯住“改变”这个根本目标，很多阅读障碍就会立即消失。</p><p>&gt;&gt; 第一个是要特别注意自己在阅读时产生的关联。如果一个知识点让你想起了其他的知识、引发了关联，一定要留意，并把它记下来。知识产生关联说明知识网络正在形成或加固，这么做还可能创造新知识，这正是学习的核心方法之一。</p><p>◆ 第四节 写作：谢谢你，费曼先生</p><p>&gt;&gt; 比如有一次他给小费曼读《大英百科全书》中关于恐龙的知识：“恐龙的身高有25英尺[1]，头有6英尺宽。”读到这儿，他没有继续念下去，而是停下来对费曼说：“我们来看看这句话是什么意思。也就是说，假如那东西站在我们家的前院，它那么高，足以把头伸进楼上的窗户。不过呢，由于它的脑袋比窗户稍微大了些，它要是硬把头挤进来，就会弄坏窗户。”这样一解释，原本陌生的概念就有了熟悉的事物作为参照物。</p><p>&gt;&gt; 无论学习什么东西，都要努力琢磨它们究竟在讲什么，它们的实际意义是什么，然后用自己的话将其重新讲出来。</p><p>&gt;&gt; 所谓费曼技巧就是通过自己的语言，用最简单的话把一件事情讲清楚，最好让外行人也能听懂。</p><p>&gt;&gt; 你不能自己站在11层，然后假设你的读者站在第10层，指望着只要告诉他第11层有哪些内容就让他明白。你的读者站在第一层，你必须知道你脚下踩着的另外10层到底是怎么构造的。这就迫使你对所掌握的，或之前认为正确的那些东西做彻彻底底的、深刻的反思，你的受众越是不懂，你需要反思的就越深刻。</p><p>&gt;&gt; 又一次，读者“晴天”问我：前额皮质、元认知、理智脑这三个概念是什么关系？我突发灵感，想到了一个类比：前额皮质就是理智脑和元认知的“肉身”。这次算我扳回一局，因为想到一个合适的类比是一件非常难得和宝贵的事。</p><p>&gt;&gt; 用自己的语言重新表达就是在调动自己的千军万马。</p><p>&gt;&gt; 所以，一个人想要真正成长，一定要学会写作，因为“只读不写”的学习是不完整的，是低效的。而写作时如果不学会用自己的语言转述，则是无用的。</p><p>◆ 第五节 运动：灵魂想要走得远，身体必须在路上</p><p>&gt;&gt; 所以运动不是关键，运动之后的活动安排及环境刺激才是关键。有效的模式是这样的：在运动后的1~2小时内进行高强度、高难度的脑力活动，比如阅读、解题、背记、写作、编程，等等，或是一些需要复杂技巧的体力活动，诸如舞蹈、钢琴，以及参加不同于以往的社交活动，如接触新的环境、人物或事物，这么做可以让新的神经元受到刺激，不断生长。换句话说，运动之后，脑子需要充分接受考验或挑战，才能让自己不断地变“聪明”。</p><p>&gt;&gt; 让自己保持做有氧运动时有些气喘的状态。比如跑步时，保持足够快的速度直到有些气喘，持续1~2分钟，然后改为快走，调整呼吸，重复即可，这个活动量几乎每个人都可以达到。</p><p>◆ 结语 一流的生活不是富有，而是觉知</p><p>&gt;&gt; 眼前就像出现了一个真空地带，我竟想不起自己这几年到底做了什么，甚至说不出一两件印象深刻的事。虽然我每天按部就班地生活，但好像什么也没做，生活就像无声的溪水，每天从身边流过，但定睛一看，什么也没有留下。那一瞬间，我产生了一种深深的失重感，第一次体会到了焦虑。</p><p>&gt;&gt; 记录日程虽然没有让我成为像柳比歇夫那样厉害的人，但提高了我对时间的敏感度。因为我每记录一笔浪费掉的时间，比如因看手机荒废了2小时，心里就会有一种愧疚感，进而就会不自觉地希望自己减少这种浪费，毕竟记录这样的日志并不光彩，谁愿意自己的生命都是由这些无聊的事情组成的呢？当然我有时候也过得异常忙碌，常常忙得晕头转向，看着密密麻麻的日志，也不禁会想：“自己到底在忙什么？”因为这些忙碌往往都是在被动应付外界的压力，而非自己主动在追求什么。于是我问自己：如果一直被外界的安排牵着走，即便每天过得很“充实”，又有什么意义呢？</p><p>&gt;&gt; 比如有一次开车后我觉得很累，在当天的反思中，我发现自己在开车时，身体的一些部位会不自觉地保持紧张和僵硬，从那以后，我便刻意提醒自己保持放松，用最小的力气去完成动作，尽量让汽车在启动和停止时柔和顺畅。不久后，开车成了我的一种享受，家人也反馈坐在车里非常舒适，没有之前的急停、急刹了。</p><p>比如有一次被领导批评。他用词刻薄，让我当场就想回击。在当天的反思中，我认真分析了他的批评，觉得他指出的问题还是很到位的，虽然他情绪不好，但出发点是好的，而且他对大多数人都是这样的脾气，并非单独针对我。想到这里，我当即就释然了</p><p>&gt;&gt; 无论何时，都要把对方的情绪和意见分开对待，这样，即使在最糟糕的事情中也能学到有用的东西。</p><p>&gt;&gt; 好的反思是感知生活中最触动自己的点，难受的、欣喜的、念念不忘的……这些点正是处在自己成长的舒适区边缘的感悟，人在舒适区边缘学习，成长是最快的。</p><p>&gt;&gt; 反思天然有正视痛苦的力量。去反思，去记录，你就会发现，痛苦哪里是什么坏事，那简直是上天给我们的成长信号与提示！</p><p>&gt;&gt; 反思的最终目的是改变，而不是形式的完美</p><p>&gt;&gt; 对自己极度坦诚。</p><p>&gt;&gt; 我一直很想知道，一个人觉醒的起点到底在哪儿？现在大致有了一个答案，那就是：觉知。当一个人能够觉知到什么是好，什么是不好的时候，就必然会主动做出新的选择。</p><p>◆ 后记 共同改变，一起前行</p><p>&gt;&gt; 封面中的蓝色和红色是本书的两种主题颜色，它们分别代表大脑的理性力量和感性力量，中间的留白隐约构成了人的大脑，寓意是一个人若是学会了用知识和智慧驱动理性和感性这两种力量，就可以获得认知觉醒。希望本书能帮助人们走出混沌，通过思考获得清醒的认知、清楚的目标、清晰的路径和清爽的情绪。</p>]]></content>
+      
+      
       <categories>
-        <category>讲解教程</category>
+          
+          <category> 读书笔记 </category>
+          
       </categories>
-  </entry>
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>《65种微习惯：轻松掌控你的行为、思维和情绪》读书笔记</title>
+      <link href="/2024/12/20/%E3%80%8A65%E7%A7%8D%E5%BE%AE%E4%B9%A0%E6%83%AF%EF%BC%9A%E8%BD%BB%E6%9D%BE%E6%8E%8C%E6%8E%A7%E4%BD%A0%E7%9A%84%E8%A1%8C%E4%B8%BA%E3%80%81%E6%80%9D%E7%BB%B4%E5%92%8C%E6%83%85%E7%BB%AA%E3%80%8B%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"/>
+      <url>/2024/12/20/%E3%80%8A65%E7%A7%8D%E5%BE%AE%E4%B9%A0%E6%83%AF%EF%BC%9A%E8%BD%BB%E6%9D%BE%E6%8E%8C%E6%8E%A7%E4%BD%A0%E7%9A%84%E8%A1%8C%E4%B8%BA%E3%80%81%E6%80%9D%E7%BB%B4%E5%92%8C%E6%83%85%E7%BB%AA%E3%80%8B%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/</url>
+      
+        <content type="html"><![CDATA[<p>《65种微习惯：轻松掌控你的行为、思维和情绪》</p><p>古川武士</p><p>238个笔记</p><p>点评</p><p>◆ 2024&#x2F;09&#x2F;08 认为好看</p><p>内容提要</p><p>◆ 一个人有什么样的习惯，就会有什么样的人生。养成好习惯需要进行持久的积极性改变。在这一过程中，你真正要依靠的不是意志力和自控力，而是不用思考就直接去做的下意识行为。</p><p>◆ 优秀不是行为，而是一种习惯。</p><p>养成好习惯，创造你想要的人生！</p><p>◆ 我们的思维很容易形成定式，我们会在日常生活中重复某种模式。</p><p>◆ 人生90%的幸福是由好的习惯决定的。</p><p>◆ “我看不到生命的意义和工作的价值。”你是否也有过这样的烦恼呢？我想说的是，只要调整好自己的情绪，你的心就会沉静下来。让我们了解自己真正想要什么，从而找到自己真正想做的事情，实现自己的价值。</p><p>◆ 为什么你总是无法改变自己呢？因为你在潜意识中总是想要“安全、安心、安定”，对变化有抵触情绪。然而，“近朱者赤，近墨者黑”，环境对一个人的成长非常重要。只要你能够改变环境，就能够向自我成长的台阶迈进。</p><p>◆ 2024&#x2F;08&#x2F;28发表想法</p><p>自助餐，很有意思的比喻</p><p>原文：当然，改变微习惯的65种方法不一定都适合你。你完全可以找到适合自己的几个方法去试试看，而不必掌握所有的方法。就像吃自助餐一样，你只要选择适合自己的那份“菜”即可。</p><p>◆ 当然，改变微习惯的65种方法不一定都适合你。你完全可以找到适合自己的几个方法去试试看，而不必掌握所有的方法。就像吃自助餐一样，你只要选择适合自己的那份“菜”即可。</p><p>不能养成微习惯的理由</p><p>◆ 避免完美主义，让自己快速行动起来。</p><p>◆ 例如，如果你有“我什么也做不好”“我比别人差”这样的观念，那么占据你内心的情绪就是无力感、自我厌恶感和绝望。</p><p>◆ 如果你有“我来做肯定行”“我只要努力就会有结果”这种积极的观念，那么自我肯定感、希望、勇气等正面情绪就会油然而生，并且成为你行动的自驱力。</p><p>◆ 在下面九种欲求中，对你来说最重要的有哪些？● 追求完美。● 同他人建立良好关系。● 达成目标。● 发挥独创性。● 深思熟虑，做好充分准备。● 有安全感。● 有愉悦感。● 感觉到自己的强大。● 按照自己的节奏行动。</p><p>◆ 每个人都有自己的制胜方法，只有找到适合自己的方法，才能真正坚持下去。</p><p>◆ 正是因为接触了日常生活中无法遇到的优秀的人，我才有了提升自己的想法和突破自我的勇气</p><p>90%的幸福都来自习惯</p><p>◆ 90%的幸福都来自习惯</p><p>◆ 1.固定值（占40%）：思维方式和认知方式</p><p>◆ 即使遇到同样的事情，有的人会理解为自己遭遇了困境，有的人则认为机遇降临到了自己头上。</p><p>◆ 2.生活状态（占10%）：生活中发生的事情</p><p>◆ 3.自发活动（占50%）：能否按照自己的心愿生活</p><p>◆ 当我们被周围环境所左右或受情绪影响不能遵守约定、使自己处于失控状态时，我们的幸福感就会下降。</p><p>◆ 在生活和工作中，不是“被迫做”，而是“主动做”——我们要像这样通过找回主体性、能动性、积极性让自己感到幸福。</p><p>◆ 如果产生了“我的人生可以由自己选择！而且我已经选择了自己想要的人生”这种感觉，你的幸福感就会陡增。你能切实感受到自己主宰自己的命运，这一点至关重要。</p><p>调整微习惯的关键在于调整好自己</p><p>◆ 我们可以从中得到以下两个启示。</p><p>◆ 如果我们能够理解这个激励机制，那么只要稍微动动脑筋就能帮助他人提高干劲。</p><p>◆ 的干劲。同样的道理，无论是早起、运动还是打扫卫生，我们都能想办法激发出自己的干劲。</p><p>◆ 本书提倡的不是强迫自己提高干劲，而是找到调整好自己的方法。如果能够调整好自己，激情就能自然而然地迸发出来，这一点极为重要。</p><p>◆ 有的人靠坚持晨练养成了早起的习惯，但是并非所有人都能做到这一点；有的人如果知道第二天能吃上“网红”早点铺的早点，他就能做到早起；有的人则通过在Facebook上打卡并记录起床时间这种方式逼迫自己每天早起，从而获得某种心理上的愉悦。</p><p>◆ 有的人喜欢在阳台上放一把椅子，一边喝咖啡一边看报，他为了享受这种从容的感觉而早起；有的人很享受在安静的地铁车厢里读书，因此愿意早起；还有的人早起，是因为他亲身感受到早晨慢跑去上班可以让一天身心愉悦。</p><p>◆ 你只要稍加开动脑筋，就可以让内心的激情燃烧起来。反过来讲，如果你懒得思考，就很难达成心中的目标。</p><p>◆ 养成好习惯和促进人生向好的关键在于两点：第一，要学会做自己喜欢的事情；第二，要有勇气让自己不喜欢的事情停下来。</p><p>摆脱习惯引力</p><p>◆ 只要遇到讨厌的工作，你就会拖延</p><p>◆ ● 对于第一次碰到的事情，你迟迟不肯动手做；</p><p>◆ 那是因为我们的大脑有一种机制，它为了保证安全而抵触新鲜事物，坚持维持现状。我把这种机制称为“习惯引力”。</p><p>方法1 开心就好</p><p>◆ 方法1 开心就好</p><p>方法2 “婴儿学步式”习惯养成法：慢慢来</p><p>◆ 方法2 “婴儿学步式”习惯养成法：慢慢来</p><p>◆ 最难的是“迈出第一步”</p><p>◆ 不用突然5点钟就起床， 只要比之前早起15分钟即可</p><p>◆ ● 慢跑→健步走；</p><p>● 减肥→把午饭的饭量减半；</p><p>● 收拾房间→只收拾5分钟，或者只打扫卫生间；</p><p>● 戒酒→平时喝3杯啤酒，现在只喝2杯半；</p><p>● 早晨5点钟起床→比以前早起15分钟。</p><p>方法3 先尝试再改变</p><p>◆ 这样一来，你的身体反应和心理感受会给你一些反馈，</p><p>◆ “晚上跑步可以消除我一天的焦虑情绪，打消我的不安，缓解工作压力，为一天的生活画上一个圆满的句号。”</p><p>◆ 你也可以用这种先尝试再改变的方法塑造习惯。例如，每天早晨设置15分钟的时间不看手机信息（尝试坚持一周），停止召开不必要的例会（尝试坚持两周），每天22点之后不看手机（尝试坚持三天），每天按时下班（尝试坚持三天）。我建议你就按照这种节奏进行尝试。</p><p>◆ 对于合适的方法你就去坚持，对于不合适的方法你就果断舍弃，慢慢调整自己的习惯。</p><p>◆ 每天按时下班，戒掉低效加班（坚持三天）</p><p>方法4 设定“例外规则”，别太完美主义</p><p>◆ 方法4 设定“例外规则”，别太完美主义</p><p>◆ 预先设定“例外规则”，遇到突发状况时可以灵活处理</p><p>◆ 如果你今天加班、没抽出时间学英语，你在地铁上背几个英语单词就足够了[插图]</p><p>◆ 当你没有精神的时候，只读一页书也很好</p><p>◆ 生活中有很多突发事件，它们会影响习惯的养成。日子久了，你就会产生一种无力感，甚至会自我厌恶。最后，你就没有了干劲，取而代之的是深深的挫败感。为了防患于未然，请你提前设置“例外规则”，用于应对特殊情况。</p><p>◆ 例如，当你心情不好或感到疲劳的时候，你可以把今天的学习任务减半。</p><p>◆ “例外规则”是一种灵活对策。设定“例外规则”不是为了自我放松，而是为了让自己坚持下去。</p><p>◆ 对于凡事追求完美的人而言，如果他做不到完美，就会极端地认为“和没做一样”，这样的人就非常适合设定“例外规则”。</p><p>◆ 如果行动归零了，你就很难再次开始。</p><p>◆ 2024&#x2F;08&#x2F;30发表想法</p><p>汝听，人言否doge</p><p>原文：昨晚我加班了。第二天早晨我不一定非得5点起床，能做到7点起床就行</p><p>方法5 给自己一套“顶配”</p><p>◆ 方法5 给自己一套“顶配”</p><p>◆ 准备好提高干劲的工具，让自己进入状态</p><p>◆ 我想买一套漂亮的运动服，这样跑步时就开心多了</p><p>方法6 “抱团式”习惯养成法：不孤单</p><p>◆ 方法6 “抱团式”习惯养成法：不孤单</p><p>◆ 如果能够找到一个合作伙伴，就可以愉快地坚持下去</p><p>◆ 有的人适合“抱团”培养好习惯。我的父母每天一起散步半小时，已经坚持了20多年。他们说：“正是因为一起散步，我俩才能坚持到今天。”其实，那半小时不仅是他们一起散步的时间，还是他们讨论健康、谈论孩子的时间，这就是他们继续走下去的理由。</p><p>方法7 学会模仿别人</p><p>◆ 方法7 学会模仿别人</p><p>◆ 向有经验的人请教，倾听别人的实践经验，模仿好的做法</p><p>◆ 在塑造微习惯的过程中，我觉得“模仿”是一条捷径。</p><p>方法8 “胡萝卜”习惯养成法：给自己一个奖励</p><p>◆ 方法8 “胡萝卜”习惯养成法：给自己一个奖励</p><p>◆ 分阶段进行，犒劳自己，把握节奏</p><p>◆ 完成这个大项目后，我想去旅行</p><p>◆ 完成这项工作后， 我想看15分钟的闲书</p><p>◆ ：为了保持上升的热情，给自己准备一份奖品。这个做法虽然看起来很普通，但是很有效果。</p><p>◆ 慢跑之后我可以洗个热水澡，还可以喝一杯啤酒。</p><p>◆  如果我能早起，就可以悠闲地一边喝咖啡一边看报纸</p><p>◆ 当然，每天给自己一些小的奖励也是很有效果的。例如，“泡上一壶红茶”“吃些小点心”“听一首喜欢的曲子放松一下”都很不错。</p><p>方法9 “马克笔”习惯养成法：记录你的成就感</p><p>◆ 方法9 “马克笔”习惯养成法：记录你的成就感</p><p>◆ 量化你的业绩和努力，提高积极性</p><p>◆ 每天都能准时打卡、不留空白，这种成就感会成为一种积极性。</p><p>◆ 努力一旦被数据化，“我可以再努力一些”这样的干劲就会涌上来。</p><p>◆ 最近出现了综合评价睡眠时间和睡眠质量的手表。</p><p>方法10 “朋友圈”习惯养成法：“晒一晒”你的努力</p><p>◆ 我在一年内读完了100本电子书，被很多网友“点赞”</p><p>◆ “想被别人表扬，想得到别人的认可”，这种想法是人类的根本需求。</p><p>方法11 提高干劲的小装备</p><p>◆ 方法11 提高干劲的小装备请使用一些能够提高积极性的小装备吧</p><p>◆ 在重要的日子里，我会穿上能带给我力量的正装</p><p>◆ 我是一个只要细分时间就能集中注意力工作的人，而让我能够集中注意力的装备就是计时器。</p><p>◆ 2024&#x2F;08&#x2F;31发表想法</p><p>这个功能宿舍极其友好，手戴小米手环6</p><p>原文：它还可以震动，早上把我喊醒时也不会打扰家人。</p><p>◆ 把琐碎的灵感写在一张A4纸上，这样你可能会有更多好的想法。</p><p>方法12 把时间节点编入计划</p><p>◆ 方法12 把时间节点编入计划一旦把时间节点确定下来，就很容易形成习惯</p><p>◆ 每天早晨上班前在楼下的咖啡厅里学习30分钟</p><p>◆ 在下班回家的地铁上，制订第二天的工作计划</p><p>◆ “决定什么时候做”这件事能让我们的行动力大大提高。</p><p>◆ ● 每周按时提交报告。● 每周五16点之前提交报告。我认为第二种方法更容易执行，因为这种方法设置了更明确的行动时间节点，这就会使我们的大脑接收的信息更加具体形象。研究结果证明，很多人都通过制订带附加条件的计划，使行动力提高了300%</p><p>◆ 例如，我们可以加上这样的条件：“早晨起床后”“走路时”“坐在办公桌前等待电脑启动时”“吃午饭时”“洗澡时”“入睡前”等。如果把“在哪里做”这一点也加入计划，你就更加容易行动了。</p><p>◆ 早会后我会和团队成员沟通5分钟洗完澡后我会在床上躺着放松10分钟</p><p>方法13 向大家宣布，断绝自己的后路</p><p>◆ 方法13 向大家宣布，断绝自己的后路</p><p>◆ 当你告诉所有人你的目标后，就意味着你真的要这样做了</p><p>◆ 2024&#x2F;09&#x2F;01发表想法</p><p>内卷时代往往适得其反喔，打工人给领导打卡是努力可视化OK的，打工人给打工人打卡是恶心人了</p><p>原文：几乎每个人都希望给别人留下好印象，“向大家宣布”利用的就是这种心理。</p><p>◆ 亲手碾碎了睡懒觉这个恶魔。</p><p>◆ 我还记得当时有人说“你小子绝对不可能戒烟”，听到此话，我越发坚定了戒烟的决心，最终成功地戒了烟。</p><p>方法14 设定一个“激情目标”</p><p>◆ 方法14 设定一个“激情目标”</p><p>◆ 如果你厌倦了按部就班，就设定一个带劲的目标吧</p><p>方法15 “年卡式”习惯养成法：要是“不想吃亏”，就坚持下去</p><p>◆ 方法15 “年卡式”习惯养成法：要是“不想吃亏”，就坚持下去</p><p>◆ 因为我提前投资了，所以就算为了挣回本钱也要努力</p><p>方法16 “爱豆式”习惯养成法：我想成为那样的人</p><p>◆ 方法16 “爱豆式”习惯养成法：我想成为那样的人</p><p>◆ 憧憬会让你的理想保持热度</p><p>方法17 “一刻钟”习惯养成法：起床后的黄金1小时</p><p>◆ 方法17 “一刻钟”习惯养成法：起床后的黄金1小时如果有一个好的开始，你就可以顺利地投入工作</p><p>◆ 一日之计在于晨。一天的开始是否顺畅会对我们一天的生活产生巨大的影响。</p><p>◆ 我每天早晨起床后，会先喝一杯咖啡，然后一边听广播一边吃早餐。与看电视时要盯着屏幕不同，听广播时我不必将视线一直停留在收音机上，所以这件事适合在早上进行。到了办公室，在开始我的创造性工作之前，我会先制订今日计划，把自己的情绪调动起来，让大脑活跃起来。</p><p>◆ 我喜欢在早晨一边喝咖啡一边冥想，这样我一整天都很放松我喜欢在早晨听有激情的音乐，开启一天的工作</p><p>方法18 学会“一心二用”</p><p>◆ 方法18 学会“一心二用”如果我能一边听歌一边运动，我就能坚持下去</p><p>◆ 那么，尝试“一心二用”的最佳时机是什么时候呢？走路时、等待时、吃饭时、洗澡时——这些时机都很好。</p><p>方法19 “氛围式”习惯养成法：寻找一个让你心情舒畅的场所</p><p>◆ 方法19 “氛围式”习惯养成法：寻找一个让你心情舒畅的场所仅仅换个地方，就能让你提高干劲</p><p>方法20 倒推“热情递减法则”，激活积极大脑</p><p>◆ 方法20 倒推“热情递减法则”，激活积极大脑养成习惯≠公式化</p><p>◆ 能够坚持下去的人最擅长利用变化和刺激。</p><p>◆ 我们在开始做一件事时，因为有刺激，所以会感到很有意思，但随着熟悉程度的增加，我们会渐渐感到厌倦。因此，我们需要适度地加入某种变化，给生活一点刺激。</p><p>拖延也是一种习惯</p><p>◆ 拖延也是一种习惯</p><p>◆ 拖延也是一种“习惯”，按原因分类的话，拖延可以分为以下7种：● 嫌麻烦；● 怕失败；● 觉得还有时间（其实已经没有时间了）；● 不想被人讨厌；● 觉得太辛苦；● 没有自信；● 不想后悔。</p><p>方法21 克服拖延心理1：以15分钟为一个单位</p><p>◆ 方法21 克服拖延心理1：以15分钟为一个单位</p><p>◆ 把时间分段，高效利用碎片时间</p><p>◆ 与跑马拉松不同，这种感觉就像短跑，你必须开足马力。如果一项工作需要15分钟，你在一个小时之内就可以完成四项工作。以我的个人经验来看，即便对于自己不太想做的事情，我用这种方法也能很好地完成。</p><p>方法22 克服拖延心理2：列一个清单，做完一项勾掉一项</p><p>◆ 方法22 克服拖延心理2：列一个清单，做完一项勾掉一项把要做的事情写出来，别总存在脑子里</p><p>◆ 你这也想做那也想做，搞得自己很焦躁，结果怎么也动不了手，只好不断拖延。</p><p>◆ 成就感和喜悦感可以提高我们的积极性，也是让我们能够坚持习惯的关键因素。因此，对孩子来说，虽然做作业本身并不是快乐的事，但是只要他们能体会到成就感和喜悦感，他们就会继续下去。</p><p>方法23 克服拖延心理3：把工作细分</p><p>◆ 方法23 克服拖延心理3：把工作细分分解你的工作，逐一突破</p><p>方法24 克服拖延心理4：聚焦具体事项</p><p>◆ 方法24 克服拖延心理4：聚焦具体事项如果有了明确的行动计划，你就容易行动起来</p><p>方法25 克服拖延心理5：停止情绪内耗，干就完了</p><p>◆ 方法25 克服拖延心理5：停止情绪内耗，干就完了对任何事都不感到麻烦的“零精神压力者”</p><p>◆ “我只是做了我该做的事情。谈不上喜欢还是讨厌，我只是以平常心默默地去做而已。”</p><p>◆ 用心去做，你就会泰然处之；不厌倦，你就能继续向前。所以，当你面对麻烦的工作时，淡定一点，做自己该做的就好。</p><p>方法26 克服拖延心理6：当场就做这件事</p><p>◆ 方法26 克服拖延心理6：当场就做这件事“我现在就做”——这是最有力量的一句话</p><p>◆ 与其在任务清单上留下“写会议记录”这一条，不如尽量当场就完成这件事。别让这件事一直萦绕在你的脑海中折磨你，到最后不得不写的时候，它会消耗你大量的精力，得不偿失。</p><p>◆ 我建议大家对于5分钟内就能完成的事情，不要拖延，马上就做。</p><p>微习惯积极心理学</p><p>◆ 对自己没有信心，惧怕失败而不能采取行动，被批评后陷入自我厌恶情绪——这些因素都会让我们进入消极状态、感到痛苦</p><p>◆ 事实和解释是两回事，我们每个人都生活在由自己做出解释的世界里，虽然事实无法改变，但解释是可以改变的。</p><p>◆ 有时我们看到的虽然是同一个事实，却由于认知方式不同而导致我们反应各异。</p><p>◆ 一位职员因为拿到了一个大订单而得到了领导的表扬。这时，其他人会怎么想？有的人会想“太厉害了，我可不行啊”，有的人则会想“我也要加油”，还有的人会想“没什么了不起的，运气好罢了</p><p>◆ 能够自我调节的人即使面对不乐观的事实，也会控制好自己的情绪，尽量积极地处理问题。</p><p>◆ 她不再对自己无论如何都无法改变的人事变动耿耿于怀，而把精力花在自己可以控制的目标和事情上。</p><p>◆ 我建议大家最好能每天坚持写日记，重新审视周围发生的事情，记录自己的对事情的理解和看法。慢慢地，你就会养成好的思维习惯。</p><p>方法27 “1厘米超越思维”：不是超过别人，而是超过自己</p><p>◆ 方法27 “1厘米超越思维”：不是超过别人，而是超过自己如果你不喜欢和别人比，那就和过去的自己比一比</p><p>◆ 我又详细地询问了一番，才知道她的那位男同事在国外工作了20年之久，而D同学只在国外工作了3年。20年和3年当然有区别，可是，D同学却忽视了这一点。</p><p>◆ 不要与他人比，而要与过去的自己比。</p><p>◆ 我坚持了一个月晨跑，发现自己即使连续跑3千米也不觉得累了与半年前相比，我的英语词汇量增加了很多</p><p>方法28 最大化思维：发挥既有优势</p><p>◆ 方法28 最大化思维：发挥既有优势如果你觉得自己既没钱又没啥大本事，就要充分发挥你已经具备的优势</p><p>◆ 后来，我才明白了一个道理：我们要学会利用现有的资金、关系、技术、知识、经验，从调动这些已有资源开始，一边做事情一边积累更多的资源。</p><p>方法29 概率思维：结果取决于行动的量</p><p>◆ 方法29 概率思维：结果取决于行动的量如果你觉得自己总是失败，就多试几次，因为有时候你欠缺的不是“能力”，而是“行动”</p><p>◆ 即使命中率只有10%，如果你出击10次，也有命中的可能</p><p>方法30 焦点思维：只关注你能做到的事</p><p>◆ 方法30 焦点思维：只关注你能做到的事因自己无法控制的事情而烦恼，这是精神压力的最大来源</p><p>◆ 很多人之所以有精神压力，是因为他们有自己无法控制的事情，并为此而感到烦恼。</p><p>◆ 书中有这么一句话：“请区分您能够控制的事情和控制不了的事情，然后将注意力集中在您能够控制的事情上。”</p><p>◆ 我不能改变自己的过去和他人的想法，但我可以改变自己的未来。</p><p>方法31 发散思维：寻找更多选项</p><p>◆ 我会问一问身边的朋友，如果公司倒闭，他们有没有其他选择我会事先准备10种方案</p><p>方法32 量变思维：只做1%的改变</p><p>◆ 方法32 量变思维：只做1%的改变如果你有10个行动方案，那么请先选3个试试</p><p>◆ 我建议大家一边行动一边思考，不要琢磨太多，而要把注意力集中在行动上。</p><p>◆ 如果你把注意力集中在思考问题上，总是踌躇不前，就会导致自己迟迟不能行动。所以，请把注意力集中在行动上，能做出1%的改善就很好。</p><p>方法33 共赢思维：如何让双方都满意</p><p>◆ 不要妥协，而要成全</p><p>◆ 例如，到了周末，丈夫可以抽出时间陪孩子玩，再去做一顿饭，给妻子创造一些自由时间，让她也有时间上网、回复Facebook上的消息。</p><p>◆ 妻子说：“我只是想发泄一下情绪，不要给我意见。”孩子说：“我想自己做决定，不要老管着我。”同事说：“我要全力以赴，不要打扰我。”</p><p>方法34 去结果思维：尽力去做就好</p><p>◆ 方法34 去结果思维：尽力去做就好不必在意结果，享受过程吧</p><p>◆ 如果我们过于注重结果和对方的反应，就会感到压力很大、进展缓慢。在这种情况下，我建议你只要明确自己的态度就好，至于对方是否采纳你的意见，那是对方的事情。</p><p>◆ 考前请努力复习，考完后就不要去想能不能考好了，因为这已经毫无意义了。</p><p>◆ 我不在意，因为提案能否通过取决于领导，我尽力就好我不在意，因为我不能掌控台下听众的反应，自己享受其中就好</p><p>方法35 “接力棒”思维：今天我做这么多就可以了</p><p>◆ 方法35 “接力棒”思维：今天我做这么多就可以了将“接力棒”交给明天的自己</p><p>◆ “现在这样就可以了”与“可以一直这样下去”是不同的。前者可以消除我的不安，让我不再认为自己可能写不出更好的东西了。</p><p>◆ 虽然我动作僵硬，但我记住了舞步，我跳成这样已经很不错了我写的博客虽然内容一般，但我每天都坚持更新，这已经很难得了</p><p>方法36 底线思维：降低你的期望值</p><p>◆ 方法36 底线思维：降低你的期望值如果现实很“骨感”，不必烦恼，只要降低你的期望值就好了</p><p>◆ 我现在已经意识到，虽然自己看到没洗的碗筷就会不舒服，想赶紧收拾干净，但是老公可能并不在意这些，而我也不能勉强他。从那以后，我转变了对做家务这件事的看法，什么时候想做就什么时候做吧。</p><p>◆ 我们要将这些问题视为“永久性问题”，并学会与之友好相处。吉田女士的观点非常新颖：“我早就把它当作‘不治之症’看待了。”“我可以控制这种不满情绪。”这些正是她的生活智慧和思维习惯，她根本就不打算改变对方，而是调整自己的期望值。</p><p>◆ 一个人不可能是完美无缺的。你的不安和不满都来自“理应如此”这种想法和现实之间的差异。这时，我建议你不要试图改变对方和现实，而要试着改变自己对所谓“理应如此”的执念。</p><p>方法37 长期思维：做好失败的思想准备</p><p>◆ 方法37 长期思维：做好失败的思想准备只要坚持下去，终有一天你会成功</p><p>◆ 我把这种最初慢慢成长，然后突然呈现成果的现象称为“裂变式成长”。就像池塘里的睡莲到了第29天会突然绽放那样，你的努力有时会经历这样的“裂变”过程。</p><p>方法38 初心思维：给自己找一个坚持下去的理由</p><p>◆ 方法38 初心思维：给自己找一个坚持下去的理由不能只想“怎样才能坚持下去”，也要想想“为什么要坚持下去”</p><p>◆ 加班、睡懒觉、熬夜“刷手机”等各种诱惑都还存在</p><p>◆ 为了养成微习惯，我建议大家从明确自己的理想开始，请你问问自己：“我想成为什么样的人？我想实现什么目标？”</p><p>方法39 故事思维：被感动的能力</p><p>◆ 方法39 故事思维：被感动的能力当我们意志消沉时，那些感人的故事能让我们振奋起来</p><p>◆ 动画片《灌篮高手》中的安西教练曾说过这样一句话：“如果你现在放弃，这场比赛就结束了。”这句话让我深受鼓舞</p><p>方法40 价值思维：发现做这件事的意义</p><p>◆ 方法40 价值思维：发现做这件事的意义如果你能够理解做这件事的意义，那么再难也能坚持下去</p><p>◆ 做一件事情的意义不是被他人赋予的，而是要靠我们自己去发现的。</p><p>◆ 负责处理投诉的不是卖出商品的那位销售员，而是当时接电话的那个人。</p><p>◆ 我要与愤怒的顾客产生共情，小心谨慎地说出每一句话，争取对方的理解。它要求我具备推测对方心情和意图的能力、瞬间想出理由的脑力，以及面对激烈的言辞无所畏惧的胆量。</p><p>◆ 我的领导很严厉，这也不是一件坏事，至少我的“抗打击能力”有了明显的提高我被调到别的部门了，很不爽。但这也是一次换个角度了解公司的机会</p><p>方法41 联想思维：想一想以前的成功经验</p><p>◆ 方法41 联想思维：想一想以前的成功经验结合以前的成功经验想一想，总会有一些灵感</p><p>方法42 成长思维：你可以换个说法</p><p>◆ 方法42 成长思维：你可以换个说法换一种思考方式，你就会发现自己能做的事</p><p>◆ 我找不到自己想做的事情，怎样才能找到我一生都喜欢的工作呢？”作家回答他说：“请问您寻找了多久呢？‘找到’是‘寻找’这个行为的结果！</p><p>◆ 我还发现一个问题，如果你对一种说法稍加改变，就可以改变思维方式。再看刚才所举的例子，你不要说“找不到自己想做的事情”，而应该说“我要寻找自己想做的事情”。</p><p>◆ 不知道”这个词会让你停止思考，但是如果你能使用“学习”“尝试”这些词，就会有动力。</p><p>◆ 例如，如果有人问我“我的个人形象不好，怎样才能提升”，我就会反问他：“你是怎样塑造个人形象的呢？”</p><p>◆ ● 被动性词语：找不到、不会、不明白、太难。● 主动性词语：尝试、学习、寻找、探求、培育。</p><p>方法43 “生活禅”思维：任何事物都有它存在的价值</p><p>◆ 方法43 “生活禅”思维：任何事物都有它存在的价值干哪一行都有价值</p><p>◆ 人生经历的一切都有意义，如果你这样想，就会对眼前发生的事情有不同的见解</p><p>方法44 感恩思维：我要说声“谢谢你”</p><p>◆ 方法44 感恩思维：我要说声“谢谢你”如果常怀感恩之心，你就会感到幸福</p><p>◆ 据说，容易陷入消极情绪的人如果开始写“感恩日记”，他的烦恼就会变少。因此，在面对容易让你产生消极情绪的事情时，如果你心怀感恩，就会觉得“那件事情本身就是好事情”。常怀感恩之情，你的想法就会发生变化。</p><p>第3章 掌控情绪的15种微习惯</p><p>◆ 第3章 掌控情绪的15种微习惯找到自己想做的事情</p><p>有温度的习惯</p><p>◆ ● 积极的情绪：安心、放松、自我肯定、成就感、感谢。● 消极的情绪： 不安、焦虑、自我厌恶、挫败感、后悔、恐惧、绝望、担心。</p><p>◆ 我们在行动和思考方面各有不同，在情绪方面也同样如此。我把它叫作“情绪习惯”。要想度过幸福的人生、有所成就，就要拥有良好的“情绪习惯”。</p><p>◆ 在积极心理学中有“3∶1法则”这一概念。人要想感受到幸福，积极情绪和消极情绪的比例就要为3∶1。</p><p>◆ 要控制好消极情绪所占的比例。如果这个比例反过来，即积极情绪和消极情绪的比例为1∶3，你就会经常被不安、焦虑、无力感、自我厌恶感所困扰。</p><p>◆ 例如，当对方的生活被一些不好的行为习惯搅乱时，我几乎可以断定他的情绪习惯也出了问题。工作和生活变得一塌糊涂，他想通过深夜喝酒、暴饮暴食等方式消除精神压力。精神压力越大，越容易陷入不好的行为习惯。</p><p>◆ ，最重要的是去挖掘沉睡在内心深处的“着迷”和“狂热”这两种欲求。如果这两种欲求爆发，感情的巨大能量就会喷涌出来，你就会找到答案</p><p>◆ 那么，这种强烈的感情从何而来呢？其实它是从信念和本质这两种力量中诞生的。有的人相信“自己能做”，有的人认为“自己不会”，这两种人哪怕处在同样的状态下，产生的情绪也完全不同。前者能够感受到希望、可能性、干劲，而后者的内心却被绝望、无力感所占据。</p><p>方法45 高能的情绪：减少放电，增加充电</p><p>◆ 方法45 高能的情绪：减少放电，增加充电当内心的能量达到最大值时，你就能够获得极大的满足感</p><p>方法46 投入的情绪：感受你的心流</p><p>◆ 方法46 投入的情绪：感受你的心流瞬间集中注意力能减小精神压力</p><p>◆ 冥想其实很简单，你只要坐在那里伸直后背，数着呼吸就可以了。最初的10分钟你会感觉有杂念涌出来，心不在焉的状态会持续一段时间，但是不久你就会进入只有呼吸存在的全身心投入状态。虽然这还算不上心无杂念的境界，你却能够感觉自己就存在于“此时此刻的瞬间”，内心仿佛进入深渊般的宁静境界。</p><p>◆ 当我们潜入平和静寂的内心深处时，那些以前扰乱内心的东西就显得微不足道了。</p><p>◆ 内心的沉静将把你带入一个平和的世界里，你能看到以前因陷入压力而忽略的东西，整个人都会变得豁达起来。</p><p>◆ 相反，酗酒、沉迷网络等行为虽然也可以让你暂时忘记其他事情，但一旦失控就会很麻烦，这样不仅会让你损失金钱，还会给你的身心健康带来危害。</p><p>方法47 主动的情绪：夺回生活的主动权</p><p>◆ 方法47 主动的情绪：夺回生活的主动权如果能够掌握生活的主动权，你的幸福指数就会提升50%</p><p>◆ 要想拥有积极的情绪，就要夺回生活的主动权。在幸福公式中，“自发活动”掌控着50%的幸福。</p><p>◆ 为了夺回主动权，我给大家一个建议：请你先写出自己被什么所束缚，然后制订一份计划并执行下去。这样做的话，你的情绪就会发生改变。</p><p>◆ ● 早晨比以前提前一个小时起床→你可以从忙乱中解放出来。● 早晨花10分钟制订一天的工作计划→结束被工作追赶的窘境。● 来到公司先不看邮件，用30分钟集中精力写报告→ 不被突发性工作所干扰。● 比约定时间提前15分钟到达→ 以防因地铁晚点或堵车而产生急躁情绪。● 每天晚上10点准时关手机→摆脱手机依赖症。● 每天写日记，回顾一天都做了什么→即使忙碌了一天也很有成就感。</p><p>方法48 好奇的情绪：做10件让自己心动的事</p><p>◆ 3.一个人去酒吧，回忆人生。</p><p>◆ 生活需要突破，不要让你的思考方式和生活方式限制了自己。拥有好奇的情绪，你就会发现更多有趣的事情。试试做出一些心动，甚至“出格”的事吧，你的人生可能会迎来转折。</p><p>世界因信念而改变</p><p>◆ “你认为自己行，你就能行；你认为自己不行，你就不行。”这句话听起来像一种精神论，但其实是一种信念。</p><p>◆ 相信“只要去做就能成功”的人会强化这一想法，让自己进入一种良性循环的状态；相反，相信“我不会”的人，随着一次次的失败，“我不会”这种信念会越来越强烈。</p><p>方法49 戒掉否定的情绪：接受真实的自己</p><p>◆ 方法49 戒掉否定的情绪：接受真实的自己不是“差距”，而是“不同”</p><p>◆ 接受真实的自己就是在与别人相比时，要把认为是“差距”的东西理解为“不同”。</p><p>方法50 戒掉讨好的情绪：没有附加条件的爱</p><p>◆ 方法50 戒掉讨好的情绪：没有附加条件的爱生活已经很艰难，有时也要放自己一马</p><p>方法51 戒掉被外界左右的情绪：面对好评依然保持清醒的头脑</p><p>◆ 方法51 戒掉被外界左右的情绪：面对好评依然保持清醒的头脑遵循自己的原则，就不容易动摇</p><p>方法52 戒掉不安的情绪：接受失败</p><p>◆ 方法52 戒掉不安的情绪：接受失败不要为没有一直走上坡路而耿耿于怀，请放下这个包袱</p><p>方法53 戒掉慌乱的情绪：搜索过去的成功经验</p><p>◆ 迷茫时立即行动起来不仅是我的信念，也是我不断成功的原因。</p><p>方法54 戒掉消极的情绪：找到一个座右铭，将它铭记于心</p><p>◆ 方法54 戒掉消极的情绪：找到一个座右铭，将它铭记于心把名言作为自己的座右铭</p><p>◆ “没有失败，只有反馈。”</p><p>◆ “你打算怎样活下去，你的内心和直觉早已知晓。”</p><p>◆ 人生就像背负着重担旅行，不能急着赶路。”</p><p>◆ 当我被眼前的利益和结果所吸引时，我会想起这句话。人生应以百年为计，将目光放远，去思考10年、30年、50年后自己将成为什么样的人。</p><p>方法55 分清“应该做”和“想做”</p><p>◆ 方法55 分清“应该做”和“想做”如果不明白自己的真心，就问问自己是“应该做”还是“想做”</p><p>◆ 那件事是你应该做的，还是你想做的？</p><p>◆ 我认为应该坚持运动，可我打心底里就不想运动我认为应该去参加公司的聚餐，但实际上并不想去</p><p>方法56 了解自己的性格类型</p><p>◆ 不会卷入事情的漩涡中，懂得退让。</p><p>方法57 重视自己热衷的事情</p><p>◆ 方法57 重视自己热衷的事情回忆小时候的经历，找出自我欲望的根源</p><p>◆ 高田先生现在做的事情和小时候着迷的事情之间是有关联的。高田先生着迷的是“全面收集信息，把它分析到能够完全理解的程度为止”。“收集信息”“了解”“分析”“解释”“归纳整理”都是他“自我欲望”的关键词。</p><p>◆ 自我欲望并不是什么特别的东西，每个人身上都有。</p><p>方法58 谁都想听好话</p><p>◆ 方法58 谁都想听好话别人说什么你才高兴呢？探求他人欲望吧</p><p>有意识地选择适合自己成长的环境</p><p>◆ 每个人在行为、思考、情绪等习惯方面都会受到同伴的影响，环境对你有着强烈的影响，反过来讲，你通过选择环境可以改变整个人生。</p><p>方法60 尝试改变环境</p><p>◆ 方法60 尝试改变环境遇到正在实现理想的人是你的运气</p><p>方法61 和自己的榜样成为朋友</p><p>◆ 方法61 和自己的榜样成为朋友为了赶上他，你会一直努力下去</p><p>方法62 结交志同道合的伙伴</p><p>◆ 方法62 结交志同道合的伙伴尝试加入不同的团体，找到你的位置</p><p>方法63 提高发现机会的敏感度</p><p>◆ 方法63 提高发现机会的敏感度机会就像天上的流星一样，会突然造访</p><p>方法64 等待好机会的到来</p><p>◆ 方法64 等待好机会的到来做好准备，等最佳时机到来时立即出手</p><p>方法65 获得最好的反馈</p><p>◆ 方法65 获得最好的反馈“差评”是你成长的营养品</p><p>后记</p><p>◆ 人就是习惯的产物。</p><p>◆ 喜欢才能做得更好。</p><p>◆ 如果发现有让自己着迷和热衷的事情，就要对其倾注全部的力量，我希望你赶紧去寻找</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 读书笔记 </category>
+          
+      </categories>
+      
+      
+    </entry>
+    
+    
+  
+  
 </search>
