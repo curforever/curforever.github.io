@@ -259,7 +259,7 @@
 </li>
 </ul>
 <h1 id="乌龙"><a href="#乌龙" class="headerlink" title="乌龙"></a>乌龙</h1><p>我尝试了<strong>VSCode + LeetCode</strong>插件，不习惯VSCode的提示和运行方式，毕竟只是编辑器，显得不是那么专业和趁手，于是转向挚爱的IDEA。</p>
-<h2 id="以LeetCode-203-移除链表元素为例"><a href="#以LeetCode-203-移除链表元素为例" class="headerlink" title="以LeetCode 203.移除链表元素为例"></a>以LeetCode 203.移除链表元素为例</h2>
+<h2 id="以LeetCode-203-移除链表元素为例"><a href="#以LeetCode-203-移除链表元素为例" class="headerlink" title="以LeetCode 203.移除链表元素为例"></a>以LeetCode 203.移除链表元素为例</h2><img src="/2024/12/25/IDEA%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%89%8B%E6%92%95LeetCode%E9%97%B9%E7%9A%84%E4%B9%8C%E9%BE%99/image-20241225171110359.png" class="" title="image-20241225171110359">
 
 
 
@@ -272,20 +272,20 @@
 </li>
 </ul>
 <h2 id="遇到的问题"><a href="#遇到的问题" class="headerlink" title="遇到的问题"></a>遇到的问题</h2><p>理应正常，实际正常的输出如下：</p>
-
+<img src="/2024/12/25/IDEA%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%89%8B%E6%92%95LeetCode%E9%97%B9%E7%9A%84%E4%B9%8C%E9%BE%99/image-20241225171538402.png" class="" title="image-20241225171538402">
 
 
 
 <p>理应正常，实际不正常的输出如下：</p>
-
+<img src="/2024/12/25/IDEA%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%89%8B%E6%92%95LeetCode%E9%97%B9%E7%9A%84%E4%B9%8C%E9%BE%99/image-20241225171642932.png" class="" title="image-20241225171642932">
 
 
 
 <p>按照<code>Solution#removeElements</code>的返回结果不应该有错：</p>
-
+<img src="/2024/12/25/IDEA%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%89%8B%E6%92%95LeetCode%E9%97%B9%E7%9A%84%E4%B9%8C%E9%BE%99/image-20241225171715430.png" class="" title="image-20241225171715430">
 
 <h2 id="发现的乌龙Bug"><a href="#发现的乌龙Bug" class="headerlink" title="发现的乌龙Bug"></a>发现的乌龙Bug</h2><p>乌龙在于一个有参构造方法的参数名笔误了！！！</p>
-
+<img src="/2024/12/25/IDEA%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%89%8B%E6%92%95LeetCode%E9%97%B9%E7%9A%84%E4%B9%8C%E9%BE%99/image-20241225171828942.png" class="" title="image-20241225171828942">
 
 
 
@@ -293,7 +293,7 @@
 <li>学以致用，善用<code>Junit</code>。不要自己写Test，怪麻烦的。</li>
 <li>即使你不会<code>Junit</code>也要会Debug，这次的bug就是通过<code>Step Into (F7)</code> 看到了控制台才发现的。</li>
 </ol>
-
+<img src="/2024/12/25/IDEA%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%89%8B%E6%92%95LeetCode%E9%97%B9%E7%9A%84%E4%B9%8C%E9%BE%99/image-20241225172201512.png" class="" title="image-20241225172201512">
 
 
       
