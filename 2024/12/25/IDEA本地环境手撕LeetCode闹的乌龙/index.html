@@ -22,19 +22,26 @@
     var CONFIG = {"hostname":"curforever.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="节目：跳进兔子洞标题：关于【一日男友】的幻想、沉迷和破灭引言随着个体需求的多样化和社会关系的复杂化，越来越多的人开始寻求非传统的情感满足方式。其中，“一日男友”这一现象逐渐浮出水面，成为探讨现代情感需求与消费文化交织的一个重要窗口。 一日男友现象概述“一日男友”指的是通过线下委托或线上平台，雇佣他人扮演一天的男朋友角色，以满足个人的情感需求。这一现象在年轻女性群体中特别普遍，尤其是在那些渴望与虚拟">
+  <meta name="description" content="背景目前LeetCode已经刷了不少题目，开始关心起这样一个问题：面试时候手撕代码怎么撕？口述、txt还是牛客平台？笔试是点入各家的链接吗？跟力扣的代码平台有什么很大区别吗？ 手撕代码咨询身边好友得到的回复是：区别很大，不能Debug。  牛客平台：哔哩哔哩  本地环境：京东（提供题目描述，自己用开发环境写代码，没有类名，函数名、参数返回值）  第三方平台：字节用飞书面试，给代码沙盒环境（极少量类">
 <meta property="og:type" content="article">
-<meta property="og:title" content="《关于【一日男友】的幻想、沉迷和破灭》播客笔记">
-<meta property="og:url" content="https://curforever.github.io/2024/12/24/%E3%80%8A%E5%85%B3%E4%BA%8E%E3%80%90%E4%B8%80%E6%97%A5%E7%94%B7%E5%8F%8B%E3%80%91%E7%9A%84%E5%B9%BB%E6%83%B3%E3%80%81%E6%B2%89%E8%BF%B7%E5%92%8C%E7%A0%B4%E7%81%AD%E3%80%8B%E6%92%AD%E5%AE%A2%E7%AC%94%E8%AE%B0/index.html">
+<meta property="og:title" content="IDEA本地环境手撕LeetCode闹的乌龙">
+<meta property="og:url" content="https://curforever.github.io/2024/12/25/IDEA%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%89%8B%E6%92%95LeetCode%E9%97%B9%E7%9A%84%E4%B9%8C%E9%BE%99/index.html">
 <meta property="og:site_name" content="像风一样の博客">
-<meta property="og:description" content="节目：跳进兔子洞标题：关于【一日男友】的幻想、沉迷和破灭引言随着个体需求的多样化和社会关系的复杂化，越来越多的人开始寻求非传统的情感满足方式。其中，“一日男友”这一现象逐渐浮出水面，成为探讨现代情感需求与消费文化交织的一个重要窗口。 一日男友现象概述“一日男友”指的是通过线下委托或线上平台，雇佣他人扮演一天的男朋友角色，以满足个人的情感需求。这一现象在年轻女性群体中特别普遍，尤其是在那些渴望与虚拟">
+<meta property="og:description" content="背景目前LeetCode已经刷了不少题目，开始关心起这样一个问题：面试时候手撕代码怎么撕？口述、txt还是牛客平台？笔试是点入各家的链接吗？跟力扣的代码平台有什么很大区别吗？ 手撕代码咨询身边好友得到的回复是：区别很大，不能Debug。  牛客平台：哔哩哔哩  本地环境：京东（提供题目描述，自己用开发环境写代码，没有类名，函数名、参数返回值）  第三方平台：字节用飞书面试，给代码沙盒环境（极少量类">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2024-12-24T06:11:17.902Z">
-<meta property="article:modified_time" content="2024-12-24T06:38:08.901Z">
+<meta property="og:image" content="https://curforever.github.io/IDEA%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%89%8B%E6%92%95LeetCode%E9%97%B9%E7%9A%84%E4%B9%8C%E9%BE%99.assets/image-20241225171110359.png">
+<meta property="og:image" content="https://curforever.github.io/IDEA%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%89%8B%E6%92%95LeetCode%E9%97%B9%E7%9A%84%E4%B9%8C%E9%BE%99.assets/image-20241225171538402.png">
+<meta property="og:image" content="https://curforever.github.io/IDEA%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%89%8B%E6%92%95LeetCode%E9%97%B9%E7%9A%84%E4%B9%8C%E9%BE%99.assets/image-20241225171642932.png">
+<meta property="og:image" content="https://curforever.github.io/IDEA%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%89%8B%E6%92%95LeetCode%E9%97%B9%E7%9A%84%E4%B9%8C%E9%BE%99.assets/image-20241225171715430.png">
+<meta property="og:image" content="https://curforever.github.io/IDEA%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%89%8B%E6%92%95LeetCode%E9%97%B9%E7%9A%84%E4%B9%8C%E9%BE%99.assets/image-20241225171828942.png">
+<meta property="og:image" content="https://curforever.github.io/IDEA%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%89%8B%E6%92%95LeetCode%E9%97%B9%E7%9A%84%E4%B9%8C%E9%BE%99.assets/image-20241225172201512.png">
+<meta property="article:published_time" content="2024-12-25T09:02:17.151Z">
+<meta property="article:modified_time" content="2024-12-25T09:23:03.672Z">
 <meta property="article:author" content="胡景峰">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://curforever.github.io/IDEA%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%89%8B%E6%92%95LeetCode%E9%97%B9%E7%9A%84%E4%B9%8C%E9%BE%99.assets/image-20241225171110359.png">
 
-<link rel="canonical" href="https://curforever.github.io/2024/12/24/%E3%80%8A%E5%85%B3%E4%BA%8E%E3%80%90%E4%B8%80%E6%97%A5%E7%94%B7%E5%8F%8B%E3%80%91%E7%9A%84%E5%B9%BB%E6%83%B3%E3%80%81%E6%B2%89%E8%BF%B7%E5%92%8C%E7%A0%B4%E7%81%AD%E3%80%8B%E6%92%AD%E5%AE%A2%E7%AC%94%E8%AE%B0/">
+<link rel="canonical" href="https://curforever.github.io/2024/12/25/IDEA%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%89%8B%E6%92%95LeetCode%E9%97%B9%E7%9A%84%E4%B9%8C%E9%BE%99/">
 
 
 <script id="page-configurations">
@@ -47,7 +54,7 @@
   };
 </script>
 
-  <title>《关于【一日男友】的幻想、沉迷和破灭》播客笔记 | 像风一样の博客</title>
+  <title>IDEA本地环境手撕LeetCode闹的乌龙 | 像风一样の博客</title>
   
 
 
@@ -187,7 +194,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://curforever.github.io/2024/12/24/%E3%80%8A%E5%85%B3%E4%BA%8E%E3%80%90%E4%B8%80%E6%97%A5%E7%94%B7%E5%8F%8B%E3%80%91%E7%9A%84%E5%B9%BB%E6%83%B3%E3%80%81%E6%B2%89%E8%BF%B7%E5%92%8C%E7%A0%B4%E7%81%AD%E3%80%8B%E6%92%AD%E5%AE%A2%E7%AC%94%E8%AE%B0/">
+    <link itemprop="mainEntityOfPage" href="https://curforever.github.io/2024/12/25/IDEA%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%89%8B%E6%92%95LeetCode%E9%97%B9%E7%9A%84%E4%B9%8C%E9%BE%99/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.png">
@@ -200,7 +207,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          《关于【一日男友】的幻想、沉迷和破灭》播客笔记
+          IDEA本地环境手撕LeetCode闹的乌龙
         </h1>
 
         <div class="post-meta">
@@ -211,7 +218,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2024-12-24 14:11:17 / 修改时间：14:38:08" itemprop="dateCreated datePublished" datetime="2024-12-24T14:11:17+08:00">2024-12-24</time>
+              <time title="创建时间：2024-12-25 17:02:17 / 修改时间：17:23:03" itemprop="dateCreated datePublished" datetime="2024-12-25T17:02:17+08:00">2024-12-25</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -219,7 +226,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%92%AD%E5%AE%A2%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">播客笔记</span></a>
+                  <a href="/categories/%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/" itemprop="url" rel="index"><span itemprop="name">环境配置</span></a>
                 </span>
             </span>
 
@@ -236,14 +243,14 @@
                 <i class="fa fa-file-word-o"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>1.2k</span>
+              <span>568</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="fa fa-clock-o"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>2 分钟</span>
+              <span>1 分钟</span>
             </span>
 
         </div>
@@ -255,29 +262,41 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h1 id="节目：跳进兔子洞"><a href="#节目：跳进兔子洞" class="headerlink" title="节目：跳进兔子洞"></a>节目：跳进兔子洞</h1><h1 id="标题：关于【一日男友】的幻想、沉迷和破灭"><a href="#标题：关于【一日男友】的幻想、沉迷和破灭" class="headerlink" title="标题：关于【一日男友】的幻想、沉迷和破灭"></a>标题：关于【一日男友】的幻想、沉迷和破灭</h1><h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>随着个体需求的多样化和社会关系的复杂化，越来越多的人开始寻求非传统的情感满足方式。其中，“一日男友”这一现象逐渐浮出水面，成为探讨现代情感需求与消费文化交织的一个重要窗口。</p>
-<h2 id="一日男友现象概述"><a href="#一日男友现象概述" class="headerlink" title="一日男友现象概述"></a>一日男友现象概述</h2><p>“一日男友”指的是<strong>通过线下委托或线上平台，雇佣他人扮演一天的男朋友角色</strong>，以满足个人的情感需求。这一现象在年轻女性群体中特别普遍，尤其是在那些<strong>渴望与虚拟角色或理想化伴侣建立情感联系的“梦女”群体</strong>中。</p>
-<h2 id="委托人的心理需求"><a href="#委托人的心理需求" class="headerlink" title="委托人的心理需求"></a>委托人的心理需求</h2><p>委托人通过<strong>金钱购买爱人</strong>的方式，寻求一种<strong>完全的情感依赖和安全感</strong>。这种需求源自于对稳定关系的渴望，但却难以在现实生活中实现。通过“一日男友”的服务，委托人可以获得：</p>
-<ol>
-<li><strong>占有欲的满足</strong>：通过拥有一个随时可以控制和依赖的伴侣，委托人获得心理上的满足。</li>
-<li><strong>绝对的确定性和安全感</strong>：无需担心关系中的不确定性和风险。</li>
-</ol>
-<p>然而，这种通过金钱购买的关系缺乏真正的情感交流，容易导致情感上的空虚和依赖性。有时甚至会引发和带来对这种情感的<strong>配得感</strong>的怀疑。</p>
-<h2 id="被委托人的角色与挑战"><a href="#被委托人的角色与挑战" class="headerlink" title="被委托人的角色与挑战"></a>被委托人的角色与挑战</h2><p>被委托人扮演“一日男友”的角色，需要具备高度的情感模拟能力和人际交往技巧。他们的工作不仅是表面的陪伴，更涉及深层次的情感交流和关系处理。具体来说：</p>
-<ol>
-<li><strong>角色还原、提供陪伴</strong>：准确模仿理想中的男友形象，满足委托人的幻想。在情感上给予委托人支持和安慰，成为其情感上的依靠。</li>
-<li><strong>关系处理</strong>：被委托人如何处理好营业和非营业状态下的区别和关系处理是一大挑战。</li>
-</ol>
-<p>这种工作模式对被委托人而言，既是一种情感劳动，也可能带来心理压力，尤其是在面对长期依赖的委托人时。</p>
-<h2 id="经济因素与行业现状"><a href="#经济因素与行业现状" class="headerlink" title="经济因素与行业现状"></a>经济因素与行业现状</h2><ul>
-<li>300r &#x2F; 天</li>
-<li>10w+ &#x2F; 月</li>
+        <h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>目前LeetCode已经刷了不少题目，开始关心起这样一个问题：<strong>面试时候手撕代码怎么撕？口述、txt还是牛客平台？笔试是点入各家的链接吗？跟力扣的代码平台有什么很大区别吗？</strong></p>
+<h2 id="手撕代码"><a href="#手撕代码" class="headerlink" title="手撕代码"></a>手撕代码</h2><p>咨询身边好友得到的回复是：区别很大，不能Debug。</p>
+<ul>
+<li><p><strong>牛客平台</strong>：哔哩哔哩</p>
+</li>
+<li><p><strong>本地环境</strong>：京东（提供题目描述，自己用开发环境写代码，没有类名，函数名、参数返回值）</p>
+</li>
+<li><p><strong>第三方平台</strong>：字节用飞书面试，给代码沙盒环境（极少量类似vc++能提供的那种提示）</p>
+</li>
+<li><p><strong>手写</strong></p>
+</li>
 </ul>
-<h2 id="一些思考"><a href="#一些思考" class="headerlink" title="一些思考"></a>一些思考</h2><h3 id="1、幻想、沉迷与破灭的循环"><a href="#1、幻想、沉迷与破灭的循环" class="headerlink" title="1、幻想、沉迷与破灭的循环"></a>1、幻想、沉迷与破灭的循环</h3><p>“一日男友”现象不仅是<strong>个体情感需求</strong>的反映，更是<strong>现代消费文化</strong>与<strong>情感表达方式</strong>的交织。委托人在通过这种服务满足幻想的同时，容易陷入情感上的沉迷。一旦这种依赖无法得到进一步满足，或者服务无法持续提供预期的情感支持，委托人便会经历情感的破灭。这种循环不仅影响个体的心理健康，还可能对现实中的人际关系产生负面影响。长期依赖虚拟或短暂的情感连接，容易导致对真实情感交流的逃避和恐惧，进一步加剧情感上的孤独感。</p>
-<p>这让我想到崩坏星穹铁道的<strong>匹诺康尼</strong>的剧情，<strong>如果现实带给你的大部分是痛苦甚至只有痛苦，你会认为一直沉溺在美梦之中不失为一种解脱吗？</strong></p>
-<h3 id="2、个人主体性"><a href="#2、个人主体性" class="headerlink" title="2、个人主体性"></a>2、个人主体性</h3><p>委托人需要<strong>保持主体性</strong>，不要沉溺于幻想当中。</p>
-<p>被委托人也要<strong>保持主体性</strong>，不被完全物化。</p>
-<h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h2><p>“一日男友”现象是现代社会情感需求与消费文化交织的产物，反映了个体在复杂社会关系中的情感困境。通过分析其背后的幻想、沉迷与破灭，我们不仅可以更好地理解当代情感需求的多样性，也能反思情感表达方式的健康性与可持续性。未来，随着社会的发展和人际关系的演变，这一现象可能会进一步发展，值得我们持续关注和深入研究。</p>
+<h1 id="乌龙"><a href="#乌龙" class="headerlink" title="乌龙"></a>乌龙</h1><p>我尝试了<strong>VSCode + LeetCode</strong>插件，不习惯VSCode的提示和运行方式，毕竟只是编辑器，显得不是那么专业和趁手，于是转向挚爱的IDEA。</p>
+<h2 id="以LeetCode-203-移除链表元素为例"><a href="#以LeetCode-203-移除链表元素为例" class="headerlink" title="以LeetCode 203.移除链表元素为例"></a>以LeetCode 203.移除链表元素为例</h2><p><img src="/IDEA%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%89%8B%E6%92%95LeetCode%E9%97%B9%E7%9A%84%E4%B9%8C%E9%BE%99.assets/image-20241225171110359.png" alt="image-20241225171110359"></p>
+<h2 id="我在IDEA中编写了以下类"><a href="#我在IDEA中编写了以下类" class="headerlink" title="我在IDEA中编写了以下类"></a>我在IDEA中编写了以下类</h2><ul>
+<li>Solution</li>
+<li>Test<ul>
+<li>DataStruct.ListNode</li>
+<li>Utils.ListUtils：用于输入样例数组转链表、打印链表方便调试</li>
+</ul>
+</li>
+</ul>
+<h2 id="遇到的问题"><a href="#遇到的问题" class="headerlink" title="遇到的问题"></a>遇到的问题</h2><p>理应正常，实际正常的输出如下：</p>
+<p><img src="/IDEA%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%89%8B%E6%92%95LeetCode%E9%97%B9%E7%9A%84%E4%B9%8C%E9%BE%99.assets/image-20241225171538402.png" alt="image-20241225171538402"></p>
+<p>理应正常，实际不正常的输出如下：</p>
+<p><img src="/IDEA%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%89%8B%E6%92%95LeetCode%E9%97%B9%E7%9A%84%E4%B9%8C%E9%BE%99.assets/image-20241225171642932.png" alt="image-20241225171642932"></p>
+<p>按照<code>Solution#removeElements</code>的返回结果不应该有错：</p>
+<p><img src="/IDEA%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%89%8B%E6%92%95LeetCode%E9%97%B9%E7%9A%84%E4%B9%8C%E9%BE%99.assets/image-20241225171715430.png" alt="image-20241225171715430"></p>
+<h2 id="发现的乌龙Bug"><a href="#发现的乌龙Bug" class="headerlink" title="发现的乌龙Bug"></a>发现的乌龙Bug</h2><p>乌龙在于一个有参构造方法的参数名笔误了！！！</p>
+<p><img src="/IDEA%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%89%8B%E6%92%95LeetCode%E9%97%B9%E7%9A%84%E4%B9%8C%E9%BE%99.assets/image-20241225171828942.png" alt="image-20241225171828942"></p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><ol>
+<li>学以致用，善用<code>Junit</code>。不要自己写Test，怪麻烦的。</li>
+<li>即使你不会<code>Junit</code>也要会Debug，这次的bug就是通过<code>Step Into (F7)</code> 看到了控制台才发现的。</li>
+</ol>
+<p><img src="/IDEA%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%89%8B%E6%92%95LeetCode%E9%97%B9%E7%9A%84%E4%B9%8C%E9%BE%99.assets/image-20241225172201512.png" alt="image-20241225172201512"></p>
 
     </div>
 
@@ -313,13 +332,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2024/12/20/IDEA%E4%BD%BF%E7%94%A8Tomcat%E8%BF%90%E8%A1%8CWeb%E9%A1%B9%E7%9B%AE%E5%8F%8A%E5%85%B6%E5%B8%B8%E8%A7%81%E6%8A%A5%E9%94%99/" rel="prev" title="IDEA使用Tomcat运行Web项目及其常见报错">
-      <i class="fa fa-chevron-left"></i> IDEA使用Tomcat运行Web项目及其常见报错
+    <a href="/2024/12/25/%E3%80%8A%E5%AF%BB%E6%89%BE%E7%9B%B4%E6%92%AD%E9%97%B4%E9%87%8C%E6%9C%80%E6%9C%89%E9%92%B1%E7%9A%84%E5%82%BB%E5%AD%90%E3%80%8B%E6%92%AD%E5%AE%A2%E7%AC%94%E8%AE%B0/" rel="prev" title="《寻找直播间里最有钱的傻子》播客笔记">
+      <i class="fa fa-chevron-left"></i> 《寻找直播间里最有钱的傻子》播客笔记
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2024/12/25/%E3%80%8A%E5%AF%BB%E6%89%BE%E7%9B%B4%E6%92%AD%E9%97%B4%E9%87%8C%E6%9C%80%E6%9C%89%E9%92%B1%E7%9A%84%E5%82%BB%E5%AD%90%E3%80%8B%E6%92%AD%E5%AE%A2%E7%AC%94%E8%AE%B0/" rel="next" title="《寻找直播间里最有钱的傻子》播客笔记">
-      《寻找直播间里最有钱的傻子》播客笔记 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -378,7 +394,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%8A%82%E7%9B%AE%EF%BC%9A%E8%B7%B3%E8%BF%9B%E5%85%94%E5%AD%90%E6%B4%9E"><span class="nav-number">1.</span> <span class="nav-text">节目：跳进兔子洞</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A0%87%E9%A2%98%EF%BC%9A%E5%85%B3%E4%BA%8E%E3%80%90%E4%B8%80%E6%97%A5%E7%94%B7%E5%8F%8B%E3%80%91%E7%9A%84%E5%B9%BB%E6%83%B3%E3%80%81%E6%B2%89%E8%BF%B7%E5%92%8C%E7%A0%B4%E7%81%AD"><span class="nav-number">2.</span> <span class="nav-text">标题：关于【一日男友】的幻想、沉迷和破灭</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%95%E8%A8%80"><span class="nav-number">2.1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E6%97%A5%E7%94%B7%E5%8F%8B%E7%8E%B0%E8%B1%A1%E6%A6%82%E8%BF%B0"><span class="nav-number">2.2.</span> <span class="nav-text">一日男友现象概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A7%94%E6%89%98%E4%BA%BA%E7%9A%84%E5%BF%83%E7%90%86%E9%9C%80%E6%B1%82"><span class="nav-number">2.3.</span> <span class="nav-text">委托人的心理需求</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A2%AB%E5%A7%94%E6%89%98%E4%BA%BA%E7%9A%84%E8%A7%92%E8%89%B2%E4%B8%8E%E6%8C%91%E6%88%98"><span class="nav-number">2.4.</span> <span class="nav-text">被委托人的角色与挑战</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%8F%E6%B5%8E%E5%9B%A0%E7%B4%A0%E4%B8%8E%E8%A1%8C%E4%B8%9A%E7%8E%B0%E7%8A%B6"><span class="nav-number">2.5.</span> <span class="nav-text">经济因素与行业现状</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E4%BA%9B%E6%80%9D%E8%80%83"><span class="nav-number">2.6.</span> <span class="nav-text">一些思考</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E3%80%81%E5%B9%BB%E6%83%B3%E3%80%81%E6%B2%89%E8%BF%B7%E4%B8%8E%E7%A0%B4%E7%81%AD%E7%9A%84%E5%BE%AA%E7%8E%AF"><span class="nav-number">2.6.1.</span> <span class="nav-text">1、幻想、沉迷与破灭的循环</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E3%80%81%E4%B8%AA%E4%BA%BA%E4%B8%BB%E4%BD%93%E6%80%A7"><span class="nav-number">2.6.2.</span> <span class="nav-text">2、个人主体性</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%93%E8%AE%BA"><span class="nav-number">2.7.</span> <span class="nav-text">结论</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%89%8B%E6%92%95%E4%BB%A3%E7%A0%81"><span class="nav-number">1.1.</span> <span class="nav-text">手撕代码</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B9%8C%E9%BE%99"><span class="nav-number">2.</span> <span class="nav-text">乌龙</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%A5LeetCode-203-%E7%A7%BB%E9%99%A4%E9%93%BE%E8%A1%A8%E5%85%83%E7%B4%A0%E4%B8%BA%E4%BE%8B"><span class="nav-number">2.1.</span> <span class="nav-text">以LeetCode 203.移除链表元素为例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%88%91%E5%9C%A8IDEA%E4%B8%AD%E7%BC%96%E5%86%99%E4%BA%86%E4%BB%A5%E4%B8%8B%E7%B1%BB"><span class="nav-number">2.2.</span> <span class="nav-text">我在IDEA中编写了以下类</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%81%87%E5%88%B0%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">2.3.</span> <span class="nav-text">遇到的问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%91%E7%8E%B0%E7%9A%84%E4%B9%8C%E9%BE%99Bug"><span class="nav-number">2.4.</span> <span class="nav-text">发现的乌龙Bug</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
