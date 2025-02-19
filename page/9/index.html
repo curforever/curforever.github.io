@@ -131,7 +131,7 @@
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">88</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">89</span></a>
 
   </li>
       <li class="menu-item menu-item-search">
@@ -180,6 +180,136 @@
 
           <div class="content index posts-expand">
             
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://curforever.github.io/2024/12/25/IDEA%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%89%8B%E6%92%95LeetCode%E9%97%B9%E7%9A%84%E4%B9%8C%E9%BE%99/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="胡景峰">
+      <meta itemprop="description" content="东南大学 软件学院">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="像风一样の博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/12/25/IDEA%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%89%8B%E6%92%95LeetCode%E9%97%B9%E7%9A%84%E4%B9%8C%E9%BE%99/" class="post-title-link" itemprop="url">IDEA本地环境手撕LeetCode闹的乌龙</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-12-25 17:02:17 / 修改时间：17:33:48" itemprop="dateCreated datePublished" datetime="2024-12-25T17:02:17+08:00">2024-12-25</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/" itemprop="url" rel="index"><span itemprop="name">环境配置</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>568</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>1 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>目前LeetCode已经刷了不少题目，开始关心起这样一个问题：<strong>面试时候手撕代码怎么撕？口述、txt还是牛客平台？笔试是点入各家的链接吗？跟力扣的代码平台有什么很大区别吗？</strong></p>
+<h2 id="手撕代码"><a href="#手撕代码" class="headerlink" title="手撕代码"></a>手撕代码</h2><p>咨询身边好友得到的回复是：区别很大，不能Debug。</p>
+<ul>
+<li><p><strong>牛客平台</strong>：哔哩哔哩</p>
+</li>
+<li><p><strong>本地环境</strong>：京东（提供题目描述，自己用开发环境写代码，没有类名，函数名、参数返回值）</p>
+</li>
+<li><p><strong>第三方平台</strong>：字节用飞书面试，给代码沙盒环境（极少量类似vc++能提供的那种提示）</p>
+</li>
+<li><p><strong>手写</strong></p>
+</li>
+</ul>
+<h1 id="乌龙"><a href="#乌龙" class="headerlink" title="乌龙"></a>乌龙</h1><p>我尝试了<strong>VSCode + LeetCode</strong>插件，不习惯VSCode的提示和运行方式，毕竟只是编辑器，显得不是那么专业和趁手，于是转向挚爱的IDEA。</p>
+<h2 id="以LeetCode-203-移除链表元素为例"><a href="#以LeetCode-203-移除链表元素为例" class="headerlink" title="以LeetCode 203.移除链表元素为例"></a>以LeetCode 203.移除链表元素为例</h2><img src="/2024/12/25/IDEA%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%89%8B%E6%92%95LeetCode%E9%97%B9%E7%9A%84%E4%B9%8C%E9%BE%99/image-20241225171110359.png" class="" title="image-20241225171110359">
+
+
+
+<h2 id="我在IDEA中编写了以下类"><a href="#我在IDEA中编写了以下类" class="headerlink" title="我在IDEA中编写了以下类"></a>我在IDEA中编写了以下类</h2><ul>
+<li>Solution</li>
+<li>Test<ul>
+<li>DataStruct.ListNode</li>
+<li>Utils.ListUtils：用于输入样例数组转链表、打印链表方便调试</li>
+</ul>
+</li>
+</ul>
+<h2 id="遇到的问题"><a href="#遇到的问题" class="headerlink" title="遇到的问题"></a>遇到的问题</h2><p>理应正常，实际正常的输出如下：</p>
+<img src="/2024/12/25/IDEA%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%89%8B%E6%92%95LeetCode%E9%97%B9%E7%9A%84%E4%B9%8C%E9%BE%99/image-20241225171538402.png" class="" title="image-20241225171538402">
+
+
+
+<p>理应正常，实际不正常的输出如下：</p>
+<img src="/2024/12/25/IDEA%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%89%8B%E6%92%95LeetCode%E9%97%B9%E7%9A%84%E4%B9%8C%E9%BE%99/image-20241225171642932.png" class="" title="image-20241225171642932">
+
+
+
+<p>按照<code>Solution#removeElements</code>的返回结果不应该有错：</p>
+<img src="/2024/12/25/IDEA%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%89%8B%E6%92%95LeetCode%E9%97%B9%E7%9A%84%E4%B9%8C%E9%BE%99/image-20241225171715430.png" class="" title="image-20241225171715430">
+
+<h2 id="发现的乌龙Bug"><a href="#发现的乌龙Bug" class="headerlink" title="发现的乌龙Bug"></a>发现的乌龙Bug</h2><p>乌龙在于一个有参构造方法的参数名笔误了！！！</p>
+<img src="/2024/12/25/IDEA%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%89%8B%E6%92%95LeetCode%E9%97%B9%E7%9A%84%E4%B9%8C%E9%BE%99/image-20241225171828942.png" class="" title="image-20241225171828942">
+
+
+
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><ol>
+<li>学以致用，善用<code>Junit</code>。不要自己写Test，怪麻烦的。</li>
+<li>即使你不会<code>Junit</code>也要会Debug，这次的bug就是通过<code>Step Into (F7)</code> 看到了控制台才发现的。</li>
+</ol>
+<img src="/2024/12/25/IDEA%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%89%8B%E6%92%95LeetCode%E9%97%B9%E7%9A%84%E4%B9%8C%E9%BE%99/image-20241225172201512.png" class="" title="image-20241225172201512">
+
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
       
   
   
