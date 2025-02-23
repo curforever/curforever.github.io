@@ -131,7 +131,7 @@
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">93</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">94</span></a>
 
   </li>
       <li class="menu-item menu-item-search">
@@ -180,6 +180,183 @@
 
           <div class="content index posts-expand">
             
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://curforever.github.io/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="胡景峰">
+      <meta itemprop="description" content="东南大学 软件学院">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="像风一样の博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/" class="post-title-link" itemprop="url">Esko Ukkonen On-line Construction of Suffix Trees</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-12-20 16:29:38" itemprop="dateCreated datePublished" datetime="2024-12-20T16:29:38+08:00">2024-12-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-12-25 17:39:52" itemprop="dateModified" datetime="2024-12-25T17:39:52+08:00">2024-12-25</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%B2%E8%A7%A3%E6%95%99%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">讲解教程</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>6.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>11 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="Esko-Ukkonen-On-line-Construction-of-Suffix-Trees"><a href="#Esko-Ukkonen-On-line-Construction-of-Suffix-Trees" class="headerlink" title="Esko Ukkonen: On-line Construction of Suffix Trees"></a>Esko Ukkonen: On-line Construction of Suffix Trees</h1><p>@[toc]</p>
+<h1 id="一、后缀树的概念及应用【详见刘方州同学报告】"><a href="#一、后缀树的概念及应用【详见刘方州同学报告】" class="headerlink" title="一、后缀树的概念及应用【详见刘方州同学报告】"></a>一、后缀树的概念及应用【详见刘方州同学报告】</h1><h2 id="1-1-字典树-Trie"><a href="#1-1-字典树-Trie" class="headerlink" title="1.1 字典树 Trie"></a>1.1 字典树 Trie</h2><p>定义：字典树，又称单词查找树或键树，是一种树形结构，是一种哈希树的变种。<br>用途：用于统计和排序大量的字符串（但不仅限于字符串），所以经常被搜索引擎系统用于文本词频统计。<br>优点：最大限度地减少无谓的字符串比较，查询效率比哈希表高。<br>核心思想：空间换时间，利用字符串的公共前缀来降低查询时间的开销以达到提高效率的目的。<br>基本性质：<br>（1）根节点不包含字符，除根节点外每一个节点都只包含一个字符。<br>（2）从根节点到某一节点，路径上经过的字符连接起来，为该节点对应的字符串。<br>（3）每个节点的所有子节点包含的字符都不相同。</p>
+<h2 id="1-2-后缀树-Suffix-Tree"><a href="#1-2-后缀树-Suffix-Tree" class="headerlink" title="1.2 后缀树 Suffix Tree"></a>1.2 后缀树 Suffix Tree</h2><p>后缀树是一种数据结构，能快速解决很多关于字符串的问题。后缀树的概念最早由Weiner于1973年提出，既而由McCreight在1976年和Ukkonen在1992年和1995年加以改进完善。<br>给定一长度为n的字符串T&#x3D;T_1 T_2 〖…T〗<em>n和整数i (1&lt;&#x3D;i&lt;&#x3D;n)，子串T_i T</em>(i+1) 〖…T〗_n便都是字符串T的后缀。以字符串T&#x3D;abcabxabcd为例，它的长度为10，所以abcabxabcd、bcabxabcd、cabxabcd、…、d都是T的后缀。规定空字串也是后缀。后缀树，就是包含一则字符串所有后缀的压缩字典树，压缩过程如图1所示。把abcabxabcd的所有后缀加入字典树并压缩后，我们得到如图2的后缀树。</p>
+<img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/6acacda119cab9dd2e567502e3677939.png" class="" title="图1 后缀字典树到后缀树的压缩过程">
+
+
+<img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/441b6b774ab91a0a40e2b0edd0232d4e.png" class="" title="图2 abcabxabcd的后缀树">
+
+<p>如图2所示，Suffix Tree与Trie的不同在于边不再只代表单个字符，而是每个边可以表示任意的长度，实操过程中用两个指针[from， to]实现，耗费O(1)的空间。</p>
+<h2 id="2-后缀树的应用"><a href="#2-后缀树的应用" class="headerlink" title="2 后缀树的应用"></a>2 后缀树的应用</h2><p>2.1 最长重复子串<br>2.2 最长公共子串<br>2.3 最长回文子串</p>
+<h1 id="二、朴素后缀树构造方法及问题"><a href="#二、朴素后缀树构造方法及问题" class="headerlink" title="二、朴素后缀树构造方法及问题"></a>二、朴素后缀树构造方法及问题</h1><p>略
+ </p>
+<h1 id="三、线性时间内后缀树在线构造方法"><a href="#三、线性时间内后缀树在线构造方法" class="headerlink" title="三、线性时间内后缀树在线构造方法"></a>三、线性时间内后缀树在线构造方法</h1><p>McCreight最初的构造法原则上要按逆序构造，也就是说字符要从末端开始插入。如此一来便不能作为在线算法， 它变得更加难以应用于实际问题，如数据压缩。<br>20年后，来自赫尔辛基理工大学的Esko Ukkonen把原算法作了一些改动，实现了线性时间内对字符串从左往右的后缀树在线构造方法。<br>对于所给的文本T，由一棵空树开始逐步构造T的后缀树。以abcabxabcd为例，先由a开始，接着是ab，然后abc，…，不断更新直到构造出abcabxabcd的后缀树。</p>
+<h2 id="3-1-概念引入"><a href="#3-1-概念引入" class="headerlink" title="3.1 概念引入"></a>3.1 概念引入</h2><h3 id="（1）隐式后缀树-Implicit-Suffix-Tree"><a href="#（1）隐式后缀树-Implicit-Suffix-Tree" class="headerlink" title="（1）隐式后缀树 Implicit Suffix Tree"></a>（1）隐式后缀树 Implicit Suffix Tree</h3><p>按上述方法在线构造abcabxabcd的后缀树的过程中，我们必然会构造出字符串abcab的后缀树，对其所有后缀枚举如下：abcab、bcab、cab、ab、b。观察发现：后缀ab被包含在abcab中作为其前缀；后缀b被包含在bcab中作为其前缀。<br>如果为ab或b单独开辟新的分支，则不符合字典树的性质，即每个节点的所有子节点包含的字符都不相同。因此我们选择暂时认为ab、b隐式包含在已有分支里，这样构造出来的后缀树称为隐式后缀树。<br>在我看来，隐式后缀树是在扫描和构建过程中节省时间的一步操作。因为字符串尚未扫描结束，所以这些操作可以先记录着而暂时不去执行，其代价是需要引入接下来要提及的活动点和剩余后缀数。</p>
+<h3 id="（2）终止符"><a href="#（2）终止符" class="headerlink" title="（2）终止符 $"></a>（2）终止符 $</h3><p><strong>问题：如何确定查找后缀树得到的子串是一个后缀还是后缀的一部分？</strong><br>解决：在文本后添加字母表以外的字符，比如$。这样，当查找到ab$或b$就说明这是一个后缀，避免了二义性。对abcab$的所有后缀重新枚举如下：xabxa$、abxa$、bxa$、xa$、a$、$。观察发现：xa$不再是xabxa$的前缀；a$不再是bcab$的前缀。</p>
+<h3 id="（3）活动点active-point、剩余后缀数-remainder"><a href="#（3）活动点active-point、剩余后缀数-remainder" class="headerlink" title="（3）活动点active point、剩余后缀数 remainder"></a>（3）活动点active point、剩余后缀数 remainder</h3><p><strong>问题：我们提到了隐式后缀树，隐式什么时候变为显式？怎么变为显式？</strong><br>比喻：隐式就像瘦子躲在胖子后面，瘦子露出马脚的时候就是变为显式的时候。<br>举例：以最终构建abcabx为例。第一阶段，我们从左到右在线构建abc的后缀树，如图3所示。<br> <img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/dd57f4da725c038161235b3f84657b20.png" class="" title="在这里插入图片描述"><br>图3 abc的后缀树<br>第二阶段，我们需要构建abcab的后缀树，如图4所示。新增字符a新增字符b的情况下，不必大刀阔斧改变树的结构，只要悄悄在每条边后面追加a追加b即可。枚举abcab的后缀集合：abcab、bcab、cab、ab、b。观察发现，abcab、bcab、cab即为三条边，而ab、b隐式地包含其中。</p>
+ <img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/7bf70b3bdbcbf172481964a86f221193.png" class="" title="在这里插入图片描述">
+
+<p>图4 abcab的后缀树<br>第三阶段，我们需要构建abcabx的后缀树。新增字符x，x就是露出的马脚，因为已有的后缀树的边里没有包含abx的。露出马脚之时就是变为显式之日，通过裂变出新的边变为显式，如图5所示。<br> <img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/2a784f64875c60a2bb00befdfcab4329.png" class="" title="在这里插入图片描述"><br>图5 abcabx的后缀树</p>
+<p><strong>问题：如何确定裂变的位置？</strong><br>解决：引入活动点active point，用于确定裂变的位置。活动点active point是一个包括(active_node, active_edge, active_length)的三元组。该三元组在每次后缀树的搜索中更新。<br>根据active_node确定结点，根据active_edge确定结点的某一条边，根据active_length确定边上的某个位置。举例来说，如图6所示，active_node为0，即根节点，active_edge为a，即从根节点出发、字符为a的这条边，active_length为2，即该边索引为2的地方，即符号|所在位置。<br> <img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/0cd8b06ef3a341b25445a60cac7e6b1c.png" class="" title="在这里插入图片描述"><br>图6 active point的含义解释</p>
+<p><strong>问题：裂变具体怎么做？</strong><br>解决：如图7所示，以abcab-&gt;abcabx为例，裂变时进行以下操作：<br>① 根据活动点确定裂变位置（ab|cab），在|处添加节点。<br>② 在新增的节点后分裂出一个边为x的节点。</p>
+<img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/33d19f111e79fc01e511eed4fd34410c.png" class="" title="在这里插入图片描述">
+<p>图7 裂变的过程<br>至此由于添加abx后缀引发的裂变完成。<br><strong>问题：只裂变一次就够了吗？</strong><br>思考：未必够。以abcab到abcabx为例，abcab的后缀树表示如图8所示。<br> <img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/916ab767229cd8688ecede1d6214c4df.png" class="" title="在这里插入图片描述"><br>图8 abcab的后缀树<br>已知abcabx的后缀集合：abcabx、bcabx、cabx、abx、bx、x。<br>如果仅在已有的边后面添加x，只能覆盖abcabx、bcabx、cabx，剩下abx、bx、x。由于每次裂变能得到1个新后缀，直觉上来说需要进行3次裂变，事实上也是如此。上述过程只完成了添加abx后缀引发的裂变。<br>解决：引入剩余后缀数remainder，表示还需要插入多少个新的后缀，即还需要裂变几次。remainder&#x3D;0时，表示当前新增字符处理完毕，继续扩展下一字符。</p>
+<h3 id="（4）后缀链接-Suffix-Link"><a href="#（4）后缀链接-Suffix-Link" class="headerlink" title="（4）后缀链接 Suffix Link"></a>（4）后缀链接 Suffix Link</h3><p>根据上述问题思考已经明确了两个事实：<br>① 活动点active point指向要裂变的位置。<br>② 要裂变的位置可能不止一个。<br><strong>问题：每次都重新从根节点搜索下一裂变处吗？</strong><br>解决：不需要。引入后缀链接Suffix Link，用于快速找到下一裂变处。<br><strong>问题：后缀链接怎么创建？</strong><br>规则：每进行一次裂变，会新增非叶节点和新边。后缀链接从该新增的非叶节点出发，指向下一次裂变新增的非叶节点，用虚线连接。<br><strong>问题：为什么后缀链接可以快速找到下一裂变处？</strong><br>观察：后缀链接连接的节点存在的关系：如果有一个从A指向B的后缀链接，那么从根节点到A节点表示的子串剔除第首个字符后得到的即为从根节点到B节点表示的子串。<br>举例：图9中节点4表示字符串ab，节点6表示字符串b，ab剔除掉首个字符a后得到b。实际处理时，每一次裂变意味着一个待添加后缀的成功插入（abx），下一次裂变的工作就是插入下一个待添加后缀（bx），下一个待添加后缀（bx）与当前成功插入的后缀（abx）的关系也是这样。<br>好处：可以方便地从一个后缀跳到另一个后缀，降低算法的时间复杂度。</p>
+<img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/adeeca639e49e547a5b54e7b817e1c59.png" class="" title="在这里插入图片描述">
+
+
+<h2 id="3-2-过程演示"><a href="#3-2-过程演示" class="headerlink" title="3.2 过程演示"></a>3.2 过程演示</h2><img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/76d05959648ed4212fe1c0ccaa09e7cd.png" class="" title="图10 后缀树构建过程演示Step 1-空树">
+
+<img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/e91af3d53f2bb9ee38567cf6045e1cc6.png" class="" title="图11 后缀树构建过程演示Step 2-a">
+
+
+
+<img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/d3851a90bc2f300a0fc14dffa770f4e5.png" class="" title="图12 后缀树构建过程演示Step 3-ab">
+
+
+
+<img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/53309f726a393bced86746c7a838c6f1.png" class="" title="图13 后缀树构建过程演示Step 4-abc">
+
+
+
+<img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/d45b48924e9a6f7252b6f2b0ce4aad13.png" class="" title="图14 后缀树构建过程演示Step 5-abca">
+
+
+<p>注意到已经存在的第一条边前缀中隐式包含了a。隐式包含在实操过程中的做法就是更新活动点active point和剩余后缀数remainder。<br>单就后缀树而言，这颗后缀树没有准确地描述当前读到的字符串abca。如何保证最后扫描结束的时候后缀树可以准确表示呢？回扣前文终结符的引入：在遇到$并做完相应操作后，后缀树可以准确地描述abca$。</p>
+<img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/3e305edbd22d407d460daf5833cba095.png" class="" title="图15 后缀树构建过程演示Step 6-abcab">
+
+<p>更新active point：a后面有b，length+1，往后挪；还在同一条边上，node和edge不变；<br>更新remainder+1&#x3D;2：表示需要插入两个后缀ab、b。<br><strong>问题：为什么remainder+1？</strong><br>因为上一步的a实际上没有被插入树中，所以它被remain了下来，而后我们又继续处理b了，所以上一步没插入的a延长成了ab。加入的1即需要插入新的后缀b。<br><strong>问题：再看active point和remainder记录信息似乎是缺失的：记录了后缀ab即将添加的位置，记录了2个待添加后缀，却没有记录b即将添加的位置？为什么呢？</strong><br>先说结论：“既然第一条边有ab|cab，那在第一条边后面（也就是第二条第三条边里）一定存在去掉a以b开头的后缀”。<br>再详细解释：回顾一下这里第二条边是如何产生的？正是因为后缀树的逐步构建过程中a后接了b，所以我们先在第一条边的a追加成ab，再为b开辟新的边，即第二条边，所以这个第二条边就是显然的以b开头的后缀。换句话说，即使a后面不是紧跟的b，而是紧跟的是个x，那也会新开一条边以x开头的。</p>
+<img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/a22f32c30e4b711815f8af1b5f9e5f9f.png" class="" title="图16 后缀树构建过程演示Step 7-abcabx-插入abx">
+
+<p>remainder&#x3D;3，表示有3个待添加的后缀：abx、bx、x<br>我们按之前的逻辑来试图更新active point：ab之后找x，找不到！因此在裂变位置添加新的节点4、新的边x。这一步完成了后缀abx的添加。但是active point怎么更新呢？ </p>
+<h3 id="Rule-1（活动点更新规则1）"><a href="#Rule-1（活动点更新规则1）" class="headerlink" title="Rule 1（活动点更新规则1）"></a>Rule 1（活动点更新规则1）</h3><p>当active_node &#x3D; root 时遵循：<br>    active_node 保持为 root；<br>    active_edge 被设置为即将被插入的新后缀的首字符；<br>    active_length 减1；</p>
+<img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/a64832fcdb1136281c02cdf2fbdf0854.png" class="" title="图17 后缀树构建过程演示Step 7-abcabx-插入abx后更新active point">
+
+<p>根据Rule 1规则更新active point：<br>    active_node 保持为 root；<br>    active_edge 被设置为即将被插入的新后缀bx的首字符b；<br>    active_length-1&#x3D;1；<br>更新remainder：remainder-1&#x3D;2，表示还有2个后缀待添加：bx、x。</p>
+<img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/63436a9acf538d6d203988fdae7ab973.png" class="" title="图18 后缀树构建过程演示Step 8-abcabx-插入bx">
+
+<p>裂变过程与abx的插入相似，不多赘述。依据Rule 1更新active point为 (0, ‘x’, 0)。<br>更新remainder-1&#x3D;1，表示还有1个后缀x没有插入。<br>注：图里的remainder&#x3D;0，我认为其意思是在扫描到x时回头处理之前的ab，但其实并没有真的扫描x，就像一个人往前走路只是把脚伸过去但没有迈过去踩实，所以默认观察到了x并处理了之前遗留的a和b，但尚未处理x，现在remainder&#x3D;0说明a和b处理好了，开始处理下一个字符x，直接在根节点加边x。<br>除此以外，该步骤还需要创建后缀链接。</p>
+<h3 id="Rule-2（后缀链接创建规则）"><a href="#Rule-2（后缀链接创建规则）" class="headerlink" title="Rule 2（后缀链接创建规则）"></a>Rule 2（后缀链接创建规则）</h3><p>如果我们分裂一条边并且插入一个新的节点，并且如果该新节点不是创建的第一个节点，则将先前插入的节点与该新节点通过一个特殊的指针连接，称为后缀链接，通过一条虚线来表示。<br>在图18中，因插入bx新裂变出来的节点6，不是扫描到x后创建的第一个节点了（第一个节点是因插入abx新裂变出来的节点4），因此创建后缀链接：4-&gt;6。<br>我的理解是“前人栽树，后人乘凉”，这条后缀链接在下一次碰到ab时会有用。</p>
+<img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/241229f58f6858bce3fdc663271d3a02.png" class="" title="图19 后缀树构建过程演示Step 9-abcabx-插入x">
+
+<p>active point为 (0, x, 0)，length&#x3D;0，所以在根节点创建边x。<br>remainder-1&#x3D;0，表示可以处理下一个字符了。</p>
+<img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/8d808c8cb610ac0bae0578d2a0f076e4.png" class="" title="图20 Step 10 后缀树构建过程演示-abcabxa">
+
+
+
+<img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/1c1968d58f4f4c5bc7683d5b16938455.png" class="" title="图21 后缀树构建过程演示Step 11-abcabxab">
+<img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/c0ae42f9a7da011ee79ddb8dc51b280e.png" class="" title="图22 后缀树构建过程演示Step 12-abcabxabc">
+
+<p>更新active point(4,’c’,1)；<br>更新remainder&#x3D;3，表示需要插入abc、bc、c三个后缀。</p>
+<img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/2bc2d57804e9482ce96f46ece0d7cf3e.png" class="" title="图23 后缀树构建过程演示Step 13-abcabxabcd">
+
+<p>更新remainder &#x3D; 4，需要插入abcd、bcd、cd、d四个后缀；<br>更新active point：abc之后找d，找不到！因此在裂变位置添加新的节点9、新的边d。<br><strong>问题：此时active point如何更新的？</strong></p>
+<h3 id="Rule-3（活动点更新规则2）"><a href="#Rule-3（活动点更新规则2）" class="headerlink" title="Rule 3（活动点更新规则2）"></a>Rule 3（活动点更新规则2）</h3><p>当从active_node从不为root的节点分裂边时，我们沿着后缀链接的方向寻找节点：<br>    如果存在一个节点，则设置该节点为 active_node；<br>    如果不存在，则设置 active_node 为 root。<br>上述两种情况的active_edge 和 active_length 保持不变。</p>
+<p>根据Rule 3，图23的active point为(6, c, 1)。<br>更新remainder &#x3D; 3，并且开始处理下一个剩余后缀bcd。<br>bc后并没有没出现d，裂变。</p>
+<img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/65e0df16b2dc3965f7e7c0189a225f24.png" class="" title="图24 后缀树构建过程演示Step 14-abcabxabcd-插入bcd">
+
+<p>裂变创建了节点11和边d。除了更新之外，根据Rule2创建后缀链接：9-&gt;11。<br>此时，我们观察两个后缀链接：<br>    4 (ab) -&gt; 6 (b)<br>    9 (abc) -&gt; 11 (bc)<br>remainder-1&#x3D;2，表示还需要插入cd、d；<br>根据Rule 3更新active point为(root, c, 1)。</p>
+<img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/386d3504718fddf9b0ce651c7dc86a79.png" class="" title="图25 后缀树构建过程演示Step 15-abcabxabcd-插入cd">
+
+<p>更新active point时：由于找不到后续d，因此裂变：新建节点13和边d；<br>更新remainder-1 &#x3D; 1；<br>依据Rule 2创建后缀链接：11 -&gt; 13。</p>
+<img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/fddc1ff5489a9a7cae0c61c89f034748.png" class="" title="图26 后缀树构建过程演示Step 16-abcabxabcd-插入d">
+
+<p>更新active point时：由于找不到后续d，因此裂变，新建边d；<br>更新remainder-1&#x3D;0。</p>
+<img src="/2024/12/20/Esko%20Ukkonen%20On-line%20Construction%20of%20Suffix%20Trees/d892500e7a996e91ed73317b7618ce7b.png" class="" title="图27 后缀树构建过程演示Step 17-abcabxabcd$">
+
+<p>对树结构的改变仅需在根节点上插入一条新边$。<br>整个后缀树构建完成。</p>
+<h2 id="3-3-复杂度分析"><a href="#3-3-复杂度分析" class="headerlink" title="3.3 复杂度分析"></a>3.3 复杂度分析</h2><p>关于隐式后缀树，如果扫描发现要被插入的字符已经存在于树中，则无需修改树的结构。原因是要被插入的字符实际上已经隐式地被包含在了当前的树中。而active point和remainder的更新记录了这部分信息，确保了在后续的操作中会进行处理。</p>
+<p><strong>问题：算法结束时remainder &gt; 0的情况存在吗？</strong><br>解决： remainder &gt; 0意味着当前仍为隐式后缀树，虽然隐式包含着后缀信息，但是整个树并没有准确表达所有后缀。<br>我们在字符串末尾添加$以避免这种情况。由于$一定不同于字符串中任一字符的特性，使得在扫描到$时一定将之前所有隐式包含的后缀暴露出来并处理，处理的过程中remainder递减至0，最终完成整个后缀树的构建。<br>remainder记录了还余下多少后缀需要插入。这些插入操作将逐个的与当前位之前的后缀进行对应，我们需要一个接着一个的处理。每次插入需要O(1)时间。active point记录了插入（裂变）的位置。仅需在该位置新增一个字符，因为其他字符都被隐式地包含了。每次插入后：对于remainder，相应减少；对于active point：如果存在后缀连接的node续接至下一个节点；如果不存在则返回root节点；如果已经是在root节点了，则依据Rule1来修改活动点。无论哪种情况，仅需O(1)时间。<br>如果这些插入操作中，如果发现要被插入的字符已经存在于树中，则什么也不做，即使 remainder&gt;0。原因是要被插入的字符实际上已经隐式地被包含在了当前的树中。而 remainder&gt;0 则确保了在后续的操作中会进行处理。</p>
+<p><strong>整体算法复杂度是多少？</strong><br>如果输入字符串的长度为n，则有n步需要执行，加上$有n+1步。在每一步中：<br>    要么消耗O(1) 时间更新active point和remainder；<br>    要么消耗O(1) 时间执行裂变插入操作；<br>因此整体算法复杂度为O(n)。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
       
   
   
