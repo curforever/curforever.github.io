@@ -131,7 +131,7 @@
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">82</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">83</span></a>
 
   </li>
       <li class="menu-item menu-item-search">
@@ -180,6 +180,132 @@
 
           <div class="content index posts-expand">
             
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://curforever.github.io/2024/12/20/%E9%93%BE%E8%A1%A8%E9%80%86%E7%BD%AE%E8%AF%A6%E7%BB%86%E8%AE%B2%E8%A7%A3%EF%BC%88%E5%9B%BE%E6%96%87%EF%BC%89/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="胡景峰">
+      <meta itemprop="description" content="东南大学 软件学院">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="像风一样の博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/12/20/%E9%93%BE%E8%A1%A8%E9%80%86%E7%BD%AE%E8%AF%A6%E7%BB%86%E8%AE%B2%E8%A7%A3%EF%BC%88%E5%9B%BE%E6%96%87%EF%BC%89/" class="post-title-link" itemprop="url">链表逆置详细讲解（图文）</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-12-20 16:28:07" itemprop="dateCreated datePublished" datetime="2024-12-20T16:28:07+08:00">2024-12-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-12-25 17:39:39" itemprop="dateModified" datetime="2024-12-25T17:39:39+08:00">2024-12-25</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%B2%E8%A7%A3%E6%95%99%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">讲解教程</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.4k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="链表逆置"><a href="#链表逆置" class="headerlink" title="链表逆置"></a>链表逆置</h1><p>&nbsp;</p>
+<h2 id="前言"><a href="#前言" class="headerlink" title="&#x3D;&#x3D;前言&#x3D;&#x3D;"></a>&#x3D;&#x3D;前言&#x3D;&#x3D;</h2><p><strong>链表逆置</strong>是初学时有困扰到我的难点.</p>
+<p>由于链表<strong>头结点</strong>可放可不放数据，所以写代码时候 <strong>-&gt;next</strong> 用的云里雾里。</p>
+<p>这里讲解头结点与第一结点区分的情况，即<strong>头结点</strong>你把它看作这个 <strong>链表的“文件名”</strong> 就行。<br>若头结点为L，则第一结点为L-&gt;next。</p>
+<p>&nbsp;</p>
+<h2 id="代码"><a href="#代码" class="headerlink" title="&#x3D;&#x3D;代码&#x3D;&#x3D;"></a>&#x3D;&#x3D;代码&#x3D;&#x3D;</h2><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> <span class="title function_">listReverse</span>(<span class="params">linkedList &amp;L</span>)</span><br><span class="line">&#123;</span><br><span class="line">	node *p,*s;</span><br><span class="line">	<span class="comment">//1.</span></span><br><span class="line">	p = L-&gt;next;</span><br><span class="line">	L-&gt;next = <span class="variable constant_">NULL</span>;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">while</span>(p)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="comment">//2.1</span></span><br><span class="line">		s = p; </span><br><span class="line">		p = p-&gt;next;</span><br><span class="line">		<span class="comment">//2.2</span></span><br><span class="line">		s-&gt;next = L-&gt;next; </span><br><span class="line">		L-&gt;next = s;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>看不懂别慌。我会把代码拆解成三块为你讲解。</strong><br>讲解前，先做一个理解工作，以 L-&gt;next 为例，按在表达式<strong>左</strong>边or<strong>右</strong>边分，存在两种情况：</p>
+<p><strong>情况一（左）：L-&gt;next &#x3D; NULL;</strong></p>
+<blockquote>
+<p>重点在<strong>next</strong>，即L的<strong>指针域</strong>，该表达式将指针域指向NULL。 </p>
+</blockquote>
+<p><strong>情况二（右）：p &#x3D; L-&gt;next;</strong></p>
+<blockquote>
+<p>重点在 L-&gt;next <strong>整体</strong>， 即 L-&gt;next 这个<strong>结点</strong>，-&gt;next在这里就是个形式，目的还是为了告诉你是<strong>这个结点</strong>！该表达式将p指针指向结点L-&gt;next。</p>
+</blockquote>
+<p>&nbsp;</p>
+<h2 id="讲解"><a href="#讲解" class="headerlink" title="&#x3D;&#x3D;讲解&#x3D;&#x3D;"></a>&#x3D;&#x3D;讲解&#x3D;&#x3D;</h2><p>我们先看<strong>第一轮</strong>循环做了什么：</p>
+<p><strong>建议阅读顺序：黑色（初始）、蓝色（操作）、红色（理解）</strong><br>&nbsp;</p>
+<style>.hxypgicfhgma{}</style><img src="/2024/12/20/%E9%93%BE%E8%A1%A8%E9%80%86%E7%BD%AE%E8%AF%A6%E7%BB%86%E8%AE%B2%E8%A7%A3%EF%BC%88%E5%9B%BE%E6%96%87%EF%BC%89/cf3babfba4681baa73937d25b54ab275.jpeg" class="hxypgicfhgma">
+<p>&nbsp;<br>&nbsp;</p>
+<p><strong>第二轮：</strong><br>&nbsp;<br><strong>建议阅读顺序：黑色（初始）、蓝色（操作）、红色（理解）</strong></p>
+<style>.ucbaxsfjbzbe{}</style><img src="/2024/12/20/%E9%93%BE%E8%A1%A8%E9%80%86%E7%BD%AE%E8%AF%A6%E7%BB%86%E8%AE%B2%E8%A7%A3%EF%BC%88%E5%9B%BE%E6%96%87%EF%BC%89/b54b1f7f25db0e810e8f91b7476a517a.jpeg" class="ucbaxsfjbzbe">
+
+<p><strong>第三轮省略（可以自己尝试）。</strong><br>&nbsp;<br>&nbsp;</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="&#x3D;&#x3D;总结&#x3D;&#x3D;"></a>&#x3D;&#x3D;总结&#x3D;&#x3D;</h2><p>不难发现：</p>
+<ul>
+<li><p>链表逆置利用了<strong>s、p两个指针</strong>的<strong>移动</strong>实现</p>
+</li>
+<li><p>每一轮循环体执行结束后，<strong>s</strong>指向<strong>刚刚逆置成功</strong>的结点，<strong>p</strong>指向<strong>下一轮待逆置</strong>的结点</p>
+</li>
+<li><p><strong>为什么需要p？</strong><br>  因为2.2步骤中s-&gt;next会<strong>被改写</strong>，<br>  若只有s，会<strong>丢失剩余的结点</strong>，<br>  这时候p起到<strong>暂存</strong>的作用，等待下一轮2.1步骤中的s&#x3D;p找到它。</p>
+</li>
+</ul>
+<p>&nbsp;<br>&nbsp;</p>
+<p><strong>最后给一份带注释的代码~</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> <span class="title function_">listReverse</span>(<span class="params">linkedList &amp;L</span>)</span><br><span class="line">&#123;</span><br><span class="line">	node *p,*s;</span><br><span class="line">	<span class="comment">//1.准备工作</span></span><br><span class="line">	p = L-&gt;next;</span><br><span class="line">	L-&gt;next = <span class="variable constant_">NULL</span>;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">while</span>(p)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="comment">//2.1 s记录正在处理的结点，p记录下一轮待处理的结点</span></span><br><span class="line">		s = p; 			<span class="comment">//s承接上一轮记录的位置</span></span><br><span class="line">		p = p-&gt;next; 	<span class="comment">//p为下一轮记录位置</span></span><br><span class="line">		<span class="comment">//2.2 把s插入 已逆置的部分 中</span></span><br><span class="line">		s-&gt;next = L-&gt;next;  <span class="comment">// L-&gt;next代表已逆置的第一结点，s的指针域指向它</span></span><br><span class="line">		L-&gt;next = s;	<span class="comment">//（头结点的指针域，即）第一结点 设置为s</span></span><br><span class="line">		<span class="comment">//2.2步骤相当于：</span></span><br><span class="line">		<span class="comment">//s 对 队伍（已逆置部分）的队首（已逆置的第一结点）说：你不要排在柜台前了，你排在我后面</span></span><br><span class="line">		<span class="comment">//等队伍排在s后面后，s自己排到了柜台前</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>&nbsp;<br>&nbsp;<br><strong>有问题可以评论区交流讨论哈~</strong> </p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
       
   
   
