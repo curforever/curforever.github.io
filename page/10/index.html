@@ -131,7 +131,7 @@
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">94</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">95</span></a>
 
   </li>
       <li class="menu-item menu-item-search">
@@ -180,6 +180,143 @@
 
           <div class="content index posts-expand">
             
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://curforever.github.io/2024/12/20/%E6%96%B0%E6%89%8B%E5%85%A5%E9%97%A8%20Git%20&%20GitHub/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="胡景峰">
+      <meta itemprop="description" content="东南大学 软件学院">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="像风一样の博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/12/20/%E6%96%B0%E6%89%8B%E5%85%A5%E9%97%A8%20Git%20&%20GitHub/" class="post-title-link" itemprop="url">新手入门 Git & GitHub</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-12-20 16:31:06" itemprop="dateCreated datePublished" datetime="2024-12-20T16:31:06+08:00">2024-12-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-12-25 17:39:26" itemprop="dateModified" datetime="2024-12-25T17:39:26+08:00">2024-12-25</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%B2%E8%A7%A3%E6%95%99%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">讲解教程</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.1k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>@[TOC](新手入门 Git &amp; GitHub)</p>
+<h1 id="零、命令行小抄"><a href="#零、命令行小抄" class="headerlink" title="&#x3D;&#x3D;零、命令行小抄&#x3D;&#x3D;"></a>&#x3D;&#x3D;零、命令行小抄&#x3D;&#x3D;</h1><blockquote>
+<p>本小抄适用于：远程仓库new了repo、本地有（要上传的）文件夹、SSH已绑定好<br>供有一定基础、但不常用的同学（包括我自己）查阅</p>
+</blockquote>
+<ol>
+<li><code>ssh-keygen -t rsa -C &quot;12345678@qq.com&quot;</code>，生成rsa（用于本地电脑和远程仓库绑定，详见下文3.3）</li>
+<li>进入要上传的文件夹，<code>git init</code> ，创建本地仓库</li>
+<li><code>git remote add origin git@github.com:xxx/yyy.git</code>，本地仓库连接远程仓库</li>
+<li>做完修改后，<code>git add .</code>，添加到临时缓冲区</li>
+<li><code>git commit -m &quot;添加了/修改了...&quot;</code>，提交到本地仓库</li>
+<li><code>git push -u origin master</code>，提交到远程仓库的master分支</li>
+<li><code>git log</code>，查看已有的commitID（为7准备）</li>
+<li><code>git reset --hard commitID</code>，撤销 commit、撤销 git add . 操作、撤销修改代码（在以下情况常用：（1）添加了一个怎么也传不上去的大文件；（2）push时候发生由于commit引起的不知名error）</li>
+<li><code>&quot;ssh:connect to host github.com port 22: Connection timed out&quot;</code>问题的解决<br> 首先，<code>vim ~/.ssh/config</code><br> 其次，添加以下代码 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># Default github user self</span><br><span class="line">Host github.com</span><br><span class="line">	port 443 # 默认是22端口</span><br><span class="line">	HostName ssh.github.com</span><br><span class="line">	IdentityFile ~/.ssh/id_rsa</span><br></pre></td></tr></table></figure>
+ 最后，<code>:wq</code>保存并退出vim模式</li>
+</ol>
+<h1 id="一、前言"><a href="#一、前言" class="headerlink" title="&#x3D;&#x3D;一、前言&#x3D;&#x3D;"></a>&#x3D;&#x3D;一、前言&#x3D;&#x3D;</h1><p><strong>学习Git</strong>真的是我学习路上的一道“<strong>槛</strong>”；<br>&emsp;&emsp;一方面，不断接触的信息告诉我“<strong>学习Git很重要</strong>”；<br>&emsp;&emsp;另一方面，每次找到的教程都有那么几步<strong>看不懂</strong>，或是<strong>看懂了记不住</strong>。</p>
+<blockquote>
+<p>我前前后后学了三四次了，<br>或被GitHub英文劝退， （不会翻墙的时候打开还会很慢）<br>或因安装软件繁琐放弃， （啥是Git？？啥是Github？？）<br>或成功按部就班实现了一次demo，但没有实践下去于是忘了</p>
+</blockquote>
+<p>谨以此篇献给想学习并且在学习<strong>Git版本控制</strong>的小白。<br>&nbsp;</p>
+<h1 id="二、原理描述"><a href="#二、原理描述" class="headerlink" title="&#x3D;&#x3D;二、原理描述&#x3D;&#x3D;"></a>&#x3D;&#x3D;二、原理描述&#x3D;&#x3D;</h1><h2 id="2-1-四句话讲明白"><a href="#2-1-四句话讲明白" class="headerlink" title="2.1 四句话讲明白"></a>2.1 四句话讲明白</h2><p><strong>Git</strong> 狭义上来说是一个版本控制软件，广义上简单理解成<code>代码的仓库</code>；<br><strong>GitHub</strong> 一个远程仓库，白话就是<code>程序员专用的“某度网盘”</code>；<br><strong>网盘会用吧？</strong> 从本地的一个文件夹<code>上传</code>到网盘，或从网盘<code>下载</code>到本地。<br><strong>Git你就会了。</strong> 从本地仓库（repository）<code>上传（push）</code>到远程仓库，或从远程仓库<code>下载（pull）</code>到本地。<br>&nbsp;</p>
+<h2 id="2-2-补充说明"><a href="#2-2-补充说明" class="headerlink" title="2.2 补充说明"></a>2.2 补充说明</h2><h3 id="（1）本地仓库"><a href="#（1）本地仓库" class="headerlink" title="（1）本地仓库"></a>（1）本地仓库</h3><ol>
+<li>电脑上的一个文件夹就是一个本地仓库</li>
+<li>只是文件夹当然不行（就像没名没证空有房屋和物资，别人怎么知道是仓库）</li>
+<li>下载Git后可以在文件夹下通过命令行输入命令建立仓库（告诉别人，我这个文件夹，是仓库）</li>
+</ol>
+<h3 id="（2）远程仓库"><a href="#（2）远程仓库" class="headerlink" title="（2）远程仓库"></a>（2）远程仓库</h3><ol>
+<li>GitHub就是一个远程仓库</li>
+<li>一个GitHub账号对应一个专属于你的仓库</li>
+<li>也许你访问GitHub官网会很慢（这需要花点小费翻墙解决）</li>
+<li>也许你读不懂英文，但我相信你可以磕磕碰碰注册成功！</li>
+</ol>
+<h3 id="（3）相互绑定"><a href="#（3）相互绑定" class="headerlink" title="（3）相互绑定"></a>（3）相互绑定</h3><ol>
+<li>有了本地和远程仓库还不够（远程仓库怎么知道该不该接收呢，我不认识你）</li>
+<li>我们需要一个SSH安全协议（远程仓库把该本地仓库的名字加入联系人名单，可以接收）</li>
+</ol>
+<h3 id="（4）上传下载"><a href="#（4）上传下载" class="headerlink" title="（4）上传下载"></a>（4）上传下载</h3><ol>
+<li>一般该操作在本地仓库进行</li>
+<li>我们通过Git提供的命令行命令实现push和pull</li>
+<li>远程仓库有时也需要做一些操作（仓库收到物资后也需要整理的嘛）</li>
+<li>即对别人提交的修改更新做审核和合并（初学我们不涉及）<br>&nbsp;</li>
+</ol>
+<h1 id="三、保姆教程"><a href="#三、保姆教程" class="headerlink" title="&#x3D;&#x3D;三、保姆教程&#x3D;&#x3D;"></a>&#x3D;&#x3D;三、保姆教程&#x3D;&#x3D;</h1><p>我将对步骤进行概述性描述，因为有一位大佬已经发过知乎，<br>我觉得写的很好，也不多赘述，各位循着我的大纲去他那亲自体验就好~<br>（链接我放评论区，欢迎大家去瞅瞅！真的很棒很棒！）</p>
+<h2 id="3-1-本地仓库（Git）"><a href="#3-1-本地仓库（Git）" class="headerlink" title="3.1 本地仓库（Git）"></a>3.1 本地仓库（Git）</h2><p>（1）下载安装git提供命令行工具  <code>[对应知乎文章 第六点]</code><br>（2）一个文件夹demo做本地仓库（这个不用教吧？？新建文件夹即可）</p>
+<h2 id="3-2-远程仓库（GitHub）"><a href="#3-2-远程仓库（GitHub）" class="headerlink" title="3.2 远程仓库（GitHub）"></a>3.2 远程仓库（GitHub）</h2><p>（1）如有需要，付费翻墙（白话就是，通过歪果的节点上外网，没有阻碍速度更快）<br>（2）一个GitHub注册账号 <code>[对应知乎文章 第二点]</code><br>（3）新建一个远程仓库repository <code>[对应知乎文章中 第四点]</code></p>
+<h2 id="3-3-相互绑定（SSH）"><a href="#3-3-相互绑定（SSH）" class="headerlink" title="3.3 相互绑定（SSH）"></a>3.3 相互绑定（SSH）</h2><p>（1）在本地生成SSH key  <code>[对应知乎文章中 第八点]</code><br>（2）向GitHub添加SSH key <code>[对应知乎文章中 第八点]</code></p>
+<h2 id="3-4-上传下载（Git命令介绍）"><a href="#3-4-上传下载（Git命令介绍）" class="headerlink" title="3.4 上传下载（Git命令介绍）"></a>3.4 上传下载（Git命令介绍）</h2><p>（1）本地仓库的更新与整理 <code>[对应知乎文章中 第七点]</code><br>（2）本地仓库通过Git命令行上传下载 <code>[对应知乎文章中 第九点]</code><br>（3）远程仓库查看效果<code>[对应知乎文章中 第九点]</code></p>
+<h1 id="结语"><a href="#结语" class="headerlink" title="&#x3D;&#x3D;结语&#x3D;&#x3D;"></a>&#x3D;&#x3D;结语&#x3D;&#x3D;</h1><p>如果对你有帮助的话给个赞吧，顺带附一张自制的说明图~</p>
+<img src="/2024/12/20/%E6%96%B0%E6%89%8B%E5%85%A5%E9%97%A8%20Git%20&%20GitHub/0f33782c01e099ef1daa513c4129d8f5.png" class="" title="在这里插入图片描述">
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
       
   
   
