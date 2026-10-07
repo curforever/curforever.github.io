@@ -267,11 +267,11 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>在 HarmonyOS 菁英班的小组实践里，我们做过一个健康生活打卡 App。我的面试复盘里记着一个很小、但很典型的问题：目标时间设置为 <strong>8 点</strong>，页面也显示 <strong>8 点</strong>，校验却仍然按默认的 <strong>9 点</strong>处理。</p>
-<p>这篇把当时的问题和可以继续完善的方法分开记录。下面的代码是解释状态关系的独立示例，不是原 App 源码，也不是一份可直接运行的完整 ArkUI 工程。</p>
+        <p>在 HarmonyOS 菁英班里，我们小组做过一个健康生活打卡 App。其中一个问题我一直记得：目标时间改成了 <strong>8 点</strong>，页面显示的也是 <strong>8 点</strong>，打卡校验却还在按默认的 <strong>9 点</strong>算。</p>
+<p>页面看起来已经改好了，业务逻辑却没跟上。现在回头看，问题出在两份“目标时间”各管各的。我把当时的排查和后来整理的想法记在这里。下面的代码是单独写的解释示例，只涉及业务状态，没有包含完整的 ArkUI 页面。</p>
 <span id="more"></span>
 
-<h2 id="从现象到原因：先问“谁在使用哪份值”"><a href="#从现象到原因：先问“谁在使用哪份值”" class="headerlink" title="从现象到原因：先问“谁在使用哪份值”"></a>从现象到原因：先问“谁在使用哪份值”</h2><table>
+<h2 id="显示改了，校验读的还是旧值"><a href="#显示改了，校验读的还是旧值" class="headerlink" title="显示改了，校验读的还是旧值"></a>显示改了，校验读的还是旧值</h2><table>
 <thead>
 <tr>
 <th align="left">环节</th>
@@ -295,16 +295,16 @@
 <td align="left">校验是否读取了同一个值？</td>
 </tr>
 </tbody></table>
-<p>当时通过 HiLog 和页面提醒分析，定位到两条路径：<code>selectedTime</code> 用于显示，<code>currentTime</code> 用于校验。它们没有保持一致。</p>
-<p>这里的 <code>currentTime</code> 名称来自当时的记录。在解释模型里，我把两个含义明确写成“目标时间”和“实际打卡时间”，避免变量名进一步造成误解。</p>
+<p>当时结合 HiLog 和页面提醒往下查，找到了两条路径：页面读 <code>selectedTime</code>，校验读 <code>currentTime</code>。选择器改了前者，后者还停在默认值。</p>
+<p><code>currentTime</code> 是当时记录里的名字，单看名称也不太容易猜出它参与了哪种判断。下面的示例直接区分“目标时间”和“实际打卡时间”，读起来清楚一些。</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">原来的路径</span><br><span class="line">选择器 → selectedTime → 页面显示 8 点</span><br><span class="line">校验器 → 另一份默认值 → 仍按 9 点判断</span><br><span class="line"></span><br><span class="line">希望形成的路径</span><br><span class="line">选择器 → 当前任务的目标时间</span><br><span class="line">             ├─ 页面从这里读</span><br><span class="line">             ├─ 校验从这里读</span><br><span class="line">             └─ 保存时也写这一份</span><br></pre></td></tr></table></figure>
 
-<p>页面更新，只说明显示路径收到了变化；并不能证明校验与保存路径也收到了变化。</p>
-<h2 id="一个更清楚的状态模型"><a href="#一个更清楚的状态模型" class="headerlink" title="一个更清楚的状态模型"></a>一个更清楚的状态模型</h2><p>先把业务状态放到一处，显示和校验都从它派生。示例用“从零点开始的分钟数”表示时间，减少字符串与时间对象混用；跨日、时区及复杂日期仍需要另行建模。</p>
+<p>这次让我记住了一点：看到页面变了，还得看看校验和保存到底读的是哪份数据。</p>
+<h2 id="我会把目标时间放到一处"><a href="#我会把目标时间放到一处" class="headerlink" title="我会把目标时间放到一处"></a>我会把目标时间放到一处</h2><p>如果再写一次，我会让显示和校验都读取任务里的目标时间。这里用“从零点开始的分钟数”表示时间，省去字符串和时间对象之间的来回转换；跨日和时区问题还需要另外处理。</p>
 <figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> <span class="title class_">Task</span> = &#123;</span><br><span class="line">  <span class="attr">targetMinutes</span>: <span class="built_in">number</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">formatTarget</span>(<span class="params"><span class="attr">task</span>: <span class="title class_">Task</span></span>): <span class="built_in">string</span> &#123;</span><br><span class="line">  <span class="keyword">const</span> hour = <span class="title class_">Math</span>.<span class="title function_">floor</span>(task.<span class="property">targetMinutes</span> / <span class="number">60</span>);</span><br><span class="line">  <span class="keyword">const</span> minute = task.<span class="property">targetMinutes</span> % <span class="number">60</span>;</span><br><span class="line">  <span class="keyword">return</span> <span class="string">`<span class="subst">$&#123;<span class="built_in">String</span>(hour).padStart(<span class="number">2</span>, <span class="string">&#x27;0&#x27;</span>)&#125;</span>:<span class="subst">$&#123;<span class="built_in">String</span>(minute).padStart(<span class="number">2</span>, <span class="string">&#x27;0&#x27;</span>)&#125;</span>`</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">isOnTime</span>(<span class="params"><span class="attr">task</span>: <span class="title class_">Task</span>, <span class="attr">checkInMinutes</span>: <span class="built_in">number</span></span>): <span class="built_in">boolean</span> &#123;</span><br><span class="line">  <span class="keyword">return</span> checkInMinutes &lt;= task.<span class="property">targetMinutes</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 用户把目标时间改为 08:00。</span></span><br><span class="line"><span class="keyword">const</span> <span class="attr">task</span>: <span class="title class_">Task</span> = &#123; <span class="attr">targetMinutes</span>: <span class="number">8</span> * <span class="number">60</span> &#125;;</span><br><span class="line"><span class="comment">// 展示与校验读取同一个 task.targetMinutes。</span></span><br></pre></td></tr></table></figure>
 
-<p>这个示例只解释业务数据。实际 ArkUI 页面还需要使用对应 SDK 版本的状态管理方式，让业务状态变化同步到界面；状态装饰器能够帮助 UI 更新，但不会替开发者消除业务上重复维护的两份值。可结合 <a target="_blank" rel="noopener" href="https://developer.huawei.com/consumer/en/doc/harmonyos-guides-V14/arkts-mvvm-v2-V14">HarmonyOS 官方状态管理文档</a>理解数据与 UI 的关系，具体 API 以项目所用 SDK 为准。</p>
-<h2 id="保存和重新进入页面，也要走同一条路径"><a href="#保存和重新进入页面，也要走同一条路径" class="headerlink" title="保存和重新进入页面，也要走同一条路径"></a>保存和重新进入页面，也要走同一条路径</h2><table>
+<p>接到 ArkUI 页面时，还要按项目的 SDK 版本选择状态管理方式。状态装饰器能让界面随数据更新，但如果自己维护了两份目标时间，它不会自动把两份数据合起来。<a target="_blank" rel="noopener" href="https://developer.huawei.com/consumer/en/doc/harmonyos-guides-V14/arkts-mvvm-v2-V14">官方状态管理文档</a>可以配合着看。</p>
+<h2 id="改完还得退出页面再试试"><a href="#改完还得退出页面再试试" class="headerlink" title="改完还得退出页面再试试"></a>改完还得退出页面再试试</h2><table>
 <thead>
 <tr>
 <th align="left">场景</th>
@@ -332,14 +332,15 @@
 <td align="left">显示可解释的错误，避免把初始化失败统一报成网络错误</td>
 </tr>
 </tbody></table>
-<p>我的记录里还有一次“编辑跑步任务时报网络连接错误”的问题，最后定位到初始化数据未入库。当时通过重装触发初始化解决了开发环境问题。进一步完善产品时，应该把初始化或迁移做成可重复执行的流程，并区分数据缺失与网络失败；重装只是一种定位与临时恢复手段。</p>
-<h2 id="留给下一次的排查顺序"><a href="#留给下一次的排查顺序" class="headerlink" title="留给下一次的排查顺序"></a>留给下一次的排查顺序</h2><ol>
+<p>同一个 App 里还遇到过另一件事：编辑跑步任务时提示“网络连接错误”，最后发现是初始化数据没有入库。开发时通过重装触发初始化，暂时恢复了正常。</p>
+<p>现在看，这个提示本身就容易把排查方向带偏。继续完善时，我会先把数据缺失和网络失败分开，再处理初始化重复执行的问题。总不能让用户每次遇到问题都重装一遍。</p>
+<h2 id="下次遇到类似问题，先查这几处"><a href="#下次遇到类似问题，先查这几处" class="headerlink" title="下次遇到类似问题，先查这几处"></a>下次遇到类似问题，先查这几处</h2><ol>
 <li>重现一条最小操作路径，记录选择、显示、校验三个值。</li>
 <li>对照读写位置，检查是否存在语义相同、分别维护的状态。</li>
 <li>将显示、校验与保存统一到明确的业务状态。</li>
 <li>覆盖取消、重入、重启和首次初始化，验证完整生命周期。</li>
 </ol>
-<p>这次小问题让我更重视“状态由谁负责”。以后看到页面已经更新，我还会继续检查：业务规则和存储是不是也在读这一份状态。</p>
+<p>以后再遇到“界面是对的，结果却不对”，我会先沿着读写位置查一遍。两个变量都叫时间，并不意味着它们一直同步。</p>
 
     </div>
 
@@ -442,7 +443,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%8E%E7%8E%B0%E8%B1%A1%E5%88%B0%E5%8E%9F%E5%9B%A0%EF%BC%9A%E5%85%88%E9%97%AE%E2%80%9C%E8%B0%81%E5%9C%A8%E4%BD%BF%E7%94%A8%E5%93%AA%E4%BB%BD%E5%80%BC%E2%80%9D"><span class="nav-number">1.</span> <span class="nav-text">从现象到原因：先问“谁在使用哪份值”</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E4%B8%AA%E6%9B%B4%E6%B8%85%E6%A5%9A%E7%9A%84%E7%8A%B6%E6%80%81%E6%A8%A1%E5%9E%8B"><span class="nav-number">2.</span> <span class="nav-text">一个更清楚的状态模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%9D%E5%AD%98%E5%92%8C%E9%87%8D%E6%96%B0%E8%BF%9B%E5%85%A5%E9%A1%B5%E9%9D%A2%EF%BC%8C%E4%B9%9F%E8%A6%81%E8%B5%B0%E5%90%8C%E4%B8%80%E6%9D%A1%E8%B7%AF%E5%BE%84"><span class="nav-number">3.</span> <span class="nav-text">保存和重新进入页面，也要走同一条路径</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%95%99%E7%BB%99%E4%B8%8B%E4%B8%80%E6%AC%A1%E7%9A%84%E6%8E%92%E6%9F%A5%E9%A1%BA%E5%BA%8F"><span class="nav-number">4.</span> <span class="nav-text">留给下一次的排查顺序</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%98%BE%E7%A4%BA%E6%94%B9%E4%BA%86%EF%BC%8C%E6%A0%A1%E9%AA%8C%E8%AF%BB%E7%9A%84%E8%BF%98%E6%98%AF%E6%97%A7%E5%80%BC"><span class="nav-number">1.</span> <span class="nav-text">显示改了，校验读的还是旧值</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%88%91%E4%BC%9A%E6%8A%8A%E7%9B%AE%E6%A0%87%E6%97%B6%E9%97%B4%E6%94%BE%E5%88%B0%E4%B8%80%E5%A4%84"><span class="nav-number">2.</span> <span class="nav-text">我会把目标时间放到一处</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%94%B9%E5%AE%8C%E8%BF%98%E5%BE%97%E9%80%80%E5%87%BA%E9%A1%B5%E9%9D%A2%E5%86%8D%E8%AF%95%E8%AF%95"><span class="nav-number">3.</span> <span class="nav-text">改完还得退出页面再试试</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8B%E6%AC%A1%E9%81%87%E5%88%B0%E7%B1%BB%E4%BC%BC%E9%97%AE%E9%A2%98%EF%BC%8C%E5%85%88%E6%9F%A5%E8%BF%99%E5%87%A0%E5%A4%84"><span class="nav-number">4.</span> <span class="nav-text">下次遇到类似问题，先查这几处</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 

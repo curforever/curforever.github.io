@@ -253,14 +253,14 @@
                 <i class="fa fa-file-word-o"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>1.3k</span>
+              <span>1.6k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="fa fa-clock-o"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>2 分钟</span>
+              <span>3 分钟</span>
             </span>
             <div class="post-description">用毕业研究原图解释任务感知渲染、共享缓存与系统时延之间的关系。</div>
 
@@ -273,11 +273,11 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>做 VR 优化时，容易先关注“某个数字有没有变好”：帧时间变低、缓存命中率变高。但系统接起来之后，真正要回答的是：画面质量是否保住了？用户需要的内容是否及时到达？缓存决策本身又增加了多少处理开销？</p>
-<p>这篇根据我的终版毕业论文整理，只讲问题、取舍和实验口径。图表复用论文正文；数字来自论文汇总，本轮没有重新运行实验。</p>
+        <p>回头整理毕业研究，最容易写出来的是几个数字：帧时间降了多少，缓存命中率涨了多少。难一点的是把这些数字放回系统里看。少算了一部分画面，用户在意的细节还在吗？缓存复用了更多内容，做决策花的时间又怎么算？</p>
+<p>这篇用论文里的几张图，把三个阶段串起来记一下：先调整终端渲染，再做多人缓存复用，最后接成端边协同系统。图表和数字都来自终版论文，这次整理没有重新跑实验。</p>
 <span id="more"></span>
 
-<h2 id="先看系统中两个优化位置"><a href="#先看系统中两个优化位置" class="headerlink" title="先看系统中两个优化位置"></a>先看系统中两个优化位置</h2><p><img src="/images/research/system-architecture.png" alt="端边协同系统总体架构，原论文图 5-1"></p>
+<h2 id="先把系统摆出来"><a href="#先把系统摆出来" class="headerlink" title="先把系统摆出来"></a>先把系统摆出来</h2><p><img src="/images/research/system-architecture.png" alt="端边协同系统总体架构，原论文图 5-1"></p>
 <table>
 <thead>
 <tr>
@@ -302,10 +302,10 @@
 <td align="left">通信与处理链路的可观察性</td>
 </tr>
 </tbody></table>
-<p>这对应论文的三个阶段：任务感知中心凹渲染、多用户共享视场缓存，以及端边集成系统。</p>
-<h2 id="阅读文字和追踪目标，应该用同一套参数吗？"><a href="#阅读文字和追踪目标，应该用同一套参数吗？" class="headerlink" title="阅读文字和追踪目标，应该用同一套参数吗？"></a>阅读文字和追踪目标，应该用同一套参数吗？</h2><p><img src="/images/research/task-rendering.png" alt="不同眼动任务的渲染效果，原论文图 3-6"></p>
-<p>中心凹渲染通常把更多质量放在注视中心，外围降低分辨率。我的研究进一步从一段头动与眼动序列识别当前任务，再调整高质量区域、过渡区域与外围质量。</p>
-<p>为什么需要任务信息？因为同一个注视位置，可能对应读文字、跟随移动目标或搜索场景物体。任务不同，对细节、范围和连续性的需求也不同。</p>
+<p>前两个阶段分别看方法是否有效，第三个阶段再把行为采集、渲染、缓存和通信接起来。分开做实验时比较清楚，接起来以后还得看各段之间有没有增加新的开销。</p>
+<h2 id="都盯着同一个位置，需求也可能不同"><a href="#都盯着同一个位置，需求也可能不同" class="headerlink" title="都盯着同一个位置，需求也可能不同"></a>都盯着同一个位置，需求也可能不同</h2><p><img src="/images/research/task-rendering.png" alt="不同眼动任务的渲染效果，原论文图 3-6"></p>
+<p>中心凹渲染会给注视中心保留更多细节，外围降低分辨率。我的研究在这个基础上加了一步：根据一段头动和眼动序列识别当前任务，再调整高质量区域、过渡区域和外围质量。</p>
+<p>读文字、追踪移动目标、在场景里找东西，都可能看向同一个位置，但需要的细节和覆盖范围不同。这也是我引入任务信息的原因：只知道“看哪里”，还不太够。</p>
 <table>
 <thead>
 <tr>
@@ -325,9 +325,10 @@
 <td align="right">4.81%</td>
 </tr>
 </tbody></table>
-<p>来源：终版论文表 3.7。以场景—路径片段为单位，先计算片段统计，再取平均。相对全分辨率加速比为 1.88×，但这是渲染实验的结果，不是完整 VR 系统的端到端加速比；图像质量仍需结合多项指标和具体场景判断。</p>
-<h2 id="缓存命中更高，系统就一定更快吗？"><a href="#缓存命中更高，系统就一定更快吗？" class="headerlink" title="缓存命中更高，系统就一定更快吗？"></a>缓存命中更高，系统就一定更快吗？</h2><p><img src="/images/research/system-cache.png" alt="系统实验缓存与共享命中率，原论文图 5-10"></p>
-<p>缓存复用能减少重复处理，但识别共享关系、形成用户群组、推理与更新缓存状态也会消耗时间。因此，需要同时看收益和处理成本。</p>
+<p>表 3.7 里，按场景—路径片段统计后，TAFR 的片段平均帧时间从 10.14 ms 降到了 5.40 ms，相对全分辨率的加速比是 1.88×。</p>
+<p>这里我只把它写成<strong>渲染实验的收益</strong>。整套 VR 系统还有通信和边缘处理，不能把 1.88× 直接放到端到端响应上。画质也要回到具体场景和图像指标里看，单看帧时间还不够。</p>
+<h2 id="命中率涨了，还得看决策花了多久"><a href="#命中率涨了，还得看决策花了多久" class="headerlink" title="命中率涨了，还得看决策花了多久"></a>命中率涨了，还得看决策花了多久</h2><p><img src="/images/research/system-cache.png" alt="系统实验缓存与共享命中率，原论文图 5-10"></p>
+<p>多人需要同一批对象块时，复用缓存可以省掉重复处理。不过，共享关系识别、用户分组、策略推理和缓存更新也需要时间。我会把命中率和处理耗时放在一起看。</p>
 <table>
 <thead>
 <tr>
@@ -352,16 +353,16 @@
 <td align="left">网络往返和头显 Motion-to-Photon 时延</td>
 </tr>
 </tbody></table>
-<p>第五章六个成对条件中，SCOPE-DDQN 相对 LRU 的缓存命中率平均相对增益为 <strong>22.08%</strong>，共享命中率为 <strong>42.78%</strong>。这两个数是各条件相对增益的平均值，不是百分点差值。</p>
-<p>举一个可以直接核算的条件：20 用户短时实验，命中率从 44.37% 到 58.47%，增加 14.10 个百分点；相对增益为 <code>14.10 / 44.37 ≈ 31.78%</code>。</p>
-<h2 id="长时运行的图，要看走势，也要看口径"><a href="#长时运行的图，要看走势，也要看口径" class="headerlink" title="长时运行的图，要看走势，也要看口径"></a>长时运行的图，要看走势，也要看口径</h2><p><img src="/images/research/long-run.png" alt="60 用户、30 分钟的窗口级结果，原论文图 5-12"></p>
-<p>这张图的窗口级命中率均值是 57.16%，边缘处理代理时延均值约 153.44 ms。需要注意三点：</p>
+<p>第五章六个成对条件里，SCOPE-DDQN 相对 LRU 的缓存命中率平均相对增益是 <strong>22.08%</strong>，共享命中率是 <strong>42.78%</strong>。整理这些数时，我会把“相对增益”几个字一起保留，否则很容易被读成增加了多少个百分点。</p>
+<p>拿 20 用户短时实验算一遍就比较直观：44.37% 到 58.47%，相差 14.10 个百分点；除以前面的 44.37%，相对增益才是约 31.78%。六个条件的 22.08% 则是各条件相对增益的平均值。</p>
+<h2 id="连续跑-30-分钟，再看这张图"><a href="#连续跑-30-分钟，再看这张图" class="headerlink" title="连续跑 30 分钟，再看这张图"></a>连续跑 30 分钟，再看这张图</h2><p><img src="/images/research/long-run.png" alt="60 用户、30 分钟的窗口级结果，原论文图 5-12"></p>
+<p>这组是 60 用户仿真请求负载，连续运行 30 分钟。图里的窗口级命中率均值是 57.16%，边缘处理代理时延均值约 153.44 ms。读图时，有三个地方要和数字一起看：</p>
 <ol>
 <li>横轴是时间窗口编号，不能直接读成秒或毫秒。</li>
 <li>代理时延不是完整头显端到端时延。</li>
 <li>60 用户指可控仿真请求负载；真实头显接入验证的是行为采集、渲染与通信链路，并不代表 60 位真人同时戴头显体验。</li>
 </ol>
-<h2 id="我希望以后继续检查的取舍"><a href="#我希望以后继续检查的取舍" class="headerlink" title="我希望以后继续检查的取舍"></a>我希望以后继续检查的取舍</h2><table>
+<h2 id="下一次做实验，我还想多看几项"><a href="#下一次做实验，我还想多看几项" class="headerlink" title="下一次做实验，我还想多看几项"></a>下一次做实验，我还想多看几项</h2><table>
 <thead>
 <tr>
 <th align="left">如果追求这个目标</th>
@@ -385,7 +386,8 @@
 <td align="left">高分位表现、窗口波动与不同用户是否均衡</td>
 </tr>
 </tbody></table>
-<p>把三个阶段接成系统后，我更重视清楚定义指标：优化了哪个环节、在哪组条件下观察到收益、还有哪些成本没被测量。这样，数字才可以用来指导下一次设计。</p>
+<p>均值之外，我还想继续看高分位、窗口波动和不同用户之间的差异。有些开销是在集成后才出现的，分开测试方法时不容易看到。</p>
+<p>以后再写“优化了多少”，我会把对应环节和实验条件一起写上。省掉这两句，数字看着更漂亮，却也更难判断到底改好了什么。</p>
 <p><a href="/research/">查看多图、多表的完整研究展示</a> · <a target="_blank" rel="noopener" href="https://github.com/curforever/curforever/tree/main/research">查看 GitHub 研究材料</a></p>
 
     </div>
@@ -493,7 +495,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%88%E7%9C%8B%E7%B3%BB%E7%BB%9F%E4%B8%AD%E4%B8%A4%E4%B8%AA%E4%BC%98%E5%8C%96%E4%BD%8D%E7%BD%AE"><span class="nav-number">1.</span> <span class="nav-text">先看系统中两个优化位置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%98%85%E8%AF%BB%E6%96%87%E5%AD%97%E5%92%8C%E8%BF%BD%E8%B8%AA%E7%9B%AE%E6%A0%87%EF%BC%8C%E5%BA%94%E8%AF%A5%E7%94%A8%E5%90%8C%E4%B8%80%E5%A5%97%E5%8F%82%E6%95%B0%E5%90%97%EF%BC%9F"><span class="nav-number">2.</span> <span class="nav-text">阅读文字和追踪目标，应该用同一套参数吗？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%93%E5%AD%98%E5%91%BD%E4%B8%AD%E6%9B%B4%E9%AB%98%EF%BC%8C%E7%B3%BB%E7%BB%9F%E5%B0%B1%E4%B8%80%E5%AE%9A%E6%9B%B4%E5%BF%AB%E5%90%97%EF%BC%9F"><span class="nav-number">3.</span> <span class="nav-text">缓存命中更高，系统就一定更快吗？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%95%BF%E6%97%B6%E8%BF%90%E8%A1%8C%E7%9A%84%E5%9B%BE%EF%BC%8C%E8%A6%81%E7%9C%8B%E8%B5%B0%E5%8A%BF%EF%BC%8C%E4%B9%9F%E8%A6%81%E7%9C%8B%E5%8F%A3%E5%BE%84"><span class="nav-number">4.</span> <span class="nav-text">长时运行的图，要看走势，也要看口径</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%88%91%E5%B8%8C%E6%9C%9B%E4%BB%A5%E5%90%8E%E7%BB%A7%E7%BB%AD%E6%A3%80%E6%9F%A5%E7%9A%84%E5%8F%96%E8%88%8D"><span class="nav-number">5.</span> <span class="nav-text">我希望以后继续检查的取舍</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%88%E6%8A%8A%E7%B3%BB%E7%BB%9F%E6%91%86%E5%87%BA%E6%9D%A5"><span class="nav-number">1.</span> <span class="nav-text">先把系统摆出来</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%83%BD%E7%9B%AF%E7%9D%80%E5%90%8C%E4%B8%80%E4%B8%AA%E4%BD%8D%E7%BD%AE%EF%BC%8C%E9%9C%80%E6%B1%82%E4%B9%9F%E5%8F%AF%E8%83%BD%E4%B8%8D%E5%90%8C"><span class="nav-number">2.</span> <span class="nav-text">都盯着同一个位置，需求也可能不同</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%91%BD%E4%B8%AD%E7%8E%87%E6%B6%A8%E4%BA%86%EF%BC%8C%E8%BF%98%E5%BE%97%E7%9C%8B%E5%86%B3%E7%AD%96%E8%8A%B1%E4%BA%86%E5%A4%9A%E4%B9%85"><span class="nav-number">3.</span> <span class="nav-text">命中率涨了，还得看决策花了多久</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%9E%E7%BB%AD%E8%B7%91-30-%E5%88%86%E9%92%9F%EF%BC%8C%E5%86%8D%E7%9C%8B%E8%BF%99%E5%BC%A0%E5%9B%BE"><span class="nav-number">4.</span> <span class="nav-text">连续跑 30 分钟，再看这张图</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8B%E4%B8%80%E6%AC%A1%E5%81%9A%E5%AE%9E%E9%AA%8C%EF%BC%8C%E6%88%91%E8%BF%98%E6%83%B3%E5%A4%9A%E7%9C%8B%E5%87%A0%E9%A1%B9"><span class="nav-number">5.</span> <span class="nav-text">下一次做实验，我还想多看几项</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 

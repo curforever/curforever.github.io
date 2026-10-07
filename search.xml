@@ -11544,11 +11544,11 @@
   <entry>
     <title>Harmony 状态一致性：页面显示 8 点，校验为什么按 9 点？</title>
     <url>//notes/harmony-state-consistency/</url>
-    <content><![CDATA[<p>在 HarmonyOS 菁英班的小组实践里，我们做过一个健康生活打卡 App。我的面试复盘里记着一个很小、但很典型的问题：目标时间设置为 <strong>8 点</strong>，页面也显示 <strong>8 点</strong>，校验却仍然按默认的 <strong>9 点</strong>处理。</p>
-<p>这篇把当时的问题和可以继续完善的方法分开记录。下面的代码是解释状态关系的独立示例，不是原 App 源码，也不是一份可直接运行的完整 ArkUI 工程。</p>
+    <content><![CDATA[<p>在 HarmonyOS 菁英班里，我们小组做过一个健康生活打卡 App。其中一个问题我一直记得：目标时间改成了 <strong>8 点</strong>，页面显示的也是 <strong>8 点</strong>，打卡校验却还在按默认的 <strong>9 点</strong>算。</p>
+<p>页面看起来已经改好了，业务逻辑却没跟上。现在回头看，问题出在两份“目标时间”各管各的。我把当时的排查和后来整理的想法记在这里。下面的代码是单独写的解释示例，只涉及业务状态，没有包含完整的 ArkUI 页面。</p>
 <span id="more"></span>
 
-<h2 id="从现象到原因：先问“谁在使用哪份值”"><a href="#从现象到原因：先问“谁在使用哪份值”" class="headerlink" title="从现象到原因：先问“谁在使用哪份值”"></a>从现象到原因：先问“谁在使用哪份值”</h2><table>
+<h2 id="显示改了，校验读的还是旧值"><a href="#显示改了，校验读的还是旧值" class="headerlink" title="显示改了，校验读的还是旧值"></a>显示改了，校验读的还是旧值</h2><table>
 <thead>
 <tr>
 <th align="left">环节</th>
@@ -11572,16 +11572,16 @@
 <td align="left">校验是否读取了同一个值？</td>
 </tr>
 </tbody></table>
-<p>当时通过 HiLog 和页面提醒分析，定位到两条路径：<code>selectedTime</code> 用于显示，<code>currentTime</code> 用于校验。它们没有保持一致。</p>
-<p>这里的 <code>currentTime</code> 名称来自当时的记录。在解释模型里，我把两个含义明确写成“目标时间”和“实际打卡时间”，避免变量名进一步造成误解。</p>
+<p>当时结合 HiLog 和页面提醒往下查，找到了两条路径：页面读 <code>selectedTime</code>，校验读 <code>currentTime</code>。选择器改了前者，后者还停在默认值。</p>
+<p><code>currentTime</code> 是当时记录里的名字，单看名称也不太容易猜出它参与了哪种判断。下面的示例直接区分“目标时间”和“实际打卡时间”，读起来清楚一些。</p>
 <figure class="highlight text"><table><tr><td class="code"><pre><span class="line">原来的路径</span><br><span class="line">选择器 → selectedTime → 页面显示 8 点</span><br><span class="line">校验器 → 另一份默认值 → 仍按 9 点判断</span><br><span class="line"></span><br><span class="line">希望形成的路径</span><br><span class="line">选择器 → 当前任务的目标时间</span><br><span class="line">             ├─ 页面从这里读</span><br><span class="line">             ├─ 校验从这里读</span><br><span class="line">             └─ 保存时也写这一份</span><br></pre></td></tr></table></figure>
 
-<p>页面更新，只说明显示路径收到了变化；并不能证明校验与保存路径也收到了变化。</p>
-<h2 id="一个更清楚的状态模型"><a href="#一个更清楚的状态模型" class="headerlink" title="一个更清楚的状态模型"></a>一个更清楚的状态模型</h2><p>先把业务状态放到一处，显示和校验都从它派生。示例用“从零点开始的分钟数”表示时间，减少字符串与时间对象混用；跨日、时区及复杂日期仍需要另行建模。</p>
+<p>这次让我记住了一点：看到页面变了，还得看看校验和保存到底读的是哪份数据。</p>
+<h2 id="我会把目标时间放到一处"><a href="#我会把目标时间放到一处" class="headerlink" title="我会把目标时间放到一处"></a>我会把目标时间放到一处</h2><p>如果再写一次，我会让显示和校验都读取任务里的目标时间。这里用“从零点开始的分钟数”表示时间，省去字符串和时间对象之间的来回转换；跨日和时区问题还需要另外处理。</p>
 <figure class="highlight ts"><table><tr><td class="code"><pre><span class="line"><span class="keyword">type</span> <span class="title class_">Task</span> = &#123;</span><br><span class="line">  <span class="attr">targetMinutes</span>: <span class="built_in">number</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">formatTarget</span>(<span class="params"><span class="attr">task</span>: <span class="title class_">Task</span></span>): <span class="built_in">string</span> &#123;</span><br><span class="line">  <span class="keyword">const</span> hour = <span class="title class_">Math</span>.<span class="title function_">floor</span>(task.<span class="property">targetMinutes</span> / <span class="number">60</span>);</span><br><span class="line">  <span class="keyword">const</span> minute = task.<span class="property">targetMinutes</span> % <span class="number">60</span>;</span><br><span class="line">  <span class="keyword">return</span> <span class="string">`<span class="subst">$&#123;<span class="built_in">String</span>(hour).padStart(<span class="number">2</span>, <span class="string">&#x27;0&#x27;</span>)&#125;</span>:<span class="subst">$&#123;<span class="built_in">String</span>(minute).padStart(<span class="number">2</span>, <span class="string">&#x27;0&#x27;</span>)&#125;</span>`</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">isOnTime</span>(<span class="params"><span class="attr">task</span>: <span class="title class_">Task</span>, <span class="attr">checkInMinutes</span>: <span class="built_in">number</span></span>): <span class="built_in">boolean</span> &#123;</span><br><span class="line">  <span class="keyword">return</span> checkInMinutes &lt;= task.<span class="property">targetMinutes</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 用户把目标时间改为 08:00。</span></span><br><span class="line"><span class="keyword">const</span> <span class="attr">task</span>: <span class="title class_">Task</span> = &#123; <span class="attr">targetMinutes</span>: <span class="number">8</span> * <span class="number">60</span> &#125;;</span><br><span class="line"><span class="comment">// 展示与校验读取同一个 task.targetMinutes。</span></span><br></pre></td></tr></table></figure>
 
-<p>这个示例只解释业务数据。实际 ArkUI 页面还需要使用对应 SDK 版本的状态管理方式，让业务状态变化同步到界面；状态装饰器能够帮助 UI 更新，但不会替开发者消除业务上重复维护的两份值。可结合 <a href="https://developer.huawei.com/consumer/en/doc/harmonyos-guides-V14/arkts-mvvm-v2-V14">HarmonyOS 官方状态管理文档</a>理解数据与 UI 的关系，具体 API 以项目所用 SDK 为准。</p>
-<h2 id="保存和重新进入页面，也要走同一条路径"><a href="#保存和重新进入页面，也要走同一条路径" class="headerlink" title="保存和重新进入页面，也要走同一条路径"></a>保存和重新进入页面，也要走同一条路径</h2><table>
+<p>接到 ArkUI 页面时，还要按项目的 SDK 版本选择状态管理方式。状态装饰器能让界面随数据更新，但如果自己维护了两份目标时间，它不会自动把两份数据合起来。<a href="https://developer.huawei.com/consumer/en/doc/harmonyos-guides-V14/arkts-mvvm-v2-V14">官方状态管理文档</a>可以配合着看。</p>
+<h2 id="改完还得退出页面再试试"><a href="#改完还得退出页面再试试" class="headerlink" title="改完还得退出页面再试试"></a>改完还得退出页面再试试</h2><table>
 <thead>
 <tr>
 <th align="left">场景</th>
@@ -11609,14 +11609,15 @@
 <td align="left">显示可解释的错误，避免把初始化失败统一报成网络错误</td>
 </tr>
 </tbody></table>
-<p>我的记录里还有一次“编辑跑步任务时报网络连接错误”的问题，最后定位到初始化数据未入库。当时通过重装触发初始化解决了开发环境问题。进一步完善产品时，应该把初始化或迁移做成可重复执行的流程，并区分数据缺失与网络失败；重装只是一种定位与临时恢复手段。</p>
-<h2 id="留给下一次的排查顺序"><a href="#留给下一次的排查顺序" class="headerlink" title="留给下一次的排查顺序"></a>留给下一次的排查顺序</h2><ol>
+<p>同一个 App 里还遇到过另一件事：编辑跑步任务时提示“网络连接错误”，最后发现是初始化数据没有入库。开发时通过重装触发初始化，暂时恢复了正常。</p>
+<p>现在看，这个提示本身就容易把排查方向带偏。继续完善时，我会先把数据缺失和网络失败分开，再处理初始化重复执行的问题。总不能让用户每次遇到问题都重装一遍。</p>
+<h2 id="下次遇到类似问题，先查这几处"><a href="#下次遇到类似问题，先查这几处" class="headerlink" title="下次遇到类似问题，先查这几处"></a>下次遇到类似问题，先查这几处</h2><ol>
 <li>重现一条最小操作路径，记录选择、显示、校验三个值。</li>
 <li>对照读写位置，检查是否存在语义相同、分别维护的状态。</li>
 <li>将显示、校验与保存统一到明确的业务状态。</li>
 <li>覆盖取消、重入、重启和首次初始化，验证完整生命周期。</li>
 </ol>
-<p>这次小问题让我更重视“状态由谁负责”。以后看到页面已经更新，我还会继续检查：业务规则和存储是不是也在读这一份状态。</p>
+<p>以后再遇到“界面是对的，结果却不对”，我会先沿着读写位置查一遍。两个变量都叫时间，并不意味着它们一直同步。</p>
 ]]></content>
       <categories>
         <category>工程复盘</category>
@@ -11630,43 +11631,16 @@
   <entry>
     <title>Java 接口慢：先把时间花在哪里说清楚</title>
     <url>//notes/java-latency-investigation/</url>
-    <content><![CDATA[<p>我在实习与面试复盘中整理过慢查询、索引和 <code>EXPLAIN</code> 相关笔记。回头看，最有用的部分是先收集证据，再决定优化哪一段；一些方便记忆的口诀则需要补上适用条件。</p>
-<p>这篇根据这些记录整理排查方法，使用独立构造的学习用 SQL 示例。重点是如何验证判断，以及哪些条件会影响结论。</p>
+    <content><![CDATA[<p>整理 Java 和 MySQL 笔记时，我发现自己很容易把“接口慢”和“该加索引了”连在一起。但一个请求里有业务处理、数据库访问，也可能有等待和外部调用，光知道接口耗时高，还不知道该改哪里。</p>
+<p>这篇记一下我整理后的排查思路。下面的订单表和 SQL 是学习示例，没有连接数据库实测，也没有对应的线上优化数据。</p>
 <span id="more"></span>
 
-<h2 id="先拆请求链路，再检查数据库"><a href="#先拆请求链路，再检查数据库" class="headerlink" title="先拆请求链路，再检查数据库"></a>先拆请求链路，再检查数据库</h2><figure class="highlight text"><table><tr><td class="code"><pre><span class="line">一次请求的响应时间</span><br><span class="line">  = 等待执行 + 业务处理 + 数据库访问 + 外部调用 + 序列化与返回</span><br><span class="line"></span><br><span class="line">先用同一请求标识对齐记录</span><br><span class="line">  → 找耗时区间</span><br><span class="line">  → 缩小到具体操作</span><br><span class="line">  → 用执行计划或其他证据核验</span><br></pre></td></tr></table></figure>
+<h2 id="先别急着加索引"><a href="#先别急着加索引" class="headerlink" title="先别急着加索引"></a>先别急着加索引</h2><figure class="highlight text"><table><tr><td class="code"><pre><span class="line">一次请求的响应时间</span><br><span class="line">  = 等待执行 + 业务处理 + 数据库访问 + 外部调用 + 序列化与返回</span><br><span class="line"></span><br><span class="line">先用同一请求标识对齐记录</span><br><span class="line">  → 找耗时区间</span><br><span class="line">  → 缩小到具体操作</span><br><span class="line">  → 用执行计划或其他证据核验</span><br></pre></td></tr></table></figure>
 
-<table>
-<thead>
-<tr>
-<th align="left">观察结果</th>
-<th align="left">下一步验证</th>
-<th align="left">不能直接下的结论</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">某条 SQL 耗时明显</td>
-<td align="left">SQL、参数、执行计划、扫描情况</td>
-<td align="left">接口慢一定是索引缺失</td>
-</tr>
-<tr>
-<td align="left">SQL 单独快，接口仍慢</td>
-<td align="left">连接获取、队列等待、外部调用和循环查询</td>
-<td align="left">数据库没问题，所以无需再看调用方式</td>
-</tr>
-<tr>
-<td align="left">平均值正常，偶尔很慢</td>
-<td align="left">分位数、并发负载、锁等待及关联请求</td>
-<td align="left">平均值够低，用户体验就没问题</td>
-</tr>
-<tr>
-<td align="left">返回记录很多</td>
-<td align="left">必要字段、分页与返回体大小</td>
-<td align="left">单纯增加线程就能解决</td>
-</tr>
-</tbody></table>
-<p>应用侧耗时记录和 MySQL 慢查询日志能回答不同问题。慢查询日志是诊断线索，具体记录规则还取决于配置；它并不能代表整条请求链路。参见 <a href="https://dev.mysql.com/doc/refman/8.0/en/slow-query-log.html">MySQL 慢查询日志文档</a>。</p>
-<h2 id="用一个示意查询说明执行计划"><a href="#用一个示意查询说明执行计划" class="headerlink" title="用一个示意查询说明执行计划"></a>用一个示意查询说明执行计划</h2><p>假设有一个学习用的订单表，需要查询某个用户最近创建的待处理订单：</p>
+<p>如果 SQL 耗时明显，我会先看具体语句、参数和扫描情况。如果 SQL 单独执行很快，接口却慢，就得继续看连接获取、外部调用，或者有没有在循环里反复查数据库。</p>
+<p>“平均耗时正常”也还不够。偶尔慢一次，可能正好发生在用户最需要结果的时候。我会把分位数、并发量和锁等待一起拿出来看，而不是只留一个平均值。</p>
+<p>应用日志和 MySQL 慢查询日志要对照着用：前者看请求各段耗时，后者帮助找到数据库里的具体语句。<a href="https://dev.mysql.com/doc/refman/8.0/en/slow-query-log.html">慢查询日志的记录规则</a>还取决于配置，查不到记录时也要先看配置。</p>
+<h2 id="拿一条查询往下看"><a href="#拿一条查询往下看" class="headerlink" title="拿一条查询往下看"></a>拿一条查询往下看</h2><p>假设要从订单表里找出某个用户最近创建的 20 条待处理订单：</p>
 <figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> id, status, created_at</span><br><span class="line"><span class="keyword">FROM</span> demo_order</span><br><span class="line"><span class="keyword">WHERE</span> user_id <span class="operator">=</span> <span class="number">1001</span> <span class="keyword">AND</span> status <span class="operator">=</span> <span class="string">&#x27;PENDING&#x27;</span></span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> created_at <span class="keyword">DESC</span></span><br><span class="line">LIMIT <span class="number">20</span>;</span><br></pre></td></tr></table></figure>
 
 <p>先查看计划：</p>
@@ -11696,32 +11670,15 @@
 <td align="left">排序、覆盖索引等补充信息，结合完整查询判断</td>
 </tr>
 </tbody></table>
-<p>对于这个查询，<code>(user_id, status, created_at)</code> 可以作为待验证的复合索引候选。是否值得创建，需要结合数据分布、现有索引、其他查询和写入成本，不能只凭这一条 SQL 决定。</p>
+<p>我会把 <code>(user_id, status, created_at)</code> 列为一个复合索引候选：前两列用于等值筛选，后面是排序列。接下来还要看表里已经有什么索引、数据分布怎样、其他查询怎么用这张表，再决定是否创建。</p>
 <figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- 学习环境中的候选方案，创建前先检查已有索引。</span></span><br><span class="line"><span class="keyword">CREATE</span> INDEX idx_user_status_created</span><br><span class="line"><span class="keyword">ON</span> demo_order (user_id, status, created_at);</span><br></pre></td></tr></table></figure>
 
-<p>复合索引需要结合最左前缀理解，而不是机械套用“关联列 → 条件列 → 返回列”的固定顺序。相关机制参见 <a href="https://dev.mysql.com/doc/refman/8.0/en/multiple-column-indexes.html">MySQL 多列索引文档</a>。</p>
-<h2 id="三句容易记住，但容易说过头的话"><a href="#三句容易记住，但容易说过头的话" class="headerlink" title="三句容易记住，但容易说过头的话"></a>三句容易记住，但容易说过头的话</h2><table>
-<thead>
-<tr>
-<th align="left">简化说法</th>
-<th align="left">更准确的理解</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><code>SELECT *</code> 会让索引失效</td>
-<td align="left">它不必然导致索引不可用，但可能增加返回数据和回表开销</td>
-</tr>
-<tr>
-<td align="left">出现 <code>OR</code> 或 <code>NOT IN</code> 就不会用索引</td>
-<td align="left">需要结合查询、数据分布和优化器选择查看计划</td>
-</tr>
-<tr>
-<td align="left">索引越多，查询越快</td>
-<td align="left">索引增加存储与写入维护成本，应该服务于实际访问模式</td>
-</tr>
-</tbody></table>
-<p>在 MySQL 8.0.18 及后续支持的版本里，<code>EXPLAIN ANALYZE</code> 可以提供实际执行过程的信息，但<strong>会真正执行语句</strong>。这和只查看估计计划不同，使用前要确认查询成本和环境。参见 <a href="https://dev.mysql.com/doc/refman/8.0/en/explain.html">EXPLAIN 官方文档</a>。</p>
-<h2 id="怎样判断修改有效"><a href="#怎样判断修改有效" class="headerlink" title="怎样判断修改有效"></a>怎样判断修改有效</h2><table>
+<p>复合索引的列顺序，我更愿意结合实际查询和最左前缀来判断。有些笔记把顺序记成一套固定口诀，换个查询就未必适用。这里可以对照 <a href="https://dev.mysql.com/doc/refman/8.0/en/multiple-column-indexes.html">MySQL 多列索引文档</a>。</p>
+<h2 id="几句口诀，回头得补上条件"><a href="#几句口诀，回头得补上条件" class="headerlink" title="几句口诀，回头得补上条件"></a>几句口诀，回头得补上条件</h2><p><code>SELECT *</code> 不一定让索引失效，但可能多返回了不需要的字段，也可能增加回表开销。对这条示例查询，我只取 <code>id</code>、<code>status</code> 和 <code>created_at</code>，至少能把需要什么写清楚。</p>
+<p><code>OR</code>、<code>NOT IN</code> 也不能一看到就判定“不走索引”。最后还是得看完整查询、数据分布和优化器给出的计划。</p>
+<p>索引多了，写入和存储的成本也会增加。为一条查询加索引之前，我还会看看它在实际访问里占多大比例。</p>
+<p>还有一个容易忽略的区别：MySQL 8.0.18 起支持的 <code>EXPLAIN ANALYZE</code> <strong>会真正执行语句</strong>。需要实际执行信息时它很有用，但不能把它当成普通 <code>EXPLAIN</code> 随手运行，尤其是成本高的查询。<a href="https://dev.mysql.com/doc/refman/8.0/en/explain.html">官方说明</a>里有两者的区别。</p>
+<h2 id="改完以后，怎么知道是它起了作用"><a href="#改完以后，怎么知道是它起了作用" class="headerlink" title="改完以后，怎么知道是它起了作用"></a>改完以后，怎么知道是它起了作用</h2><table>
 <thead>
 <tr>
 <th align="left">要保持一致的条件</th>
@@ -11745,7 +11702,8 @@
 <td align="left">检查索引修改是否增加其他操作成本</td>
 </tr>
 </tbody></table>
-<p>我希望留下的是一套可复用的排查顺序：定位耗时区间、提出假设、收集证据、做最小修改，再在一致条件下验证。最终记录的结论应该能解释“为什么有效”和“在哪些条件下有效”。</p>
+<p>再快的第二次查询，也可能只是缓存热起来了。做前后对比时，我会把数据、参数、并发和缓存状态一并记下来，再比较耗时和扫描量。</p>
+<p>这些笔记以后还要拿到具体问题里检验。目前先提醒自己：遇到慢接口，第一步是找到时间花在哪儿，索引排在后面。</p>
 ]]></content>
       <categories>
         <category>工程复盘</category>
@@ -11759,11 +11717,11 @@
   <entry>
     <title>VR 渲染优化：画面清楚、缓存命中和响应快，怎样取舍？</title>
     <url>//notes/vr-quality-cache-latency/</url>
-    <content><![CDATA[<p>做 VR 优化时，容易先关注“某个数字有没有变好”：帧时间变低、缓存命中率变高。但系统接起来之后，真正要回答的是：画面质量是否保住了？用户需要的内容是否及时到达？缓存决策本身又增加了多少处理开销？</p>
-<p>这篇根据我的终版毕业论文整理，只讲问题、取舍和实验口径。图表复用论文正文；数字来自论文汇总，本轮没有重新运行实验。</p>
+    <content><![CDATA[<p>回头整理毕业研究，最容易写出来的是几个数字：帧时间降了多少，缓存命中率涨了多少。难一点的是把这些数字放回系统里看。少算了一部分画面，用户在意的细节还在吗？缓存复用了更多内容，做决策花的时间又怎么算？</p>
+<p>这篇用论文里的几张图，把三个阶段串起来记一下：先调整终端渲染，再做多人缓存复用，最后接成端边协同系统。图表和数字都来自终版论文，这次整理没有重新跑实验。</p>
 <span id="more"></span>
 
-<h2 id="先看系统中两个优化位置"><a href="#先看系统中两个优化位置" class="headerlink" title="先看系统中两个优化位置"></a>先看系统中两个优化位置</h2><p><img src="/images/research/system-architecture.png" alt="端边协同系统总体架构，原论文图 5-1"></p>
+<h2 id="先把系统摆出来"><a href="#先把系统摆出来" class="headerlink" title="先把系统摆出来"></a>先把系统摆出来</h2><p><img src="/images/research/system-architecture.png" alt="端边协同系统总体架构，原论文图 5-1"></p>
 <table>
 <thead>
 <tr>
@@ -11788,10 +11746,10 @@
 <td align="left">通信与处理链路的可观察性</td>
 </tr>
 </tbody></table>
-<p>这对应论文的三个阶段：任务感知中心凹渲染、多用户共享视场缓存，以及端边集成系统。</p>
-<h2 id="阅读文字和追踪目标，应该用同一套参数吗？"><a href="#阅读文字和追踪目标，应该用同一套参数吗？" class="headerlink" title="阅读文字和追踪目标，应该用同一套参数吗？"></a>阅读文字和追踪目标，应该用同一套参数吗？</h2><p><img src="/images/research/task-rendering.png" alt="不同眼动任务的渲染效果，原论文图 3-6"></p>
-<p>中心凹渲染通常把更多质量放在注视中心，外围降低分辨率。我的研究进一步从一段头动与眼动序列识别当前任务，再调整高质量区域、过渡区域与外围质量。</p>
-<p>为什么需要任务信息？因为同一个注视位置，可能对应读文字、跟随移动目标或搜索场景物体。任务不同，对细节、范围和连续性的需求也不同。</p>
+<p>前两个阶段分别看方法是否有效，第三个阶段再把行为采集、渲染、缓存和通信接起来。分开做实验时比较清楚，接起来以后还得看各段之间有没有增加新的开销。</p>
+<h2 id="都盯着同一个位置，需求也可能不同"><a href="#都盯着同一个位置，需求也可能不同" class="headerlink" title="都盯着同一个位置，需求也可能不同"></a>都盯着同一个位置，需求也可能不同</h2><p><img src="/images/research/task-rendering.png" alt="不同眼动任务的渲染效果，原论文图 3-6"></p>
+<p>中心凹渲染会给注视中心保留更多细节，外围降低分辨率。我的研究在这个基础上加了一步：根据一段头动和眼动序列识别当前任务，再调整高质量区域、过渡区域和外围质量。</p>
+<p>读文字、追踪移动目标、在场景里找东西，都可能看向同一个位置，但需要的细节和覆盖范围不同。这也是我引入任务信息的原因：只知道“看哪里”，还不太够。</p>
 <table>
 <thead>
 <tr>
@@ -11811,9 +11769,10 @@
 <td align="right">4.81%</td>
 </tr>
 </tbody></table>
-<p>来源：终版论文表 3.7。以场景—路径片段为单位，先计算片段统计，再取平均。相对全分辨率加速比为 1.88×，但这是渲染实验的结果，不是完整 VR 系统的端到端加速比；图像质量仍需结合多项指标和具体场景判断。</p>
-<h2 id="缓存命中更高，系统就一定更快吗？"><a href="#缓存命中更高，系统就一定更快吗？" class="headerlink" title="缓存命中更高，系统就一定更快吗？"></a>缓存命中更高，系统就一定更快吗？</h2><p><img src="/images/research/system-cache.png" alt="系统实验缓存与共享命中率，原论文图 5-10"></p>
-<p>缓存复用能减少重复处理，但识别共享关系、形成用户群组、推理与更新缓存状态也会消耗时间。因此，需要同时看收益和处理成本。</p>
+<p>表 3.7 里，按场景—路径片段统计后，TAFR 的片段平均帧时间从 10.14 ms 降到了 5.40 ms，相对全分辨率的加速比是 1.88×。</p>
+<p>这里我只把它写成<strong>渲染实验的收益</strong>。整套 VR 系统还有通信和边缘处理，不能把 1.88× 直接放到端到端响应上。画质也要回到具体场景和图像指标里看，单看帧时间还不够。</p>
+<h2 id="命中率涨了，还得看决策花了多久"><a href="#命中率涨了，还得看决策花了多久" class="headerlink" title="命中率涨了，还得看决策花了多久"></a>命中率涨了，还得看决策花了多久</h2><p><img src="/images/research/system-cache.png" alt="系统实验缓存与共享命中率，原论文图 5-10"></p>
+<p>多人需要同一批对象块时，复用缓存可以省掉重复处理。不过，共享关系识别、用户分组、策略推理和缓存更新也需要时间。我会把命中率和处理耗时放在一起看。</p>
 <table>
 <thead>
 <tr>
@@ -11838,16 +11797,16 @@
 <td align="left">网络往返和头显 Motion-to-Photon 时延</td>
 </tr>
 </tbody></table>
-<p>第五章六个成对条件中，SCOPE-DDQN 相对 LRU 的缓存命中率平均相对增益为 <strong>22.08%</strong>，共享命中率为 <strong>42.78%</strong>。这两个数是各条件相对增益的平均值，不是百分点差值。</p>
-<p>举一个可以直接核算的条件：20 用户短时实验，命中率从 44.37% 到 58.47%，增加 14.10 个百分点；相对增益为 <code>14.10 / 44.37 ≈ 31.78%</code>。</p>
-<h2 id="长时运行的图，要看走势，也要看口径"><a href="#长时运行的图，要看走势，也要看口径" class="headerlink" title="长时运行的图，要看走势，也要看口径"></a>长时运行的图，要看走势，也要看口径</h2><p><img src="/images/research/long-run.png" alt="60 用户、30 分钟的窗口级结果，原论文图 5-12"></p>
-<p>这张图的窗口级命中率均值是 57.16%，边缘处理代理时延均值约 153.44 ms。需要注意三点：</p>
+<p>第五章六个成对条件里，SCOPE-DDQN 相对 LRU 的缓存命中率平均相对增益是 <strong>22.08%</strong>，共享命中率是 <strong>42.78%</strong>。整理这些数时，我会把“相对增益”几个字一起保留，否则很容易被读成增加了多少个百分点。</p>
+<p>拿 20 用户短时实验算一遍就比较直观：44.37% 到 58.47%，相差 14.10 个百分点；除以前面的 44.37%，相对增益才是约 31.78%。六个条件的 22.08% 则是各条件相对增益的平均值。</p>
+<h2 id="连续跑-30-分钟，再看这张图"><a href="#连续跑-30-分钟，再看这张图" class="headerlink" title="连续跑 30 分钟，再看这张图"></a>连续跑 30 分钟，再看这张图</h2><p><img src="/images/research/long-run.png" alt="60 用户、30 分钟的窗口级结果，原论文图 5-12"></p>
+<p>这组是 60 用户仿真请求负载，连续运行 30 分钟。图里的窗口级命中率均值是 57.16%，边缘处理代理时延均值约 153.44 ms。读图时，有三个地方要和数字一起看：</p>
 <ol>
 <li>横轴是时间窗口编号，不能直接读成秒或毫秒。</li>
 <li>代理时延不是完整头显端到端时延。</li>
 <li>60 用户指可控仿真请求负载；真实头显接入验证的是行为采集、渲染与通信链路，并不代表 60 位真人同时戴头显体验。</li>
 </ol>
-<h2 id="我希望以后继续检查的取舍"><a href="#我希望以后继续检查的取舍" class="headerlink" title="我希望以后继续检查的取舍"></a>我希望以后继续检查的取舍</h2><table>
+<h2 id="下一次做实验，我还想多看几项"><a href="#下一次做实验，我还想多看几项" class="headerlink" title="下一次做实验，我还想多看几项"></a>下一次做实验，我还想多看几项</h2><table>
 <thead>
 <tr>
 <th align="left">如果追求这个目标</th>
@@ -11871,7 +11830,8 @@
 <td align="left">高分位表现、窗口波动与不同用户是否均衡</td>
 </tr>
 </tbody></table>
-<p>把三个阶段接成系统后，我更重视清楚定义指标：优化了哪个环节、在哪组条件下观察到收益、还有哪些成本没被测量。这样，数字才可以用来指导下一次设计。</p>
+<p>均值之外，我还想继续看高分位、窗口波动和不同用户之间的差异。有些开销是在集成后才出现的，分开测试方法时不容易看到。</p>
+<p>以后再写“优化了多少”，我会把对应环节和实验条件一起写上。省掉这两句，数字看着更漂亮，却也更难判断到底改好了什么。</p>
 <p><a href="/research/">查看多图、多表的完整研究展示</a> · <a href="https://github.com/curforever/curforever/tree/main/research">查看 GitHub 研究材料</a></p>
 ]]></content>
       <categories>
