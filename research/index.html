@@ -1,49 +1,39 @@
 <!DOCTYPE html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="curforever 的技术、阅读与播客笔记：从输入到实践，给未来的自己留日志。"><meta name="color-scheme" content="light dark"><title>VR 研究图解 · curforever</title><link rel="canonical" href="https://curforever.github.io/research/"><style>
-:root{--bg:#f5f7fb;--panel:#fff;--ink:#182236;--muted:#526178;--line:#dce3ed;--link:#315cae;--wash:#f3f6fc}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif}a{color:var(--link);text-decoration:none}a:focus-visible{outline:3px solid #8b5cf6;outline-offset:5px;border-radius:4px}a:hover{color:#7c3aed}main{width:min(1040px,calc(100% - 40px));margin:0 auto;padding:26px 0 42px}nav{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:24px}nav .brand{font-weight:750;letter-spacing:-.4px;color:var(--ink)}nav .links{display:flex;gap:22px;font-size:14px}.hero{position:relative;padding:38px 42px;background:#101827;border:1px solid #25334a;border-radius:16px;color:#f8fafc;overflow:hidden}.hero:before{content:"";position:absolute;left:0;top:30px;bottom:30px;width:4px;background:linear-gradient(#8b5cf6,#2dd4bf)}.hero .eyebrow{color:#c4b5fd}.hero h1{font-size:clamp(29px,4vw,43px);line-height:1.2;letter-spacing:-1px;margin:15px 0}.hero h1 span{color:#2dd4bf}.hero p{max-width:720px;color:#cbd5e1;margin:14px 0 22px}.tags{display:flex;flex-wrap:wrap;gap:9px}.tags span{font-size:12px;letter-spacing:.3px;padding:4px 11px;background:#202d43;border-radius:5px;color:#e2e8f0}.intro{display:flex;justify-content:space-between;gap:24px;margin:26px 2px 19px;align-items:center}.intro h2{font-size:20px;margin:0}.intro p{margin:0;font-size:13px;color:var(--muted)}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.tile{padding:25px 26px 18px;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 5px 16px #10182705}.eyebrow{font-size:10px;letter-spacing:1.7px;color:#7c3aed;font-weight:700}.t1 .eyebrow{color:#a16207}.t2 .eyebrow{color:#0d9488}.t3 .eyebrow{color:#be185d}.tile h2{font-size:20px;margin:9px 0 9px}.tile p{font-size:14px;color:var(--muted);margin:0 0 16px}.tile ul{list-style:none;padding:0;margin:0}.tile li{border-top:1px solid var(--line)}.tile li a{position:relative;display:block;padding:13px 26px 13px 0}.tile strong{font-size:14px;display:block}.tile li span{display:block;font-size:12px;color:var(--muted)}.tile li b{position:absolute;right:1px;top:19px;color:#8b5cf6}.continuity{border:1px dashed var(--line);border-radius:10px;padding:18px 23px;margin-top:22px;font-size:14px;color:var(--muted)}.continuity strong{color:var(--ink)}footer{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:28px;font-size:12px;color:var(--muted)}@media(max-width:650px){main{width:calc(100% - 28px);padding-top:18px}.grid{grid-template-columns:1fr;gap:14px}.hero{padding:28px 24px}.intro{display:block}.intro p{margin-top:7px}.tile{padding:21px 22px 15px}nav .links{gap:16px}}@media(prefers-color-scheme:dark){:root{--bg:#0d1420;--panel:#151f2e;--ink:#e5edf8;--muted:#a5b3c7;--line:#2c3b51;--link:#93b8ff;--wash:#182437}.t1 .eyebrow{color:#fcd34d}.t2 .eyebrow{color:#5eead4}.t3 .eyebrow{color:#f9a8d4}.eyebrow{color:#c4b5fd}}
-</style></head><body><main>
-<nav aria-label="主导航"><a class="brand" href="/">curforever<span style="color:#0d9488">.</span> / notebook</a><div class="links"><a href="/archives/">全部归档</a><a href="/categories/">主题分类</a><a href="/research/">研究图解</a><a href="/about/">关于</a><a href="https://github.com/curforever">GitHub ↗</a></div></nav>
-<header class="hero"><div class="eyebrow">VR / PERFORMANCE / HUMAN INTERACTION</div><h1>把算力用在<br><span>用户真正需要的地方。</span></h1><p>用原论文图表看懂：任务感知渲染、多用户共享缓存，以及端边系统集成的收益与代价。</p><div class="tags"><span>原图与实测汇总</span><span>方法到系统</span><span>说明实验口径</span></div></header><style>nav a{white-space:nowrap}.research-doc{margin-top:24px;padding:28px;background:var(--panel);border:1px solid var(--line);border-radius:12px}.research-doc img{max-width:100%;height:auto;display:block;background:white;margin:20px auto;border-radius:7px}.research-doc h1{font-size:27px}.research-doc h2{font-size:23px;margin-top:34px;padding-bottom:9px;border-bottom:1px solid var(--line)}.research-doc h3{font-size:19px}.research-doc table{display:block;width:100%;overflow-x:auto;border-collapse:collapse;font-size:14px;margin:18px 0}.research-doc th,.research-doc td{border:1px solid var(--line);padding:10px 13px;min-width:105px}.research-doc th{background:var(--wash);text-align:left}.research-doc blockquote{border-left:3px solid #8b5cf6;margin:18px 0;padding:8px 18px;background:var(--wash);color:var(--muted);font-size:14px}.research-doc p{overflow-wrap:anywhere}.research-doc details{padding:15px;border:1px dashed var(--line);border-radius:8px}.research-doc summary{cursor:pointer}.research-doc code{padding:2px 4px;border-radius:4px;background:var(--wash)}@media(max-width:650px){.research-doc{padding:18px}.research-doc h1{font-size:23px}.research-doc h2{font-size:21px}.research-doc table{font-size:12px}.research-doc td,.research-doc th{padding:8px;min-width:90px}}</style><article class="research-doc"><p align="right" dir="auto"><b>简体中文</b> · <a href="/research/en/">English</a> · <a href="/">返回主页</a></p>
-<h1 dir="auto">🥽 VR 研究：把算力用在用户真正需要的地方</h1>
-<p dir="auto"><strong>一个问题，两个优化位置，一条完整系统链路。</strong></p>
-<p dir="auto">VR 画面既要清楚，也要及时响应。我的毕业研究尝试回答：用户正在阅读、搜索还是追踪目标时，怎样调整画面细节？多位用户看到相同场景内容时，能不能减少重复处理？</p>
-<markdown-accessiblity-table><table role="table">
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light dark"><title>VR 研究图解 · curforever</title><meta name="description" content="从眼动任务识别、渲染参数控制到多人共享缓存与端边系统：用原图看懂问题、方法、结果与边界。"><link rel="canonical" href="https://curforever.github.io/research/"><link rel="alternate" hreflang="zh-CN" href="https://curforever.github.io/research/"><link rel="alternate" hreflang="en" href="https://curforever.github.io/research/en/"><meta property="og:type" content="article"><meta property="og:title" content="VR 研究图解 · curforever"><meta property="og:description" content="从眼动任务识别、渲染参数控制到多人共享缓存与端边系统：用原图看懂问题、方法、结果与边界。"><meta property="og:url" content="https://curforever.github.io/research/"><meta property="og:image" content="https://curforever.github.io/images/research/system-architecture.png"><link rel="icon" type="image/svg+xml" href="/images/curforever.svg"><link rel="stylesheet" href="/styles/notebook.css"><link rel="stylesheet" href="/styles/research.css"></head>
+<body><a class="skip-link" href="#main">跳到正文</a><main id="main"><nav aria-label="主导航"><a class="brand" href="/">curforever<span style="color:#0d9488">.</span> / notebook</a><div class="links"><a href="/archives/">全部归档</a><a href="/categories/">主题分类</a><a href="/research/" aria-current="page">研究图解</a><a href="/about/">关于</a><a href="https://github.com/curforever">GitHub ↗</a></div></nav>
+<article class="research-doc"><p align="right"><b>简体中文</b> · <a href="/research/en/">English</a> · <a href="/">返回博客</a></p>
+
+<h1 id="🥽-VR-研究：把算力用在用户真正需要的地方"><a href="#🥽-VR-研究：把算力用在用户真正需要的地方" class="headerlink" title="🥽 VR 研究：把算力用在用户真正需要的地方"></a>🥽 VR 研究：把算力用在用户真正需要的地方</h1><p><strong>用户关注的区域要清楚，多人重复的处理可以少做一点。</strong> 我的毕业研究把眼动任务识别、渲染参数控制、共享缓存与端边通信接成一条可评估的链路。</p>
+<table>
 <thead>
 <tr>
-<th align="left">先看什么</th>
-<th align="left">能了解什么</th>
+<th align="left">研究工作</th>
+<th align="left">怎么解决</th>
+<th align="left">论文中观察到的结果</th>
 </tr>
 </thead>
-<tbody>
-<tr>
-<td align="left"><a href="#user-content-overview">① 一张图看懂系统</a></td>
-<td align="left">头显、渲染端和边缘缓存怎样合作</td>
+<tbody><tr>
+<td align="left"><strong>任务感知渲染</strong></td>
+<td align="left">根据眼动任务调整细节区域与分辨率</td>
+<td align="left">片段平均帧时间：10.14 → 5.40 ms</td>
 </tr>
 <tr>
-<td align="left"><a href="#user-content-perception">② 跟着任务分配画面细节</a></td>
-<td align="left">第三章：眼动任务识别与中心凹渲染</td>
+<td align="left"><strong>多人缓存复用</strong></td>
+<td align="left">识别共享对象块，学习缓存调度</td>
+<td align="left">六组系统条件中，命中率平均相对增益 22.08%</td>
 </tr>
 <tr>
-<td align="left"><a href="#user-content-reuse">③ 多人共享，少做重复工作</a></td>
-<td align="left">第四章：共享视场与缓存决策</td>
+<td align="left"><strong>系统集成与评估</strong></td>
+<td align="left">Unity 终端 + Python 边缘服务 + TCP 通信</td>
+<td align="left">真实头显链路验证；60 用户仿真负载运行 30 分钟</td>
 </tr>
-<tr>
-<td align="left"><a href="#user-content-results">④ 放进系统，看看实际表现</a></td>
-<td align="left">第五章：集成实验的结果与统计口径</td>
-</tr>
-<tr>
-<td align="left"><a href="#user-content-gallery">⑤ 更多原图与实现脉络</a></td>
-<td align="left">原论文图表、实现技术与研究边界</td>
-</tr>
-</tbody>
-</table></markdown-accessiblity-table>
-<blockquote>
-<p dir="auto">图表取自我的终版学位论文正文。这里只公开展示材料，相关代码仓库保持私有。下面的数字来自论文中的实验汇总，本轮没有重新执行实验。</p>
-</blockquote>
-<p dir="auto"><a id="user-content-overview"></a></p>
-<h2 dir="auto">① 一张图看懂：端侧少算一点，边侧复用一点</h2>
-<p dir="auto"><a target="_blank" rel="noopener noreferrer" href="/images/research/system-architecture.png"><img src="/images/research/system-architecture.png" alt="终版论文图 5-1：端边协同系统总体架构" style="max-width: 100%;"></a></p>
-<markdown-accessiblity-table><table role="table">
+</tbody></table>
+<p><sub>图表与数字来自终版论文；不同实验的条件在下文分别说明。代码仓库保持私有。</sub></p>
+<p><a id="overview"></a></p>
+<h2 id="一张图看懂系统：端侧按需，边侧复用"><a href="#一张图看懂系统：端侧按需，边侧复用" class="headerlink" title="一张图看懂系统：端侧按需，边侧复用"></a>一张图看懂系统：端侧按需，边侧复用</h2><figure><a href="/images/research/system-architecture.png" target="_blank" rel="noopener" aria-label="终版论文图 5-1：端边协同系统总体架构"><img width="1239" height="666" loading="eager" decoding="async" src="/images/research/system-architecture.png" alt="终版论文图 5-1：端边协同系统总体架构"></a><figcaption>终版论文图 5-1：端边协同系统总体架构</figcaption></figure>
+<p><strong>看图路线：</strong>终端采集头动与眼动 → 识别任务并调整画面 → 向边缘服务发送状态与对象块请求 → 返回缓存决策与结果。</p>
+<p><a href="#perception">① 任务与画质</a> · <a href="#reuse">② 共享与缓存</a> · <a href="#results">③ 系统结果</a> · <a href="#gallery">④ 实现与原图</a></p>
+<table>
 <thead>
 <tr>
 <th align="left">系统位置</th>
@@ -51,8 +41,7 @@
 <th align="left">在做什么</th>
 </tr>
 </thead>
-<tbody>
-<tr>
+<tbody><tr>
 <td align="left"><strong>终端侧</strong></td>
 <td align="left">用户此刻需要哪里更清楚？</td>
 <td align="left">采集头动与眼动，识别当前任务，调整高质量区域与外围画质</td>
@@ -67,14 +56,12 @@
 <td align="left">两端要知道哪些事情？</td>
 <td align="left">上报状态与对象块请求，返回决策与缓存结果</td>
 </tr>
-</tbody>
-</table></markdown-accessiblity-table>
-<p dir="auto">这三部分对应论文第三、四、五章。先分别验证方法，再把它们接成一个可以运行、观察和评估的系统。</p>
-<p dir="auto"><a id="user-content-perception"></a></p>
-<h2 dir="auto">② 同一个注视点，不一定需要同一套画质</h2>
-<p dir="auto">阅读文字、追踪移动目标、搜索物体，对细节和视野范围的要求不同。中心凹渲染把画面分为三层；我的方法进一步考虑用户正在做什么，再调节各层范围与分辨率。</p>
-<p dir="auto"><a target="_blank" rel="noopener noreferrer" href="/images/research/task-rendering.png"><img src="/images/research/task-rendering.png" alt="终版论文图 3-6：凝视、追踪、阅读、搜索与浏览的渲染效果" style="max-width: 100%;"></a></p>
-<markdown-accessiblity-table><table role="table">
+</tbody></table>
+<p>这三部分对应论文第三、四、五章：先分别验证方法，再接成系统。本页复述论文中的实验汇总，没有重新执行实验。</p>
+<p><a id="perception"></a></p>
+<h2 id="②-同一个注视点，不一定需要同一套画质"><a href="#②-同一个注视点，不一定需要同一套画质" class="headerlink" title="② 同一个注视点，不一定需要同一套画质"></a>② 同一个注视点，不一定需要同一套画质</h2><p>阅读文字、追踪移动目标、搜索物体，对细节和视野范围的要求不同。中心凹渲染把画面分为三层；我的方法进一步考虑用户正在做什么，再调节各层范围与分辨率。</p>
+<figure><a href="/images/research/task-rendering.png" target="_blank" rel="noopener" aria-label="终版论文图 3-6：凝视、追踪、阅读、搜索与浏览的渲染效果"><img width="1226" height="449" loading="lazy" decoding="async" src="/images/research/task-rendering.png" alt="终版论文图 3-6：凝视、追踪、阅读、搜索与浏览的渲染效果"></a><figcaption>终版论文图 3-6：凝视、追踪、阅读、搜索与浏览的渲染效果</figcaption></figure>
+<table>
 <thead>
 <tr>
 <th align="left">处理步骤</th>
@@ -82,8 +69,7 @@
 <th align="left">为什么需要这一步</th>
 </tr>
 </thead>
-<tbody>
-<tr>
+<tbody><tr>
 <td align="left"><strong>观察行为</strong></td>
 <td align="left">一段头动、眼动序列</td>
 <td align="left">单个注视点无法完整说明任务</td>
@@ -103,11 +89,9 @@
 <td align="left">连续变化的参数</td>
 <td align="left">避免参数频繁跳变影响体验</td>
 </tr>
-</tbody>
-</table></markdown-accessiblity-table>
-<p dir="auto"><a target="_blank" rel="noopener noreferrer" href="/images/research/foveation-layers.png"><img src="/images/research/foveation-layers.png" alt="终版论文图 3-5：中心、过渡、外围三层结构" style="max-width: 100%;"></a></p>
-<h3 dir="auto">怎么评价“画面还好、开销更低”？</h3>
-<markdown-accessiblity-table><table role="table">
+</tbody></table>
+<figure><a href="/images/research/foveation-layers.png" target="_blank" rel="noopener" aria-label="终版论文图 3-5：中心、过渡、外围三层结构"><img width="1226" height="707" loading="lazy" decoding="async" src="/images/research/foveation-layers.png" alt="终版论文图 3-5：中心、过渡、外围三层结构"></a><figcaption>终版论文图 3-5：中心、过渡、外围三层结构</figcaption></figure>
+<h3 id="怎么评价“画面还好、开销更低”？"><a href="#怎么评价“画面还好、开销更低”？" class="headerlink" title="怎么评价“画面还好、开销更低”？"></a>怎么评价“画面还好、开销更低”？</h3><table>
 <thead>
 <tr>
 <th align="left">渲染策略</th>
@@ -116,8 +100,7 @@
 <th align="right">相对全分辨率加速比</th>
 </tr>
 </thead>
-<tbody>
-<tr>
+<tbody><tr>
 <td align="left">全分辨率渲染</td>
 <td align="right">10.14 ± 2.99 ms</td>
 <td align="right">33.42%</td>
@@ -135,24 +118,21 @@
 <td align="right"><strong>4.81%</strong></td>
 <td align="right"><strong>1.88×</strong></td>
 </tr>
-</tbody>
-</table></markdown-accessiblity-table>
-<p dir="auto">来源：终版论文表 3.7，正文第 48 页。以场景—路径片段为统计单元，先在每个片段内计算，再对片段取平均。这里的加速比只说明这组渲染实验，不能直接解释为整个 VR 系统都快了 1.88 倍。</p>
-<p dir="auto"><a target="_blank" rel="noopener noreferrer" href="/images/research/quality-comparison.png"><img src="/images/research/quality-comparison.png" alt="终版论文图 3-14：Fireplace 场景的图像质量与局部细节对比" style="max-width: 100%;"></a></p>
-<p dir="auto">图像质量用 PSNR、SSIM、LPIPS、FovVideoVDP 等指标共同评估。TAFR 的总体 SSIM 与 LPIPS 表现较好，但并非每个场景、每个指标都最优。任务识别模型的准确率为 <strong>93.85 ± 0.26%</strong>，对应的是<strong>样本级五折交叉验证</strong>，不能据此声称对完全未见用户有同等准确率。</p>
-<p dir="auto"><a id="user-content-reuse"></a></p>
-<h2 dir="auto">③ 多人看到同一部分场景，可以共享什么？</h2>
-<p dir="auto">不同用户的位置与朝向不同，但仍可能同时看到同一个对象。把场景内容表示成对象块后，就能识别这些重叠部分，并用共享价值辅助缓存调度。</p>
-<p dir="auto"><a target="_blank" rel="noopener noreferrer" href="/images/research/shared-views.png"><img src="/images/research/shared-views.png" alt="终版论文图 4-3：不同用户视场与共享对象块" style="max-width: 100%;"></a></p>
-<markdown-accessiblity-table><table role="table">
+</tbody></table>
+<p>来源：终版论文表 3.7，正文第 48 页。以场景—路径片段为统计单元，先在每个片段内计算，再对片段取平均。这里的加速比只说明这组渲染实验，不能直接解释为整个 VR 系统都快了 1.88 倍。</p>
+<figure><a href="/images/research/quality-comparison.png" target="_blank" rel="noopener" aria-label="终版论文图 3-14：Fireplace 场景的图像质量与局部细节对比"><img width="1226" height="682" loading="lazy" decoding="async" src="/images/research/quality-comparison.png" alt="终版论文图 3-14：Fireplace 场景的图像质量与局部细节对比"></a><figcaption>终版论文图 3-14：Fireplace 场景的图像质量与局部细节对比</figcaption></figure>
+<p>图像质量用 PSNR、SSIM、LPIPS、FovVideoVDP 等指标共同评估。TAFR 的总体 SSIM 与 LPIPS 表现较好，但并非每个场景、每个指标都最优。任务识别模型的准确率为 <strong>93.85 ± 0.26%</strong>，对应的是<strong>样本级五折交叉验证</strong>，不能据此声称对完全未见用户有同等准确率。</p>
+<p><a id="reuse"></a></p>
+<h2 id="③-多人看到同一部分场景，可以共享什么？"><a href="#③-多人看到同一部分场景，可以共享什么？" class="headerlink" title="③ 多人看到同一部分场景，可以共享什么？"></a>③ 多人看到同一部分场景，可以共享什么？</h2><p>不同用户的位置与朝向不同，但仍可能同时看到同一个对象。把场景内容表示成对象块后，就能识别这些重叠部分，并用共享价值辅助缓存调度。</p>
+<figure><a href="/images/research/shared-views.png" target="_blank" rel="noopener" aria-label="终版论文图 4-3：不同用户视场与共享对象块"><img width="1226" height="652" loading="lazy" decoding="async" src="/images/research/shared-views.png" alt="终版论文图 4-3：不同用户视场与共享对象块"></a><figcaption>终版论文图 4-3：不同用户视场与共享对象块</figcaption></figure>
+<table>
 <thead>
 <tr>
 <th align="left">缓存要回答的问题</th>
 <th align="left">对应动作</th>
 </tr>
 </thead>
-<tbody>
-<tr>
+<tbody><tr>
 <td align="left">新内容值不值得放进来？</td>
 <td align="left">写入</td>
 </tr>
@@ -164,15 +144,13 @@
 <td align="left">容量不足时先让谁腾位置？</td>
 <td align="left">淘汰</td>
 </tr>
-</tbody>
-</table></markdown-accessiblity-table>
-<p dir="auto">SCOPE-DDQN 用当前状态和反馈学习这些选择。收益应与 LRU 等规则策略比较，也要检查决策开销和高负载表现；算法更复杂并不自动意味着系统更好。</p>
-<p dir="auto"><a target="_blank" rel="noopener noreferrer" href="/images/research/simulation-cache.png"><img src="/images/research/simulation-cache.png" alt="终版论文图 4-9：方法实验的缓存命中率" style="max-width: 100%;"></a></p>
-<p dir="auto">这张图属于<strong>第四章方法实验</strong>。下面属于<strong>第五章集成系统实验</strong>，两者的请求流程和统计口径不同，所以数字不应拼在一起当作一条性能曲线。</p>
-<p dir="auto"><a id="user-content-results"></a></p>
-<h2 dir="auto">④ 接成系统后，收益还能留下多少？</h2>
-<p dir="auto"><a target="_blank" rel="noopener noreferrer" href="/images/research/system-cache.png"><img src="/images/research/system-cache.png" alt="终版论文图 5-10：集成系统中 LRU 与 SCOPE-DDQN 的对比" style="max-width: 100%;"></a></p>
-<markdown-accessiblity-table><table role="table">
+</tbody></table>
+<p>SCOPE-DDQN 用当前状态和反馈学习这些选择。收益应与 LRU 等规则策略比较，也要检查决策开销和高负载表现；算法更复杂并不自动意味着系统更好。</p>
+<figure><a href="/images/research/simulation-cache.png" target="_blank" rel="noopener" aria-label="终版论文图 4-9：方法实验的缓存命中率"><img width="1226" height="684" loading="lazy" decoding="async" src="/images/research/simulation-cache.png" alt="终版论文图 4-9：方法实验的缓存命中率"></a><figcaption>终版论文图 4-9：方法实验的缓存命中率</figcaption></figure>
+<p>这张图属于<strong>第四章方法实验</strong>。下面属于<strong>第五章集成系统实验</strong>，两者的请求流程和统计口径不同，所以数字不应拼在一起当作一条性能曲线。</p>
+<p><a id="results"></a></p>
+<h2 id="④-接成系统后，收益还能留下多少？"><a href="#④-接成系统后，收益还能留下多少？" class="headerlink" title="④ 接成系统后，收益还能留下多少？"></a>④ 接成系统后，收益还能留下多少？</h2><figure><a href="/images/research/system-cache.png" target="_blank" rel="noopener" aria-label="终版论文图 5-10：集成系统中 LRU 与 SCOPE-DDQN 的对比"><img width="1226" height="362" loading="lazy" decoding="async" src="/images/research/system-cache.png" alt="终版论文图 5-10：集成系统中 LRU 与 SCOPE-DDQN 的对比"></a><figcaption>终版论文图 5-10：集成系统中 LRU 与 SCOPE-DDQN 的对比</figcaption></figure>
+<table>
 <thead>
 <tr>
 <th align="left">用户规模与时长</th>
@@ -182,8 +160,7 @@
 <th align="right">SCOPE-DDQN 共享命中率</th>
 </tr>
 </thead>
-<tbody>
-<tr>
+<tbody><tr>
 <td align="left">10 用户 · 短时</td>
 <td align="right">55.72%</td>
 <td align="right">64.22%</td>
@@ -225,11 +202,10 @@
 <td align="right">15.10%</td>
 <td align="right">19.34%</td>
 </tr>
-</tbody>
-</table></markdown-accessiblity-table>
-<p dir="auto">来源：终版论文表 5.4，正文第 84 页。六个条件分别比较两种方法，共 12 组实验；多用户请求由可控仿真生成，真实头显接入用于验证采集、渲染和通信链路。</p>
-<p dir="auto"><strong>看一个直观例子：</strong> 20 用户短时条件下，缓存命中率从 44.37% 到 58.47%，增加 <strong>14.10 个百分点</strong>，相对增加约 <strong>31.78%</strong>。“百分点”与“相对百分比”是两种不同说法。</p>
-<markdown-accessiblity-table><table role="table">
+</tbody></table>
+<p>来源：终版论文表 5.4，正文第 84 页。六个条件分别比较两种方法，共 12 组实验；多用户请求由可控仿真生成，真实头显接入用于验证采集、渲染和通信链路。</p>
+<p><strong>看一个直观例子：</strong> 20 用户短时条件下，缓存命中率从 44.37% 到 58.47%，增加 <strong>14.10 个百分点</strong>，相对增加约 <strong>31.78%</strong>。“百分点”与“相对百分比”是两种不同说法。</p>
+<table>
 <thead>
 <tr>
 <th align="left">六组成对条件的汇总</th>
@@ -237,8 +213,7 @@
 <th align="right">Bootstrap 95% 置信区间</th>
 </tr>
 </thead>
-<tbody>
-<tr>
+<tbody><tr>
 <td align="left">缓存命中率</td>
 <td align="right">22.08%</td>
 <td align="right">[18.31%, 26.51%]</td>
@@ -248,23 +223,19 @@
 <td align="right">42.78%</td>
 <td align="right">[35.46%, 49.23%]</td>
 </tr>
-</tbody>
-</table></markdown-accessiblity-table>
-<p dir="auto">来源：终版论文表 5.5，正文第 85 页。这是六组相对增益的均值，不是把每组百分点差值平均后得到的结果。</p>
-<h3 dir="auto">能不能持续运行？</h3>
-<p dir="auto"><a target="_blank" rel="noopener noreferrer" href="/images/research/long-run.png"><img src="/images/research/long-run.png" alt="终版论文图 5-12：60 用户、30 分钟条件下的窗口级表现" style="max-width: 100%;"></a></p>
-<p dir="auto">这张图观察的是长时运行趋势：窗口级命中率均值 <strong>57.16%</strong>，边缘处理代理时延均值约 <strong>153.44 ms</strong>。代理时延衡量边缘服务接收请求到生成响应的处理过程；它不等于真实网络往返时延，更不等于头显端到端 Motion-to-Photon 时延。</p>
-<p dir="auto"><a id="user-content-gallery"></a></p>
-<h2 dir="auto">⑤ 实现脉络与更多原图</h2>
-<markdown-accessiblity-table><table role="table">
+</tbody></table>
+<p>来源：终版论文表 5.5，正文第 85 页。这是六组相对增益的均值，不是把每组百分点差值平均后得到的结果。</p>
+<h3 id="能不能持续运行？"><a href="#能不能持续运行？" class="headerlink" title="能不能持续运行？"></a>能不能持续运行？</h3><figure><a href="/images/research/long-run.png" target="_blank" rel="noopener" aria-label="终版论文图 5-12：60 用户、30 分钟条件下的窗口级表现"><img width="1226" height="770" loading="lazy" decoding="async" src="/images/research/long-run.png" alt="终版论文图 5-12：60 用户、30 分钟条件下的窗口级表现"></a><figcaption>终版论文图 5-12：60 用户、30 分钟条件下的窗口级表现</figcaption></figure>
+<p>这张图观察的是长时运行趋势：窗口级命中率均值 <strong>57.16%</strong>，边缘处理代理时延均值约 <strong>153.44 ms</strong>。代理时延衡量边缘服务接收请求到生成响应的处理过程；它不等于真实网络往返时延，更不等于头显端到端 Motion-to-Photon 时延。窗口级均值与全程命中率的聚合方式不同，数字可能略有差异。</p>
+<p><a id="gallery"></a></p>
+<h2 id="⑤-实现脉络与更多原图"><a href="#⑤-实现脉络与更多原图" class="headerlink" title="⑤ 实现脉络与更多原图"></a>⑤ 实现脉络与更多原图</h2><table>
 <thead>
 <tr>
 <th align="left">实现部分</th>
 <th align="left">技术与工作</th>
 </tr>
 </thead>
-<tbody>
-<tr>
+<tbody><tr>
 <td align="left">终端与场景</td>
 <td align="left">Unity 2022.3 LTS、C#、Pico 4 Enterprise 接入、任务驱动参数调整</td>
 </tr>
@@ -280,34 +251,27 @@
 <td align="left">实验组织</td>
 <td align="left">方法对比、消融、集成系统对比、30 分钟长时运行分析</td>
 </tr>
-</tbody>
-</table></markdown-accessiblity-table>
+</tbody></table>
 <details>
 <summary><b>展开查看通信、运行效果和更多实验原图</b></summary>
-<h3 dir="auto">两端怎么交换状态</h3>
-<p dir="auto"><a target="_blank" rel="noopener noreferrer" href="/images/research/communication.png"><img src="/images/research/communication.png" alt="图 5-2：通信时序与时延分解" style="max-width: 100%;"></a></p>
-<h3 dir="auto">系统运行中怎样改变画面细节</h3>
-<p dir="auto"><a target="_blank" rel="noopener noreferrer" href="/images/research/runtime-rendering.png"><img src="/images/research/runtime-rendering.png" alt="图 5-6：任务驱动渲染" style="max-width: 100%;"></a></p>
-<h3 dir="auto">共享机会如何随用户变化</h3>
-<p dir="auto"><a target="_blank" rel="noopener noreferrer" href="/images/research/shared-heatmap.png"><img src="/images/research/shared-heatmap.png" alt="图 5-7：动态群组与共享对象块" style="max-width: 100%;"></a></p>
-<h3 dir="auto">缓存模型如何组织决策</h3>
-<p dir="auto"><a target="_blank" rel="noopener noreferrer" href="/images/research/cache-decision.png"><img src="/images/research/cache-decision.png" alt="图 4-4：SCOPE-DDQN 缓存决策模型" style="max-width: 100%;"></a></p>
-<h3 dir="auto">渲染开销与图像质量怎样同时观察</h3>
-<p dir="auto"><a target="_blank" rel="noopener noreferrer" href="/images/research/frame-time.png"><img src="/images/research/frame-time.png" alt="图 3-17：片段平均帧时间分布" style="max-width: 100%;"></a></p>
-<p dir="auto"><a target="_blank" rel="noopener noreferrer" href="/images/research/quality-efficiency.png"><img src="/images/research/quality-efficiency.png" alt="图 3-19：质量与效率的联合评价" style="max-width: 100%;"></a></p>
-<h3 dir="auto">六组系统条件中的相对增益</h3>
-<p dir="auto"><a target="_blank" rel="noopener noreferrer" href="/images/research/relative-gains.png"><img src="/images/research/relative-gains.png" alt="图 5-11：相对增益对比" style="max-width: 100%;"></a></p>
+
+<h3 id="两端怎么交换状态"><a href="#两端怎么交换状态" class="headerlink" title="两端怎么交换状态"></a>两端怎么交换状态</h3><figure><a href="/images/research/communication.png" target="_blank" rel="noopener" aria-label="图 5-2：通信时序与时延分解"><img width="1090" height="542" loading="lazy" decoding="async" src="/images/research/communication.png" alt="图 5-2：通信时序与时延分解"></a><figcaption>图 5-2：通信时序与时延分解</figcaption></figure>
+<h3 id="系统运行中怎样改变画面细节"><a href="#系统运行中怎样改变画面细节" class="headerlink" title="系统运行中怎样改变画面细节"></a>系统运行中怎样改变画面细节</h3><figure><a href="/images/research/runtime-rendering.png" target="_blank" rel="noopener" aria-label="图 5-6：任务驱动渲染"><img width="1226" height="623" loading="lazy" decoding="async" src="/images/research/runtime-rendering.png" alt="图 5-6：任务驱动渲染"></a><figcaption>图 5-6：任务驱动渲染</figcaption></figure>
+<h3 id="共享机会如何随用户变化"><a href="#共享机会如何随用户变化" class="headerlink" title="共享机会如何随用户变化"></a>共享机会如何随用户变化</h3><figure><a href="/images/research/shared-heatmap.png" target="_blank" rel="noopener" aria-label="图 5-7：动态群组与共享对象块"><img width="1226" height="500" loading="lazy" decoding="async" src="/images/research/shared-heatmap.png" alt="图 5-7：动态群组与共享对象块"></a><figcaption>图 5-7：动态群组与共享对象块</figcaption></figure>
+<h3 id="缓存模型如何组织决策"><a href="#缓存模型如何组织决策" class="headerlink" title="缓存模型如何组织决策"></a>缓存模型如何组织决策</h3><figure><a href="/images/research/cache-decision.png" target="_blank" rel="noopener" aria-label="图 4-4：SCOPE-DDQN 缓存决策模型"><img width="1226" height="695" loading="lazy" decoding="async" src="/images/research/cache-decision.png" alt="图 4-4：SCOPE-DDQN 缓存决策模型"></a><figcaption>图 4-4：SCOPE-DDQN 缓存决策模型</figcaption></figure>
+<h3 id="渲染开销与图像质量怎样同时观察"><a href="#渲染开销与图像质量怎样同时观察" class="headerlink" title="渲染开销与图像质量怎样同时观察"></a>渲染开销与图像质量怎样同时观察</h3><figure><a href="/images/research/frame-time.png" target="_blank" rel="noopener" aria-label="图 3-17：片段平均帧时间分布"><img width="858" height="457" loading="lazy" decoding="async" src="/images/research/frame-time.png" alt="图 3-17：片段平均帧时间分布"></a><figcaption>图 3-17：片段平均帧时间分布</figcaption></figure>
+<figure><a href="/images/research/quality-efficiency.png" target="_blank" rel="noopener" aria-label="图 3-19：质量与效率的联合评价"><img width="818" height="536" loading="lazy" decoding="async" src="/images/research/quality-efficiency.png" alt="图 3-19：质量与效率的联合评价"></a><figcaption>图 3-19：质量与效率的联合评价</figcaption></figure>
+<h3 id="六组系统条件中的相对增益"><a href="#六组系统条件中的相对增益" class="headerlink" title="六组系统条件中的相对增益"></a>六组系统条件中的相对增益</h3><figure><a href="/images/research/relative-gains.png" target="_blank" rel="noopener" aria-label="图 5-11：相对增益对比"><img width="1226" height="637" loading="lazy" decoding="async" src="/images/research/relative-gains.png" alt="图 5-11：相对增益对比"></a><figcaption>图 5-11：相对增益对比</figcaption></figure>
 </details>
-<h2 dir="auto">这份展示能说明什么，还有什么边界？</h2>
-<markdown-accessiblity-table><table role="table">
+
+<h2 id="这份展示能说明什么，还有什么边界？"><a href="#这份展示能说明什么，还有什么边界？" class="headerlink" title="这份展示能说明什么，还有什么边界？"></a>这份展示能说明什么，还有什么边界？</h2><table>
 <thead>
 <tr>
 <th align="left">能支持的结论</th>
 <th align="left">需要继续验证的部分</th>
 </tr>
 </thead>
-<tbody>
-<tr>
+<tbody><tr>
 <td align="left">任务识别、渲染控制、共享缓存可以接成可运行链路</td>
 <td align="left">换设备、换场景、换真实用户后的效果</td>
 </tr>
@@ -319,7 +283,7 @@
 <td align="left">可控多用户负载下能比较缓存收益与长时趋势</td>
 <td align="left">大规模真实用户部署、无线网络变化与端到端体验</td>
 </tr>
-</tbody>
-</table></markdown-accessiblity-table>
-<p dir="auto">我在这项研究中做的是：把问题拆成可测量的模块，把模块接成系统，再用不同口径的实验解释各自的收益与代价。</p>
-<p dir="auto">原图来源与页码：<a href="/images/research/sources.json">素材索引</a>。更多交流：<a href="https://github.com/curforever/curforever/issues">GitHub Issues</a>。</p></article><footer><span>curforever · Research notes</span><a href="https://github.com/curforever/curforever/tree/main/research">GitHub 原图与材料 ↗</a></footer></main></body></html>
+</tbody></table>
+<p>我在这项研究中做的是：把问题拆成可测量的模块，把模块接成系统，再用不同口径的实验解释各自的收益与代价。</p>
+<p>原图来源与页码：<a href="/images/research/sources.json">素材索引</a>。更多交流：<a href="https://github.com/curforever/curforever/issues">GitHub Issues</a>。</p>
+</article><footer class="research-footer"><span>curforever · Research notes</span><a href="https://github.com/curforever/curforever/tree/main/research">GitHub 原图与材料 ↗</a><a href="https://github.com/curforever/curforever/issues">交流与反馈 ↗</a></footer></main></body></html>
