@@ -11543,7 +11543,7 @@
   </entry>
   <entry>
     <title>Harmony 状态一致性：页面显示 8 点，校验为什么按 9 点？</title>
-    <url>//notes/harmony-state-consistency/</url>
+    <url>/notes/harmony-state-consistency/</url>
     <content><![CDATA[<p>在 HarmonyOS 菁英班里，我们小组做过一个健康生活打卡 App。其中一个问题我一直记得：目标时间改成了 <strong>8 点</strong>，页面显示的也是 <strong>8 点</strong>，打卡校验却还在按默认的 <strong>9 点</strong>算。</p>
 <p>页面看起来已经改好了，业务逻辑却没跟上。现在回头看，问题出在两份“目标时间”各管各的。我把当时的排查和后来整理的想法记在这里。下面的代码是单独写的解释示例，只涉及业务状态，没有包含完整的 ArkUI 页面。</p>
 <span id="more"></span>
@@ -11630,7 +11630,7 @@
   </entry>
   <entry>
     <title>Java 接口慢：先把时间花在哪里说清楚</title>
-    <url>//notes/java-latency-investigation/</url>
+    <url>/notes/java-latency-investigation/</url>
     <content><![CDATA[<p>整理 Java 和 MySQL 笔记时，我发现自己很容易把“接口慢”和“该加索引了”连在一起。但一个请求里有业务处理、数据库访问，也可能有等待和外部调用，光知道接口耗时高，还不知道该改哪里。</p>
 <p>这篇记一下我整理后的排查思路。下面的订单表和 SQL 是学习示例，没有连接数据库实测，也没有对应的线上优化数据。</p>
 <span id="more"></span>
@@ -11716,7 +11716,7 @@
   </entry>
   <entry>
     <title>VR 渲染优化：画面清楚、缓存命中和响应快，怎样取舍？</title>
-    <url>//notes/vr-quality-cache-latency/</url>
+    <url>/notes/vr-quality-cache-latency/</url>
     <content><![CDATA[<p>回头整理毕业研究，最容易写出来的是几个数字：帧时间降了多少，缓存命中率涨了多少。难一点的是把这些数字放回系统里看。少算了一部分画面，用户在意的细节还在吗？缓存复用了更多内容，做决策花的时间又怎么算？</p>
 <p>这篇用论文里的几张图，把三个阶段串起来记一下：先调整终端渲染，再做多人缓存复用，最后接成端边协同系统。图表和数字都来自终版论文，这次整理没有重新跑实验。</p>
 <span id="more"></span>
